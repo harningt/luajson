@@ -21,6 +21,8 @@ local ignored = (space + comment)^0
 -- Potential deviation, allow for newlines inside strings
 local strictString = lpeg.P('"') * ((1 - lpeg.S('"\r\n\f\\')) + (lpeg.P("\\") * 1))^0 * lpeg.P('"')
 local string = lpeg.P('"') * ((1 - lpeg.S('"\\')) + (lpeg.P("\\") * 1))^0 * lpeg.P('"')
+local captureString = lpeg.P('"') * lpeg.C(((1 - lpeg.S('"\\')) + (lpeg.P("\\") * 1))^0) * lpeg.P('"')
+
 -- Deviation.. permit leading zeroes, permit inf number of negatives w/ space between
 local int = lpeg.P('-')^0 * space^0 * digits
 local frac = lpeg.P('.') * digits
@@ -45,7 +47,7 @@ local function unicodeParse(code1,code2)
 end
 	
 local function parseString(s)
-	s = s:match('^"(.*)"$') -- TODO: Optimize
+	--s = s:match('^"(.*)"$') -- TODO: Optimize
 	s = s:gsub('\\(.)', knownReplacements)
 	s = s:gsub('\\u(..)(..)', unicodeParse)
 	return s
@@ -53,7 +55,7 @@ end
 
 -- For null and undefined, use the util.null value to preserve null-ness
 local valueCapture = ignored * (
-	lpeg.C(string) / parseString
+	captureString / parseString
 	+ lpeg.C(number) / tonumber
 	+ lpeg.P("true") * lpeg.Cc(true)
 	+ lpeg.P("false") * lpeg.Cc(false)
@@ -64,7 +66,7 @@ local valueCapture = ignored * (
 
 local tableKey = 
 	lpeg.C(identifier) 
-	+ string / parseString
+	+ captureString / parseString
 	+ int / tonumber
 
 local tableVal = lpeg.V(VAL)
