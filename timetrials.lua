@@ -7,36 +7,42 @@ require('json')
 require('os')
 require('table')
 
+local skipDecode = (...) == '--skipDecode'
+local count = tonumber(select(2, ...) or 500) or 500
+local strDup = tonumber(select(3, ...) or 1) or 1
 local t1 = os.clock()
 local jstr
 local v
-for i=1,500 do
+for i=1,count do
   local t = {}
   for j=1,500 do
     t[#t + 1] = j
   end
   for j=1,500 do
-    t[#t + 1] = "VALUE"
+    t[#t + 1] = string.rep("VALUE", strDup)
   end
   jstr = json.encode(t)
-  v = json.decode(jstr)
+  if not skipDecode then v = json.decode(jstr) end
   --print(json.encode(t))
 end
 
-for i = 1,500 do
+for i = 1,count do
   local t = {}
   for j=1,500 do
-    local m= math.mod(j,3)
+    local m= j % 4
+    local idx = string.rep('a'..j, strDup)
     if (m==0) then
-      t['a'..j] = true
+      t[idx] = true
     elseif m==1 then 
-      t['a'..j] = json.util.null
+      t[idx] = json.util.null
+    elseif m==2 then
+      t[idx] = j
     else
-      t['a'..j] = j
+      t[idx] = string.char(j % 0xFF)
     end
   end
   jstr = json.encode(t)
-  v = json.decode(jstr)
+  if not skipDecode then v = json.decode(jstr) end
 end
 
 print (jstr)
