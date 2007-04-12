@@ -18,11 +18,22 @@ local encodingMap = {
 	['\t'] = '\\t',
 	['\b'] = '\\b',
 	['\f'] = '\\f',
-	-- TODO FIGURE UNICODE OUT
-	['\000'] = '\\u0000'
+	['/'] = '\\/'
 }
+
+-- Pre-encode the control characters to speed up encoding...
+-- NOTE: UTF-8 may not work out right w/ JavaScript
+-- JavaScript uses 2 bytes after a \u... yet UTF-8 is a 
+-- byte-stream encoding, not pairs of bytes (it does encode 
+-- some letters > 1 byte, but base case is 1)
+for i = 1, 255 do
+	local c = string.char(i)
+	if c:match('%c') and not encodingMap[c] then
+		encodingMap[c] = string.format('\\u%.4X', i)
+	end
+end
 local function encodeString(s)
-	return '"' .. string.gsub(s, '[\\"\n\t\b\f%z]', encodingMap) .. '"'
+	return '"' .. string.gsub(s, '[\\"/%c%z]', encodingMap) .. '"'
 end
 
 local function isArray(val)
