@@ -11,6 +11,9 @@ module("json.decode")
 local digit = lpeg.R("09")
 local digits = digit^1
 local alpha = lpeg.R("AZ","az")
+local hex = lpeg.R("09","AF","af")
+local hexpair = hex * hex
+
 local identifier = (alpha + lpeg.P("_")) * (alpha + lpeg.P('-')^0 * digits + lpeg.P("_")) ^0
 
 local space = lpeg.S(" \n\r\t\f")
@@ -18,22 +21,6 @@ local comment = (lpeg.P("//") * (1 - lpeg.P("\n"))^0 * lpeg.P("\n"))
 	+ (lpeg.P("/*") * (1 - lpeg.P("*/"))^0 * lpeg.P("*/"))
 
 local ignored = (space + comment)^0
-
--- Potential deviation, allow for newlines inside strings
-local strictStringDeclare = lpeg.P('"') * ((1 - lpeg.S('"\r\n\f\b\t\\')) + (lpeg.P("\\") * lpeg.S("rnfbt/\\\"u")))^0 * lpeg.P('"')
-local stringDeclare = lpeg.P('"') * ((1 - lpeg.S('"\\')) + (lpeg.P("\\") * 1))^0 * lpeg.P('"')
-local captureString = lpeg.P('"') * lpeg.C(((1 - lpeg.S('"\\')) + (lpeg.P("\\") * 1))^0) * lpeg.P('"')
-local strictCaptureString = lpeg.P('"') * lpeg.C(((1 - lpeg.S('"\r\n\f\b\t\\')) + (lpeg.P("\\") * lpeg.S("rnfbt/\\\"u")))^0) * lpeg.P('"')
-
--- Deviation.. permit leading zeroes, permit inf number of negatives w/ space between
-local int = lpeg.P('-')^0 * space^0 * digits
-local strictInt = (lpeg.P('-') + 0) * (lpeg.R("19") * digits + digit)
-local frac = lpeg.P('.') * digits
-local exp = lpeg.S("Ee") * (lpeg.S("-+") + 0) * digits -- Optional +- after the E
-local number = int * frac * exp + int * frac + int * exp + int
-local strictNumber = strictInt * frac * exp + strictInt * frac + strictInt * exp + strictInt
-
-local VAL, TABLE, ARRAY = 2,3,4
 
 local knownReplacements = {
 	n = "\n",
@@ -46,20 +33,42 @@ local knownReplacements = {
 	['/'] = "/",
 	['"'] = '"'
 }
-local function unicodeParse(code1,code2)
-	return string.char(tonumber(code1, 16),tonumber(code2,16))
+local function unicodeParse(code1, code2)
+	code1, code2 = assert(tonumber(code1, 16)), assert(tonumber(code2, 16))
+	return string.char(code1, code2)
 end
 
-local function parseString(s)
-	--s = s:match('^"(.*)"$') -- TODO: Optimize
-	s = s:gsub('\\(.)', knownReplacements)
-	s = s:gsub('\\u(..)(..)', unicodeParse)
-	return s
+-- Potential deviation, allow for newlines inside strings
+local function buildStringCapture(stopParse, escapeMatch)
+	return lpeg.P('"') * lpeg.Cs(((1 - lpeg.S(stopParse)) + (lpeg.P("\\") / "" * escapeMatch))^0) * lpeg.P('"')
 end
+
+local doSimpleSub = lpeg.C(lpeg.S("rnfbt/\\z\"")) / knownReplacements
+local doUniSub = (lpeg.P('u') * lpeg.C(hexpair) * lpeg.C(hexpair) + lpeg.P(false)) / unicodeParse
+local doSub = doSimpleSub + doUniSub
+-- Non-strict capture just spits back input value w/o slash
+local captureString = buildStringCapture('"\\', doSub + lpeg.C(1))
+local strictCaptureString = buildStringCapture('"\\\r\n\f\b\t', #lpeg.S("rnfbt/\\\"u") * doSub)
+
+-- Deviation.. permit leading zeroes, permit inf number of negatives w/ space between
+local int = lpeg.P('-')^0 * space^0 * digits
+local number, strictNumber
+local strictInt = (lpeg.P('-') + 0) * (lpeg.R("19") * digits + digit)
+do
+	local frac = lpeg.P('.') * digits
+	local exp = lpeg.S("Ee") * (lpeg.S("-+") + 0) * digits -- Optional +- after the E
+	local function getNumber(intBase)
+		return  intBase * frac * exp + intBase * frac + intBase * exp + intBase
+	end
+	number = getNumber(int)
+	strictNumber = getNumber(strictInt)
+end
+
+local VAL, TABLE, ARRAY = 2,3,4
 
 -- For null and undefined, use the util.null value to preserve null-ness
 local valueCapture = ignored * (
-	captureString / parseString
+	captureString
 	+ lpeg.C(number) / tonumber
 	+ lpeg.P("true") * lpeg.Cc(true)
 	+ lpeg.P("false") * lpeg.Cc(false)
@@ -68,7 +77,7 @@ local valueCapture = ignored * (
 	+ lpeg.V(ARRAY)
 ) * ignored
 local strictValueCapture = ignored * (
-	strictCaptureString / parseString
+	strictCaptureString
 	+ lpeg.C(strictNumber) / tonumber
 	+ lpeg.P("true") * lpeg.Cc(true)
 	+ lpeg.P("false") * lpeg.Cc(false)
@@ -97,11 +106,9 @@ end
 
 local tableKey = 
 	lpeg.C(identifier) 
-	+ captureString / parseString
+	+ captureString
 	+ int / tonumber
-local strictTableKey =
-	captureString / parseString
-	+ int / tonumber
+local strictTableKey = captureString
 
 local tableVal = lpeg.V(VAL)
 
