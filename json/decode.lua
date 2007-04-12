@@ -14,7 +14,7 @@ local alpha = lpeg.R("AZ","az")
 local hex = lpeg.R("09","AF","af")
 local hexpair = hex * hex
 
-local identifier = (alpha + lpeg.P("_")) * (alpha + lpeg.P('-')^0 * digits + lpeg.P("_")) ^0
+local identifier = lpeg.R("AZ","az","__") * lpeg.R("AZ","az", "__", "09") ^0
 
 local space = lpeg.S(" \n\r\t\f")
 local comment = (lpeg.P("//") * (1 - lpeg.P("\n"))^0 * lpeg.P("\n"))
@@ -58,7 +58,7 @@ do
 	local frac = lpeg.P('.') * digits
 	local exp = lpeg.S("Ee") * (lpeg.S("-+") + 0) * digits -- Optional +- after the E
 	local function getNumber(intBase)
-		return  intBase * frac * exp + intBase * frac + intBase * exp + intBase
+		return  intBase * (frac + 0) * (exp + 0)
 	end
 	number = getNumber(int)
 	strictNumber = getNumber(strictInt)
