@@ -34,7 +34,7 @@ local knownReplacements = {
 	['"'] = '"'
 }
 local function unicodeParse(code1, code2)
-	code1, code2 = assert(tonumber(code1, 16)), assert(tonumber(code2, 16))
+	code1, code2 = tonumber(code1, 16), tonumber(code2, 16)
 	return string.char(code1, code2)
 end
 
@@ -81,7 +81,7 @@ local strictValueCapture = ignored * (
 	+ lpeg.C(strictNumber) / tonumber
 	+ lpeg.P("true") * lpeg.Cc(true)
 	+ lpeg.P("false") * lpeg.Cc(false)
-	+ (lpeg.P("null") + lpeg.P("undefined")) * lpeg.Cc(util.null)
+	+ lpeg.P("null") * lpeg.Cc(util.null)
 	+ lpeg.V(TABLE) 
 	+ lpeg.V(ARRAY)
 ) * ignored
@@ -93,11 +93,7 @@ local function initDepth(s, i)
 end
 local function incDepth(s, i)
 	currentDepth = currentDepth + 1
-	if currentDepth >= 20 then
-		return false
-	else
-		return i
-	end
+	return currentDepth < 20 and i or false
 end
 local function decDepth(s, i)
 	currentDepth = currentDepth - 1
@@ -105,7 +101,7 @@ local function decDepth(s, i)
 end
 
 local tableKey = 
-	lpeg.C(identifier) 
+	lpeg.C(identifier)
 	+ captureString
 	+ int / tonumber
 local strictTableKey = captureString
@@ -154,10 +150,12 @@ end
 -- arrayItem == element
 local arrayItem = lpeg.V(VAL)
 local arrayElements = lpeg.Ct(arrayItem * (ignored * lpeg.P(',') * ignored * arrayItem)^0) / processArray
-local strictArrayCapture = lpeg.P("[") * lpeg.P(incDepth) * ignored 
+local strictArrayCapture = 
+	lpeg.P("[") * lpeg.P(incDepth) * ignored 
 	* (arrayElements + 0) * ignored 
 	* lpeg.P("]") * lpeg.P(decDepth)
-local arrayCapture = lpeg.P("[") * ignored 
+local arrayCapture = 
+	lpeg.P("[") * ignored 
 	* (arrayElements + 0) * ignored 
 	* (lpeg.P(",") + 0) * ignored 
 	* lpeg.P("]")
@@ -165,16 +163,16 @@ local arrayCapture = lpeg.P("[") * ignored
 -- Deviation: allow for trailing comma, allow for "undefined" to be a value...
 local grammar = lpeg.P({
 	[1] = lpeg.V(2),
-	[2] = valueCapture,
-	[3] = tableCapture,
-	[4] = arrayCapture
+	[VALUE] = valueCapture,
+	[TABLE] = tableCapture,
+	[ARRAY] = arrayCapture
 }) * ignored * -1
 
 local strictGrammar = lpeg.P({
 	[1] = lpeg.P(initDepth) * (lpeg.V(TABLE) + lpeg.V(ARRAY)), -- Initial value MUST be an object or array
-	[2] = strictValueCapture,
-	[3] = strictTableCapture,
-	[4] = strictArrayCapture
+	[VALUE] = strictValueCapture,
+	[TABLE] = strictTableCapture,
+	[ARRAY] = strictArrayCapture
 }) * ignored * -1
 
 --NOTE: Certificate was trimmed down to make it easier to read....
