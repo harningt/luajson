@@ -64,7 +64,7 @@ do
 	strictNumber = getNumber(strictInt)
 end
 
-local VAL, TABLE, ARRAY = 2,3,4
+local VALUE, TABLE, ARRAY = 2,3,4
 
 -- For null and undefined, use the util.null value to preserve null-ness
 local valueCapture = ignored * (
@@ -106,19 +106,19 @@ local tableKey =
 	+ int / tonumber
 local strictTableKey = captureString
 
-local tableVal = lpeg.V(VAL)
+local tableVal = lpeg.V(VALUE)
 
 -- tableItem == pair
-local tableItem = tableKey * ignored * lpeg.P(':') * ignored * tableVal
-local strictTableItem = strictTableKey * ignored * lpeg.P(':') * ignored * tableVal
-
 local function applyTableKey(tab, key, val)
 	if not tab then tab = {} end -- Initialize table for this set...
 	tab[key] = val
 	return tab
 end
-tableItem = tableItem / applyTableKey
-strictTableItem = strictTableItem / applyTableKey
+local function createTableItem(keyParser)
+	return (keyParser * ignored * lpeg.P(':') * ignored * tableVal) / applyTableKey
+end
+local tableItem = createTableItem(tableKey)
+local strictTableItem = createTableItem(strictTableKey)
 
 local tableElements = lpeg.Ca(lpeg.Cc(false) * tableItem * (ignored * lpeg.P(',') * ignored * tableItem)^0)
 local strictTableElements = lpeg.Ca(lpeg.Cc(false) * strictTableItem * (ignored * lpeg.P(',') * ignored * strictTableItem)^0)
@@ -148,7 +148,7 @@ local function processArray(array)
 	return array
 end
 -- arrayItem == element
-local arrayItem = lpeg.V(VAL)
+local arrayItem = lpeg.V(VALUE)
 local arrayElements = lpeg.Ct(arrayItem * (ignored * lpeg.P(',') * ignored * arrayItem)^0) / processArray
 local strictArrayCapture = 
 	lpeg.P("[") * lpeg.P(incDepth) * ignored 
@@ -162,7 +162,7 @@ local arrayCapture =
 
 -- Deviation: allow for trailing comma, allow for "undefined" to be a value...
 local grammar = lpeg.P({
-	[1] = lpeg.V(2),
+	[1] = lpeg.V(VALUE),
 	[VALUE] = valueCapture,
 	[TABLE] = tableCapture,
 	[ARRAY] = arrayCapture
