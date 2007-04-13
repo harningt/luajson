@@ -67,23 +67,23 @@ end
 local VALUE, TABLE, ARRAY = 2,3,4
 
 -- For null and undefined, use the util.null value to preserve null-ness
+local booleanCapture =
+	lpeg.P("true") * lpeg.Cc(true)
+	+ lpeg.P("false") * lpeg.Cc(false)
+local tableArrayCapture = lpeg.V(TABLE) + lpeg.V(ARRAY)
 local valueCapture = ignored * (
 	captureString
 	+ lpeg.C(number) / tonumber
-	+ lpeg.P("true") * lpeg.Cc(true)
-	+ lpeg.P("false") * lpeg.Cc(false)
+	+ booleanCapture
 	+ (lpeg.P("null") + lpeg.P("undefined")) * lpeg.Cc(util.null)
-	+ lpeg.V(TABLE) 
-	+ lpeg.V(ARRAY)
+	+ tableArrayCapture
 ) * ignored
 local strictValueCapture = ignored * (
 	strictCaptureString
 	+ lpeg.C(strictNumber) / tonumber
-	+ lpeg.P("true") * lpeg.Cc(true)
-	+ lpeg.P("false") * lpeg.Cc(false)
+	+ booleanCapture
 	+ lpeg.P("null") * lpeg.Cc(util.null)
-	+ lpeg.V(TABLE) 
-	+ lpeg.V(ARRAY)
+	+ tableArrayCapture
 ) * ignored
 
 local currentDepth
@@ -106,8 +106,6 @@ local tableKey =
 	+ int / tonumber
 local strictTableKey = captureString
 
-local tableVal = lpeg.V(VALUE)
-
 -- tableItem == pair
 local function applyTableKey(tab, key, val)
 	if not tab then tab = {} end -- Initialize table for this set...
@@ -115,7 +113,7 @@ local function applyTableKey(tab, key, val)
 	return tab
 end
 local function createTableItem(keyParser)
-	return (keyParser * ignored * lpeg.P(':') * ignored * tableVal) / applyTableKey
+	return (keyParser * ignored * lpeg.P(':') * ignored * lpeg.V(VALUE)) / applyTableKey
 end
 local tableItem = createTableItem(tableKey)
 local strictTableItem = createTableItem(strictTableKey)
