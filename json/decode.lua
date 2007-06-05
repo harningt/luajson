@@ -147,14 +147,14 @@ local function processArray(array)
 end
 -- arrayItem == element
 local arrayItem = lpeg.V(VALUE)
-local arrayElements = lpeg.Ct(arrayItem * (ignored * lpeg.P(',') * ignored * arrayItem)^0) / processArray
+local arrayElements = lpeg.Ct(arrayItem * (ignored * lpeg.P(',') * ignored * arrayItem)^0 + 0) / processArray
 local strictArrayCapture = 
 	lpeg.P("[") * lpeg.P(incDepth) * ignored 
-	* (arrayElements + 0) * ignored 
+	* (arrayElements) * ignored 
 	* lpeg.P("]") * lpeg.P(decDepth)
 local arrayCapture = 
 	lpeg.P("[") * ignored 
-	* (arrayElements + 0) * ignored 
+	* (arrayElements) * ignored 
 	* (lpeg.P(",") + 0) * ignored 
 	* lpeg.P("]")
 
