@@ -1,8 +1,8 @@
 --
 --------------------------------------------------------------------------------
 --         FILE:  dataTest.lua
---        USAGE:  ./dataTest.lua 
-package.path = package.path .. ';?/init.lua'
+--        USAGE:  ./dataTest.lua
+package.path = package.path .. ';?/init.lua;../src/?.lua;../src/?/init.lua'
 
 require("json")
 local f = io.open("data.txt")

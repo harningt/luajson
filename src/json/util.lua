@@ -1,7 +1,12 @@
+--[[
+	Licensed according to the included 'LICENSE' document
+	Author: Thomas Harning Jr <harningt@gmail.com>
+]]
 local type = type
 local print = print
 local tostring = tostring
 local pairs = pairs
+
 module("json.util")
 local function foreach(tab, func)
 	for k, v in pairs(tab) do
@@ -25,7 +30,7 @@ function printValue(tab, name)
 					if type(value) == 'string' then
 						value = '[[' .. tostring(value) .. ']]'
 					end
-                   	print(space .. key .. '=' .. tostring(value))
+					print(space .. key .. '=' .. tostring(value))
                 end
         end
         doPrint(name, tab)

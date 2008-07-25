@@ -1,3 +1,7 @@
+--[[
+	Licensed according to the included 'LICENSE' document
+	Author: Thomas Harning Jr <harningt@gmail.com>
+]]
 local lpeg = require("lpeg")
 local util = require("json.util")
 
@@ -77,6 +81,7 @@ local valueCapture = ignored * (
 	+ booleanCapture
 	+ (lpeg.P("null") + lpeg.P("undefined")) * lpeg.Cc(util.null)
 	+ tableArrayCapture
+	+ ("b64(" * captureString * ")")
 ) * ignored
 local strictValueCapture = ignored * (
 	strictCaptureString

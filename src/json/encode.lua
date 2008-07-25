@@ -1,3 +1,7 @@
+--[[
+	Licensed according to the included 'LICENSE' document
+	Author: Thomas Harning Jr <harningt@gmail.com>
+]]
 local externalIsArray = IsArray -- Support for the special IsArray external function...
 
 local tostring, string, type = tostring, string, type
@@ -23,8 +27,8 @@ local encodingMap = {
 
 -- Pre-encode the control characters to speed up encoding...
 -- NOTE: UTF-8 may not work out right w/ JavaScript
--- JavaScript uses 2 bytes after a \u... yet UTF-8 is a 
--- byte-stream encoding, not pairs of bytes (it does encode 
+-- JavaScript uses 2 bytes after a \u... yet UTF-8 is a
+-- byte-stream encoding, not pairs of bytes (it does encode
 -- some letters > 1 byte, but base case is 1)
 for i = 1, 255 do
 	local c = string.char(i)
@@ -57,7 +61,6 @@ local function isArray(val)
 	end
 
 	return true
-	
 end
 
 local function tonull(val)
@@ -66,7 +69,9 @@ local function tonull(val)
 	end
 end
 
-local alreadyEncoded -- Table set at the beginning of every 
+-- Forward reference for encodeValue function
+local encodeValue
+local alreadyEncoded -- Table set at the beginning of every
 	-- encoding operation to empty to detect recursiveness
 local function encodeTable(tab)
 	if alreadyEncoded[tab] then
@@ -106,7 +111,8 @@ local encodeMapping = {
 function isEncodable(item)
 	return encodeMapping[type(item)] and not (type(item) == 'function' and item ~= null)
 end
-function encodeValue(item)
+
+--[[local ]] function encodeValue(item)
 	local encoder = encodeMapping[type(item)]
 	if not encoder then
 		error("Invalid item to encode: " .. type(item))
