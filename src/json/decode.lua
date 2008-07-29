@@ -111,6 +111,10 @@ local tableKey =
 	+ int / tonumber
 local strictTableKey = captureString
 
+local function initTable(tab)
+	return {}
+end
+
 -- tableItem == pair
 local function applyTableKey(tab, key, val)
 	if not tab then tab = {} end -- Initialize table for this set...
@@ -123,17 +127,17 @@ end
 local tableItem = createTableItem(tableKey)
 local strictTableItem = createTableItem(strictTableKey)
 
-local tableElements = lpeg.Ca(lpeg.Cc(false) * tableItem * (ignored * lpeg.P(',') * ignored * tableItem)^0)
-local strictTableElements = lpeg.Ca(lpeg.Cc(false) * strictTableItem * (ignored * lpeg.P(',') * ignored * strictTableItem)^0)
+local tableElements = lpeg.Ca(lpeg.Cc(false) / initTable * (tableItem * (ignored * lpeg.P(',') * ignored * tableItem)^0 + 0))
+local strictTableElements = lpeg.Ca(lpeg.Cc(false) / initTable * (strictTableItem * (ignored * lpeg.P(',') * ignored * strictTableItem)^0 + 0))
 
-local tableCapture = 
-	lpeg.P("{") * ignored 
-	* (tableElements + 0) * ignored 
-	* (lpeg.P(',') + 0) * ignored 
+local tableCapture =
+	lpeg.P("{") * ignored
+	* tableElements * ignored
+	* (lpeg.P(',') + 0) * ignored
 	* lpeg.P("}")
 local strictTableCapture =
-	lpeg.P("{") * lpeg.P(incDepth) * ignored 
-	* (strictTableElements + 0) * ignored 
+	lpeg.P("{") * lpeg.P(incDepth) * ignored
+	* strictTableElements * ignored
 	* lpeg.P("}") * lpeg.P(decDepth)
 
 
