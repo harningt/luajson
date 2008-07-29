@@ -22,11 +22,43 @@ local function getFileData(fileName)
 	return data
 end
 
+local function putTempData(data)
+	local name = os.tmpname()
+	local f = assert(io.open(name, 'wb'))
+	f:write(data)
+	f:close()
+	return name
+end
+
+-- Ensure that the encoder/decoder can round-trip valid JSON
+local function RoundTripTest(parseFunc, luaData)
+	local dataString = json.encode(luaData)
+	assert(dataString, "Couldn't encode the lua data")
+	local success, result = pcall(parseFunc, dataString)
+	if not success then
+		print("Could not parse the generated JSON of (", luaData)
+		print("GENERATED: [[" .. dataString .. "]]")
+		print("DATA STORED IN: ", putTempData(dataString))
+		return
+	end
+	local newData = json.encode(result)
+	if not dataString == newData then
+		print("Encoded values do not match")
+		print("ORIGINAL: [[" .. dataString .. "]]")
+		print("RE-ENCOD: [[" .. newData .. "]])")
+	end
+	return true
+end
 local function TestParser(parseFunc)
 	for _,f in ipairs(successTests) do
 		local data = getFileData(f)
-		local succeed = pcall(parseFunc, data)
-		if not succeed then print("Failed on : " .. f) end
+		local succeed, result = pcall(parseFunc, data)
+		if not succeed then print("Failed on : " .. f)
+		else
+			if not RoundTripTest(parseFunc, result) then
+				print("FAILED TO ROUND TRIP: " .. f)
+			end
+		end
 	end
 
 	for _,f in ipairs(failTests) do
@@ -36,7 +68,7 @@ local function TestParser(parseFunc)
 	end
 end
 print("Testing lax/fast mode...")
-TestParser(function(data) json.decode(data) end)
+TestParser(function(data) return json.decode(data) end)
 
 print("Testing strict mode...")
-TestParser(function(data) json.decode(data, true) end)
+TestParser(function(data) return json.decode(data, true) end)
