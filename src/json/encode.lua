@@ -22,6 +22,7 @@ local encodingMap = {
 	['\t'] = '\\t',
 	['\b'] = '\\b',
 	['\f'] = '\\f',
+	['\r'] = '\\r',
 	['/'] = '\\/'
 }
 
@@ -100,9 +101,19 @@ local function encodeTable(tab)
 	end
 end
 
+local function encodeNumber(number)
+	local str = tostring(number)
+	if str == "nan" then return "NaN" end
+	if str == "inf" then return "Infinity" end
+	if str == "-inf" then return "-Infinity" end
+	return str
+end
+
+local allowAllNumbers = true
+
 local encodeMapping = {
 	['table'  ] = encodeTable,
-	['number' ] = tostring,
+	['number' ] = allowAllNumbers and encodeNumber or tostring,
 	['boolean'] = tostring,
 	['function'] = tonull,
 	['string' ] = encodeString,
