@@ -5,6 +5,8 @@
 local lpeg = require("lpeg")
 local util = require("json.util")
 
+local number = require("json.decode.number")
+
 local setmetatable, getmetatable = setmetatable, getmetatable
 local assert = assert
 local print = print
@@ -12,8 +14,6 @@ local tonumber = tonumber
 local ipairs = ipairs
 local string = string
 module("json.decode")
-local digit = lpeg.R("09")
-local digits = digit^1
 local alpha = lpeg.R("AZ","az")
 local hex = lpeg.R("09","AF","af")
 local hexpair = hex * hex
@@ -57,30 +57,6 @@ local doSub = doSimpleSub + doUniSub
 local captureString = buildStringCapture('"\\', doSub + lpeg.C(1))
 local strictCaptureString = buildStringCapture('"\\\r\n\f\b\t', #lpeg.S("rnfbt/\\\"u") * doSub)
 
--- Deviation.. permit leading zeroes, permit inf number of negatives w/ space between
-local int = lpeg.P('-')^0 * space^0 * digits
-
-local buildNumberCapture
-do
-	local strictInt = (lpeg.P('-') + 0) * (lpeg.R("19") * digits + digit)
-	local frac = lpeg.P('.') * digits
-	local exp = lpeg.S("Ee") * (lpeg.S("-+") + 0) * digits -- Optional +- after the E
-	local function getNumber(intBase)
-		return  intBase * (frac + 0) * (exp + 0)
-	end
-	local nanInf = lpeg.S("Ii") * lpeg.P("nfinity") + lpeg.S("Nn") * lpeg.S("Aa") * lpeg.S("Nn")
-
-	function buildNumberCapture(allowNaN, strictMinusSpace)
-		local ret
-		ret = strictMinusSpace and strictInt or int
-		ret = getNumber(ret)
-		if allowNaN then
-			ret = ret + nanInf
-		end
-		return lpeg.C(ret) / tonumber
-	end
-end
-
 local VALUE, TABLE, ARRAY = 2,3,4
 
 -- For null and undefined, use the util.null value to preserve null-ness
@@ -95,7 +71,7 @@ local undefinedCapture = lpeg.P("undefined") * lpeg.Cc(undefinedValue)
 local function buildValueCapture(nullValue, undefinedValue, allowUndefined, allowNaN, strictMinusSpace, strictString)
 	local ret = (
 		(strictString and strictCaptureString or captureString)
-		+ buildNumberCapture(allowNaN, strictMinusSpace)
+		+ number.buildCapture({nan = allowNaN, inf = allowNaN, struct = strictMinusSpace})
 		+ booleanCapture
 		+ nullCapture
 	)
@@ -128,7 +104,7 @@ end
 local tableKey = 
 	lpeg.C(identifier)
 	+ captureString
-	+ int / tonumber
+	+ number.int / tonumber
 local strictTableKey = captureString
 
 local function initTable(tab)
