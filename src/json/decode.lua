@@ -18,6 +18,9 @@ local alpha = lpeg.R("AZ","az")
 local hex = lpeg.R("09","AF","af")
 local hexpair = hex * hex
 
+local nullValue = util.null
+local undefinedValue = util.null
+
 local identifier = lpeg.R("AZ","az","__") * lpeg.R("AZ","az", "__", "09") ^0
 
 local space = lpeg.S(" \n\r\t\f")
@@ -56,16 +59,26 @@ local strictCaptureString = buildStringCapture('"\\\r\n\f\b\t', #lpeg.S("rnfbt/\
 
 -- Deviation.. permit leading zeroes, permit inf number of negatives w/ space between
 local int = lpeg.P('-')^0 * space^0 * digits
-local number, strictNumber
-local strictInt = (lpeg.P('-') + 0) * (lpeg.R("19") * digits + digit)
+
+local buildNumberCapture
 do
+	local strictInt = (lpeg.P('-') + 0) * (lpeg.R("19") * digits + digit)
 	local frac = lpeg.P('.') * digits
 	local exp = lpeg.S("Ee") * (lpeg.S("-+") + 0) * digits -- Optional +- after the E
 	local function getNumber(intBase)
 		return  intBase * (frac + 0) * (exp + 0)
 	end
-	number = getNumber(int)
-	strictNumber = getNumber(strictInt)
+	local nanInf = lpeg.S("Ii") * lpeg.P("nfinity") + lpeg.S("Nn") * lpeg.S("Aa") * lpeg.S("Nn")
+
+	function buildNumberCapture(allowNaN, strictMinusSpace)
+		local ret
+		ret = strictMinusSpace and strictInt or int
+		ret = getNumber(ret)
+		if allowNaN then
+			ret = ret + nanInf
+		end
+		return lpeg.C(ret) / tonumber
+	end
 end
 
 local VALUE, TABLE, ARRAY = 2,3,4
@@ -75,21 +88,28 @@ local booleanCapture =
 	lpeg.P("true") * lpeg.Cc(true)
 	+ lpeg.P("false") * lpeg.Cc(false)
 local tableArrayCapture = lpeg.V(TABLE) + lpeg.V(ARRAY)
-local valueCapture = ignored * (
-	captureString
-	+ lpeg.C(number) / tonumber
-	+ booleanCapture
-	+ (lpeg.P("null") + lpeg.P("undefined")) * lpeg.Cc(util.null)
-	+ tableArrayCapture
-	+ ("b64(" * captureString * ")")
-) * ignored
-local strictValueCapture = ignored * (
-	strictCaptureString
-	+ lpeg.C(strictNumber) / tonumber
-	+ booleanCapture
-	+ lpeg.P("null") * lpeg.Cc(util.null)
-	+ tableArrayCapture
-) * ignored
+
+local nullCapture = lpeg.P("null") * lpeg.Cc(nullValue)
+local undefinedCapture = lpeg.P("undefined") * lpeg.Cc(undefinedValue)
+
+local function buildValueCapture(nullValue, undefinedValue, allowUndefined, allowNaN, strictMinusSpace, strictString)
+	local ret = (
+		(strictString and strictCaptureString or captureString)
+		+ buildNumberCapture(allowNaN, strictMinusSpace)
+		+ booleanCapture
+		+ nullCapture
+	)
+	if allowUndefined then
+		ret = ret + undefinedCapture
+	end
+	ret = ret + tableArrayCapture
+	ret = ignored * ret * ignored
+	return ret
+end
+
+local valueCapture = buildValueCapture(nullValue, nullValue, true, true, false, false)
+
+local strictValueCapture = buildValueCapture(nullValue, nil, false, false, true, true)
 
 local currentDepth
 local function initDepth(s, i)
