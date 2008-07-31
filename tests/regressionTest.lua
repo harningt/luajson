@@ -53,7 +53,7 @@ local function TestParser(parseFunc)
 	for _,f in ipairs(successTests) do
 		local data = getFileData(f)
 		local succeed, result = pcall(parseFunc, data)
-		if not succeed then print("Failed on : " .. f)
+		if not succeed then print("Failed on : " .. f .. "(" .. result .. ")")
 		else
 			if not RoundTripTest(parseFunc, result) then
 				print("FAILED TO ROUND TRIP: " .. f)
