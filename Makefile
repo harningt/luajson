@@ -2,7 +2,7 @@
 # Makefile to prepare releases and run tests
 #
 
-.PHONY: all clean check dist dist-all dist-bzip2 dist-gzip dist-zip
+.PHONY: all clean check dist dist-all dist-bzip2 dist-gzip dist-zip distcheck
 
 DIST_DIR=dist
 LUA_BIN=lua
@@ -28,7 +28,11 @@ dist-gzip: distdir
 dist-zip: distdir
 	git archive --format=zip --prefix=$(VERSION)/ HEAD > $(DIST_DIR)/$(VERSION).zip
 
-
-
 check:
 	cd tests && lua regressionTest.lua
+
+distcheck: dist-bzip2
+	mkdir -p tmp
+	tar -C tmp -xf $(DIST_DIR)/$(VERSION).tar.bz2
+	cd tmp
+	make check
