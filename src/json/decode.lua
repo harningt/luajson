@@ -23,17 +23,13 @@ local string = string
 local tostring = tostring
 
 module("json.decode")
-local alpha = lpeg.R("AZ","az")
 
 local nullValue = jsonutil.null
 local undefinedValue = jsonutil.null
 
-local identifier = util.identifier
-
 local ignored = util.ignored
 
 local VALUE, TABLE, ARRAY = util.VALUE, util.TABLE, util.ARRAY
-
 
 local captureString = strings.buildCapture(strings.default)
 local strictCaptureString = strings.buildCapture(strings.strict)
@@ -42,7 +38,6 @@ local strictCaptureString = strings.buildCapture(strings.strict)
 local booleanCapture =
 	lpeg.P("true") * lpeg.Cc(true)
 	+ lpeg.P("false") * lpeg.Cc(false)
-local tableArrayCapture = lpeg.V(TABLE) + lpeg.V(ARRAY)
 
 local nullCapture = lpeg.P("null") * lpeg.Cc(nullValue)
 local undefinedCapture = lpeg.P("undefined") * lpeg.Cc(undefinedValue)
@@ -57,7 +52,8 @@ local function buildValueCapture(nullValue, undefinedValue, allowUndefined, allo
 	if allowUndefined then
 		ret = ret + undefinedCapture
 	end
-	ret = ret + tableArrayCapture
+	-- Allow for a table or array as a value
+	ret = ret + lpeg.V(TABLE) + lpeg.V(ARRAY)
 	ret = ignored * ret * ignored
 	return ret
 end
@@ -100,8 +96,6 @@ local strictGrammar = lpeg.P({
 	[TABLE] = strictTableCapture,
 	[ARRAY] = strictArrayCapture
 }) * ignored * (-1 + lpeg.P(er))
-
---NOTE: Certificate was trimmed down to make it easier to read....
 
 function decode(data, strict)
 	util.doInit()
