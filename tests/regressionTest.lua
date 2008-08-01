@@ -4,17 +4,7 @@ require("json")
 
 require("lfs")
 
-local successTests = {}
-local failTests = {}
-local failStrictTests = {}
-
-for f in lfs.dir("test") do
-	if f:match("^fail.*\.json") then
-		failTests[#failTests + 1] = "test/" .. f
-	elseif f:match("^pass.*\.json") then
-		successTests[#successTests + 1] = "test/" .. f
-	end
-end
+local success = true
 
 local function getFileData(fileName)
 	local f = io.open(fileName, 'rb')
@@ -33,7 +23,7 @@ local function putTempData(data)
 end
 
 -- Ensure that the encoder/decoder can round-trip valid JSON
-local function RoundTripTest(parseFunc, luaData)
+local function RoundTripTest(parseFunc, jsonData, luaData, fullRoundTrip)
 	local dataString = json.encode(luaData)
 	assert(dataString, "Couldn't encode the lua data")
 	local success, result = pcall(parseFunc, dataString)
@@ -43,43 +33,56 @@ local function RoundTripTest(parseFunc, luaData)
 		print("DATA STORED IN: ", putTempData(dataString))
 		return
 	end
-	local newData = json.encode(result)
-	if not dataString == newData then
-		print("Encoded values do not match")
-		print("ORIGINAL: [[" .. dataString .. "]]")
-		print("RE-ENCOD: [[" .. newData .. "]])")
+	if fullRoundTrip then
+		if dataString ~= jsonData then
+			print("Encoded values do not match")
+			print("ORIGINAL: [[" .. jsonData .. "]]")
+			print("RE-ENCOD: [[" .. dataString .. "]])")
+			return
+		end
 	end
 	return true
 end
 
-local function testFile(fileName, parseFunc, expectSuccess)
+local function testFile(fileName, parseFunc, expectSuccess, fullRoundTrip)
 	local data = getFileData(fileName)
 	if not data then return end
-	print("TESTING: ", fileName, "for", expectSuccess and "success" or "fail")
+	io.write(".")
 	local succeed, result = pcall(parseFunc, data)
 	if expectSuccess ~= succeed then
 		print("Wrongly " .. (expectSuccess and "Failed" or "Succeeded") .. " on : " .. fileName .. "(" .. tostring(result) .. ")")
+		success = false
 	elseif succeed then
-		if not RoundTripTest(parseFunc, result) then
+		if not RoundTripTest(parseFunc, data, result, fullRoundTrip) then
 			print("FAILED TO ROUND TRIP: " .. fileName)
+			success = false
 		end
 	end
 end
 
-local function TestParser(parseFunc, successNames, failNames)
-	for _,successes in ipairs(successNames) do
-		for f in lfs.dir(successes) do
-			testFile(successes .. "/" .. f, parseFunc, true)
+local function testDirectories(parseFunc, directories, ...)
+	if not directories then return end
+	for _,directory in ipairs(directories) do
+		if lfs.attributes(directory, 'mode') == 'directory' then
+			for f in lfs.dir(directory) do
+				testFile(directory .. "/" .. f, parseFunc, ...)
+			end
 		end
 	end
-	for _, failures in ipairs(failNames) do
-		for f in lfs.dir(failures) do
-			testFile(failures .. "/" .. f, parseFunc, false)
-		end
-	end
+	io.write("\n")
 end
-print("Testing lax/fast mode...")
-TestParser(function(data) return json.decode(data) end, {"test/pass","test/fail_strict"}, {"test/fail_all"})
 
-print("Testing strict mode...")
-TestParser(function(data) return json.decode(data, true) end, {"test/pass"}, {"test/fail_strict","test/fail_all"})
+local function TestParser(parseFunc, successNames, failNames, roundTripNames)
+	testDirectories(parseFunc, successNames, true, false)
+	testDirectories(parseFunc, failNames, false, false)
+	testDirectories(parseFunc, roundTripNames, true, true)
+end
+print("Testing lax/fast mode:")
+TestParser(function(data) return json.decode(data) end, {"test/pass","test/fail_strict"}, {"test/fail_all"},{"test/roundtrip","test/roundtrip_lax"})
+
+print("Testing strict mode:")
+TestParser(function(data) return json.decode(data, true) end, {"test/pass"}, {"test/fail_strict","test/fail_all"}, {"test/roundtrip"})
+
+if not success then
+	os.exit(1)
+end
