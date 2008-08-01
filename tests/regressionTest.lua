@@ -6,6 +6,7 @@ require("lfs")
 
 local successTests = {}
 local failTests = {}
+local failStrictTests = {}
 
 for f in lfs.dir("test") do
 	if f:match("^fail.*\.json") then
@@ -16,7 +17,8 @@ for f in lfs.dir("test") do
 end
 
 local function getFileData(fileName)
-	local f = assert(io.open(fileName, 'rb'))
+	local f = io.open(fileName, 'rb')
+	if not f then return end
 	local data = f:read('*a')
 	f:close()
 	return data
@@ -49,26 +51,35 @@ local function RoundTripTest(parseFunc, luaData)
 	end
 	return true
 end
-local function TestParser(parseFunc)
-	for _,f in ipairs(successTests) do
-		local data = getFileData(f)
-		local succeed, result = pcall(parseFunc, data)
-		if not succeed then print("Failed on : " .. f .. "(" .. result .. ")")
-		else
-			if not RoundTripTest(parseFunc, result) then
-				print("FAILED TO ROUND TRIP: " .. f)
-			end
+
+local function testFile(fileName, parseFunc, expectSuccess)
+	local data = getFileData(fileName)
+	if not data then return end
+	print("TESTING: ", fileName, "for", expectSuccess and "success" or "fail")
+	local succeed, result = pcall(parseFunc, data)
+	if expectSuccess ~= succeed then
+		print("Wrongly " .. (expectSuccess and "Failed" or "Succeeded") .. " on : " .. fileName .. "(" .. tostring(result) .. ")")
+	elseif succeed then
+		if not RoundTripTest(parseFunc, result) then
+			print("FAILED TO ROUND TRIP: " .. fileName)
 		end
 	end
+end
 
-	for _,f in ipairs(failTests) do
-		local data = getFileData(f)
-		local failed = not pcall(parseFunc, data)
-		if not failed then print("Didn't fail on : " .. f) end
+local function TestParser(parseFunc, successNames, failNames)
+	for _,successes in ipairs(successNames) do
+		for f in lfs.dir(successes) do
+			testFile(successes .. "/" .. f, parseFunc, true)
+		end
+	end
+	for _, failures in ipairs(failNames) do
+		for f in lfs.dir(failures) do
+			testFile(failures .. "/" .. f, parseFunc, false)
+		end
 	end
 end
 print("Testing lax/fast mode...")
-TestParser(function(data) return json.decode(data) end)
+TestParser(function(data) return json.decode(data) end, {"test/pass","test/fail_strict"}, {"test/fail_all"})
 
 print("Testing strict mode...")
-TestParser(function(data) return json.decode(data, true) end)
+TestParser(function(data) return json.decode(data, true) end, {"test/pass"}, {"test/fail_strict","test/fail_all"})
