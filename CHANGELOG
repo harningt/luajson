@@ -1,0 +1,15 @@
+LuaJSON v0.6 Change Log
+
+Fixes since v0.5
+----------------
+
+ * Encoder
+   * Add support for encoding NaN/Infinity and \r
+ * Decoder
+   * Refactored most parts (string,object,array,number) out into separate
+     configurable modules
+   * Fixed support for empty objects, previous behavior was to not record a value
+ * Build System/Tests
+   * Added preliminary round-trip tests
+   * Added some additional simple tests to help track down decoding errors
+   * Added 'distcheck' target to test what would be distributed
