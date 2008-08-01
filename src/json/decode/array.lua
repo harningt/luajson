@@ -28,6 +28,9 @@ local function processArray(array)
 	if #array == array.n then
 		array.n = nil
 	end
+	if jsonutil.InitArray then
+		array = jsonutil.InitArray(array) or array
+	end
 	return array
 end
 -- arrayItem == element

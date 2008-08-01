@@ -6,7 +6,7 @@ local type = type
 local print = print
 local tostring = tostring
 local pairs = pairs
-
+local getmetatable, setmetatable = getmetatable, setmetatable
 module("json.util")
 local function foreach(tab, func)
 	for k, v in pairs(tab) do
@@ -39,5 +39,25 @@ end
 -- Function to insert nulls into the JSON stream
 function null()
 	return null
+end
+
+local ArrayMT = {}
+
+--[[
+	Return's true if the metatable marks it as an array..
+	Or false if it has no array component at all
+	Otherwise nil to get the normal detection component working
+]]
+function IsArray(value)
+	local ret = getmetatable(value) == ArrayMT
+	if not ret then
+		if #value == 0 then return false end
+	else
+		return ret
+	end
+end
+function InitArray(array)
+	setmetatable(array, ArrayMT)
+	return array
 end
 

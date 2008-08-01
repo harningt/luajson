@@ -2,8 +2,6 @@
 	Licensed according to the included 'LICENSE' document
 	Author: Thomas Harning Jr <harningt@gmail.com>
 ]]
-local externalIsArray = IsArray -- Support for the special IsArray external function...
-
 local tostring, string, type = tostring, string, type
 local tonumber, math, assert = tonumber, math, assert
 local table, pairs, ipairs = table, pairs, ipairs
@@ -11,7 +9,9 @@ local getmetatable, setmetatable = getmetatable, setmetatable
 local select = select
 local print = print
 local error = error
-local null = require("json.util").null
+local util = require("json.util")
+local null = util.null
+local externalIsArray = IsArray or util.IsArray -- Support for the special IsArray external function...
 
 module("json.encode")
 
@@ -42,8 +42,11 @@ local function encodeString(s)
 end
 
 local function isArray(val)
-	if externalIsArray and externalIsArray(val) then
-		return true
+	if externalIsArray then
+		local ret = externalIsArray(val)
+		if ret == true or ret == false then
+			return ret
+		end
 	end
 	-- Use the 'n' element if it's a number
 	if type(val.n) == 'number' and math.floor(val.n) == val.n and val.n >= 1 then
