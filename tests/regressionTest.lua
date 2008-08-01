@@ -34,10 +34,13 @@ local function RoundTripTest(parseFunc, jsonData, luaData, fullRoundTrip)
 		return
 	end
 	if fullRoundTrip then
+		-- Ensure that whitespace is trimmed off ends
+		dataString = dataString:match("^[%s]*(.-)[%s]*$")
+		jsonData = jsonData:match("^[%s]*(.-)[%s]*$")
 		if dataString ~= jsonData then
 			print("Encoded values do not match")
-			print("ORIGINAL: [[" .. jsonData .. "]]")
-			print("RE-ENCOD: [[" .. dataString .. "]])")
+			print("ORIGINAL: << " .. jsonData .. " >>")
+			print("RE-ENCOD: << " .. dataString .. " >>")
 			return
 		end
 	end
