@@ -93,7 +93,7 @@ Options:
 	allowUndefined => whether or not to allow undefined values
 ]]
 function getDecoder(mode)
-	mode = mode == true and strict or strictOrMode or default
+	mode = mode == true and strict or mode or default
 	if mode == strict and strictDecoder then
 		return strictDecoder
 	elseif mode == default and defaultDecoder then
@@ -102,7 +102,7 @@ function getDecoder(mode)
 	return buildDecoder(mode)
 end
 
-function decode(data, strictOrMode)
+function decode(data, mode)
 	local decoder = getDecoder(mode)
 	return decoder(data)
 end
