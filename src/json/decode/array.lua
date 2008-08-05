@@ -42,6 +42,12 @@ local defaultOptions = {
 	depthLimiter = nil
 }
 
+default = {}
+strict = {
+	trailingComma = false,
+	depthLimiter = util.buildDepthLimit(20)
+}
+
 function buildCapture(options)
 	options = options and util.merge({}, defaultOptions, options) or defaultOptions
 	local incDepth, decDepth

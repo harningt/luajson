@@ -83,8 +83,15 @@ end
 print("Testing lax/fast mode:")
 TestParser(function(data) return json.decode(data) end, {"test/pass","test/fail_strict"}, {"test/fail_all"},{"test/roundtrip","test/roundtrip_lax"})
 
-print("Testing strict mode:")
-TestParser(function(data) return json.decode(data, true) end, {"test/pass"}, {"test/fail_strict","test/fail_all"}, {"test/roundtrip"})
+print("Testing (mostly) strict mode:")
+local strict = json.decode.util.merge({}, json.decode.strict, {
+	number = {
+		nan = false,
+		inf = true,
+		strict = true
+	}
+})
+TestParser(function(data) return json.decode(data, strict) end, {"test/pass"}, {"test/fail_strict","test/fail_all"}, {"test/roundtrip"})
 
 if not success then
 	os.exit(1)

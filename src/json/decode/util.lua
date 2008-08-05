@@ -49,8 +49,11 @@ function doInit()
 	end
 end
 
+-- Current depth is persistent
+-- If more complex depth management needed, a new system would need to be setup
+local currentDepth = 0
+
 function buildDepthLimit(limit)
-	local currentDepth = 0
 	local function init()
 		currentDepth = 0
 	end
@@ -66,4 +69,3 @@ function buildDepthLimit(limit)
 	end
 	return {incDepth, decDepth}
 end
-

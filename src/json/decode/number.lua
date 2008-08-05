@@ -31,6 +31,13 @@ local defaultOptions = {
 	frac = true,
 	exp = true
 }
+
+default = {}
+strict = {
+	nan = false,
+	inf = false,
+	strict = true
+}
 --[[
 	Options: configuration options for number rules
 		nan: match NaN

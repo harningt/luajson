@@ -25,8 +25,16 @@ end
 local defaultOptions = {
 	number = true,
 	identifier = true,
-	trailingComma = true,
-	limitDepth = nil -- 20
+	trailingComma = true
+}
+
+default = {}
+
+strict = {
+	number = false,
+	identifier = false,
+	trailingComma = false,
+	depthLimiter = util.buildDepthLimit(20)
 }
 
 function buildCapture(options)
