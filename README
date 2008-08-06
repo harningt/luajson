@@ -8,6 +8,8 @@ Requirements
 	LPeg (Tested with 0.7, 0.8 ... 0.6 should work)
 	For regressionTest:
 		lfs (Tested with 1.4.1)
+	For lunit-tests:
+		lunit >= 0.4
 
 License
 	All-but tests: MIT-style, See LICENSE for details
