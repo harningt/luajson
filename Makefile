@@ -30,6 +30,7 @@ dist-zip: distdir
 
 check:
 	cd tests && lua regressionTest.lua
+	cd tests && lunit lunit-*.lua
 
 distcheck: dist-bzip2
 	mkdir -p tmp
