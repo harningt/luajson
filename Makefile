@@ -35,5 +35,5 @@ check:
 distcheck: dist-bzip2
 	mkdir -p tmp
 	tar -C tmp -xf $(DIST_DIR)/$(VERSION).tar.bz2
-	cd tmp
-	make check
+	cd tmp/$(VERSION) && make check
+	rm -rf tmp
