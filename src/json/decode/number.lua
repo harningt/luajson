@@ -23,7 +23,7 @@ local frac = lpeg.P('.') * digits
 local exp = lpeg.S("Ee") * (lpeg.S("-+") + 0) * digits
 
 local nan = lpeg.S("Nn") * lpeg.S("Aa") * lpeg.S("Nn")
-local inf = lpeg.S("Ii") * lpeg.P("nfinity")
+local inf = (lpeg.P('-') + 0) * lpeg.S("Ii") * lpeg.P("nfinity")
 
 local defaultOptions = {
 	nan = true,
