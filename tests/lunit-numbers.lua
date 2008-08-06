@@ -11,6 +11,11 @@ decode = json.decode.getDecoder(false)
 
 module("lunit-numbers", lunit.testcase, package.seeall)
 
+function setup()
+	-- Ensure that the decoder is reset
+	_G["decode"] = json.decode.getDecoder(false)
+end
+
 local function assert_near(expect, received)
 	local pctDiff
 	if expect == received then
@@ -65,6 +70,12 @@ function test_nan_nostrict()
 	assert_true(value ~= value)
 	local value = decode("NaN")
 	assert_true(value ~= value)
+end
+
+function test_expression()
+	assert_error(function()
+		decode("1 + 2")
+	end)
 end
 
 -- For strict tests, small concession must be made to allow non-array/objects as root

@@ -8,6 +8,10 @@ decode = json.decode.getDecoder(false)
 
 module("lunit-tests", lunit.testcase, package.seeall)
 
+function setup()
+	_G["decode"] = json.decode.getDecoder(false)
+end
+
 function test_array_empty()
 	local ret = assert_table(decode("[]"))
 	assert_equal(0, #ret)
