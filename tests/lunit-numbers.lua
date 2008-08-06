@@ -82,6 +82,39 @@ end
 local strict = json.decode.util.merge({}, json.decode.strict, {initialObject = false})
 local strictDecoder = json.decode.getDecoder(strict)
 
+local numberValue = json.decode.util.merge({}, json.decode.number.default, {hex = true})
+
+local hex = json.decode.util.merge({}, json.decode.default, {number = numberValue})
+local hexDecoder = json.decode.getDecoder(hex)
+
+function test_hex()
+	if decode == hexDecoder then -- MUST SKIP FAIL UNTIL BETTER METHOD SETUP
+		return
+	end
+	assert_error(function()
+		decode("0x20")
+	end)
+end
+
+local hexNumbers = {
+	0xDEADBEEF,
+	0xCAFEBABE,
+	0x00000000,
+	0xFFFFFFFF,
+	0xCE,
+	0x01
+}
+
+function test_hex_only()
+	_G["decode"] = hexDecoder
+	for _, v in ipairs(hexNumbers) do
+		assert_equal(v, decode(("0x%x"):format(v)))
+		assert_equal(v, decode(("0X%X"):format(v)))
+		assert_equal(v, decode(("0x%X"):format(v)))
+		assert_equal(v, decode(("0X%x"):format(v)))
+	end
+end
+
 local function buildStrictDecoder(f)
 	return testutil.buildPatchedDecoder(f, strictDecoder)
 end
@@ -90,11 +123,12 @@ local function buildFailedStrictDecoder(f)
 end
 -- SETUP CHECKS FOR SEQUENCE OF DECODERS
 for k, v in pairs(_M) do
-	if k:match("^test_") and not k:match("_gen$") then
+	if k:match("^test_") and not k:match("_gen$") and not k:match("_only$") then
 		if k:match("_nostrict") then
 			_M[k .. "_strict_gen"] = buildFailedStrictDecoder(v)
 		else
 			_M[k .. "_strict_gen"] = buildStrictDecoder(v)
 		end
+		_M[k .. "_hex_gen"] = testutil.buildPatchedDecoder(v, hexDecoder)
 	end
 end

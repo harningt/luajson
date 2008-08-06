@@ -24,12 +24,14 @@ local exp = lpeg.S("Ee") * (lpeg.S("-+") + 0) * digits
 
 local nan = lpeg.S("Nn") * lpeg.S("Aa") * lpeg.S("Nn")
 local inf = (lpeg.P('-') + 0) * lpeg.S("Ii") * lpeg.P("nfinity")
+local hex = (lpeg.P("0x") + lpeg.P("0X")) * lpeg.R("09","AF","af")^1
 
 local defaultOptions = {
 	nan = true,
 	inf = true,
 	frac = true,
-	exp = true
+	exp = true,
+	hex = false
 }
 
 default = {}
@@ -50,7 +52,12 @@ strict = {
 ]]
 function buildMatch(options)
 	options = util.merge({}, defaultOptions, options)
-	local ret = options.strict and strictInt or int
+	local ret
+	if options.hex then
+		ret = hex + (options.strict and strictInt or int)
+	else
+		ret = options.strict and strictInt or int
+	end
 	if options.frac then
 		ret = ret * (frac + 0)
 	end
