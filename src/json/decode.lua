@@ -21,6 +21,7 @@ local tonumber = tonumber
 local ipairs, pairs = ipairs, pairs
 local string = string
 local tostring = tostring
+local type = type
 
 module("json.decode")
 
@@ -70,6 +71,13 @@ local function buildDecoder(mode)
 	end
 	if mode.functionCalls then
 		for name, func in pairs(mode.functionCalls) do
+			-- TODO: Potentially permit patterns for 'name' and potentially pass the name of the function called to the function itself
+			if type(name) ~= 'string' then
+				error("Invalid functionCalls name: " .. tostring(name) .. " not a string")
+			end
+			if type(func) ~= 'function' then
+				error("Invalid functionCalls item: " .. name .. " not a function")
+			end
 			valueCapture = valueCapture + lpeg.P((name .. "(") * lpeg.V(VALUE) / func * ")")
 		end
 	end

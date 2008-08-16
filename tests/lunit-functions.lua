@@ -50,3 +50,56 @@ function test_identity()
 		end
 	end
 end
+
+-- Test for a function that throws
+function test_function_failure()
+	local function testFunction(...)
+		error("CANNOT CONTINUE")
+	end
+	local strict = json.decode.util.merge({}, json.decode.default, {
+		functionCalls = {
+			call = testFunction
+		}
+	})
+	local decode = json.decode.getDecoder(strict)
+	for i, v in ipairs(values) do
+		local str = "call(" .. encode(v) .. ")"
+		assert_error(function()
+			decode(str)
+		end)
+	end
+end
+
+-- Test for a function that is not a function
+function test_not_a_function_fail()
+	local notFunction = {
+		0/0, 1/0, -1/0, 0, 1, "Hello", true, false, {}, coroutine.create(function() end)
+	}
+	for _, v in ipairs(notFunction) do
+		assert_error(function()
+			local strict = json.decode.util.merge({}, json.decode.default, {
+				functionCalls = {
+					call = v
+				}
+			})
+			json.decode.getDecoder(strict)
+		end)
+	end
+end
+
+-- Test for a name that is not a string
+function test_name_not_string()
+	local notString = {
+		true, false, 0/0, 1/0, -1/0, 0, 1, {}, function() end, coroutine.create(function() end)
+	}
+	for _, v in ipairs(notString) do
+		assert_error(function()
+			local strict = json.decode.util.merge({}, json.decode.default, {
+				functionCalls = {
+					[v] = function() end
+				}
+			})
+			json.decode.getDecoder(strict)
+		end)
+	end
+end
