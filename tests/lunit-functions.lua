@@ -103,3 +103,26 @@ function test_name_not_string()
 		end)
 	end
 end
+
+-- Test for a name that is a string or a pattern
+function test_name_matches_string_or_pattern()
+	local matchedValues = {
+		["mystring"] = "mystring",
+		[lpeg.P("m") * (lpeg.P("y") + lpeg.P("Y")) * "string"] = "mystring",
+		[lpeg.P("m") * (lpeg.P("y") + lpeg.P("Y")) * "string"] = "mYstring"
+	}
+	local matched
+	local function mustBeCalled()
+		matched = true
+	end
+	for pattern, value in pairs(matchedValues) do
+		matched = false
+		local strict = json.decode.util.merge({}, json.decode.default, {
+			functionCalls = {
+				[pattern] = mustBeCalled
+			}
+		})
+		json.decode.getDecoder(strict)(value .. "(true)")
+		assert_true(matched, "Value <" .. value .. "> did not match the given pattern")
+	end
+end

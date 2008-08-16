@@ -72,13 +72,17 @@ local function buildDecoder(mode)
 	if mode.functionCalls then
 		for name, func in pairs(mode.functionCalls) do
 			-- TODO: Potentially permit patterns for 'name' and potentially pass the name of the function called to the function itself
-			if type(name) ~= 'string' then
-				error("Invalid functionCalls name: " .. tostring(name) .. " not a string")
+			if type(name) ~= 'string' and not lpeg.type(name) == 'pattern'then
+				error("Invalid functionCalls name: " .. tostring(name) .. " not a string or LPEG pattern")
 			end
 			if type(func) ~= 'function' then
 				error("Invalid functionCalls item: " .. name .. " not a function")
 			end
-			valueCapture = valueCapture + lpeg.P((name .. "(") * lpeg.V(VALUE) / func * ")")
+			if type(name) == 'string' then
+				valueCapture = valueCapture + lpeg.P((name .. "(") * lpeg.V(VALUE) / func * ")")
+			else
+				valueCapture = valueCapture + (name * "(" * lpeg.V(VALUE) / func * ")")
+			end
 		end
 	end
 	valueCapture = valueCapture + lpeg.V(TABLE) + lpeg.V(ARRAY)
