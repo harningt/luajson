@@ -27,7 +27,8 @@ local values = {
 }
 
 function test_identity()
-	local function testFunction(...)
+	local function testFunction(capturedName, ...)
+		assert_equal('call', capturedName)
 		return (...)
 	end
 	local strict = json.decode.util.merge({}, json.decode.default, {
@@ -108,14 +109,15 @@ end
 function test_name_matches_string_or_pattern()
 	local matchedValues = {
 		["mystring"] = "mystring",
-		[lpeg.P("m") * (lpeg.P("y") + lpeg.P("Y")) * "string"] = "mystring",
-		[lpeg.P("m") * (lpeg.P("y") + lpeg.P("Y")) * "string"] = "mYstring"
+		[lpeg.C(lpeg.P("m") * (lpeg.P("y") + lpeg.P("Y")) * "string")] = "mystring",
+		[lpeg.C(lpeg.P("m") * (lpeg.P("y") + lpeg.P("Y")) * "string")] = "mYstring"
 	}
-	local matched
-	local function mustBeCalled()
-		matched = true
-	end
 	for pattern, value in pairs(matchedValues) do
+		local matched = false
+		local function mustBeCalled(capturedName, ...)
+			assert_equal(value, capturedName)
+			matched = true
+		end
 		matched = false
 		local strict = json.decode.util.merge({}, json.decode.default, {
 			functionCalls = {

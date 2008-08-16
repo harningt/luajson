@@ -78,11 +78,15 @@ local function buildDecoder(mode)
 			if type(func) ~= 'function' then
 				error("Invalid functionCalls item: " .. name .. " not a function")
 			end
+			local nameCallCapture
 			if type(name) == 'string' then
-				valueCapture = valueCapture + lpeg.P((name .. "(") * lpeg.V(VALUE) / func * ")")
+				nameCallCapture = lpeg.P(name .. "(") * lpeg.Cc(name)
 			else
-				valueCapture = valueCapture + (name * "(" * lpeg.V(VALUE) / func * ")")
+				-- Name matcher expected to produce a capture
+				nameCallCapture = name * "("
 			end
+			-- Call func over nameCallCapture and value to permit function receiving name
+			valueCapture = valueCapture + (nameCallCapture * lpeg.V(VALUE)) / func * ")"
 		end
 	end
 	valueCapture = valueCapture + lpeg.V(TABLE) + lpeg.V(ARRAY)
