@@ -18,7 +18,7 @@ local setmetatable, getmetatable = setmetatable, getmetatable
 local assert = assert
 local print = print
 local tonumber = tonumber
-local ipairs = ipairs
+local ipairs, pairs = ipairs, pairs
 local string = string
 local tostring = tostring
 
@@ -67,6 +67,11 @@ local function buildDecoder(mode)
 	)
 	if mode.allowUndefined then
 		valueCapture = valueCapture + undefinedCapture
+	end
+	if mode.functionCalls then
+		for name, func in pairs(mode.functionCalls) do
+			valueCapture = valueCapture + lpeg.P((name .. "(") * lpeg.V(VALUE) / func * ")")
+		end
 	end
 	valueCapture = valueCapture + lpeg.V(TABLE) + lpeg.V(ARRAY)
 	valueCapture = ignored * valueCapture * ignored
