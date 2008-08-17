@@ -1,8 +1,6 @@
 --[[
   Some Time Trails for the JSON4Lua package
 ]]--
-
-package.path = package.path .. ';?/init.lua;../src/?.lua;../src/?/init.lua'
 require('json')
 require('os')
 require('table')

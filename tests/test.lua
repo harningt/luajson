@@ -1,5 +1,4 @@
 -- Additional path that may be required
-package.path = package.path .. ';?/init.lua;../src/?.lua;../src/?/init.lua'
 require("json")
 
 local testStrings = {

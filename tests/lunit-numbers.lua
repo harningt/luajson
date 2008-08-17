@@ -1,5 +1,3 @@
-package.path = package.path .. ';?/init.lua;../src/?.lua;../src/?/init.lua'
-
 local json = require("json")
 local lunit = require("lunit")
 local math = math
