@@ -126,3 +126,36 @@ function test_name_matches_string_or_pattern()
 		assert_true(matched, "Value <" .. value .. "> did not match the given pattern")
 	end
 end
+
+-- Test for enabled/disabled multiargument calling
+function test_multi_arguments()
+	local argumentRets = {
+		[""] = 0,
+		["1"] = 1,
+		["1,2"] = 2,
+		["\"A\",1,true,false"] = 4
+	}
+	local function func(capturedName, ...)
+		return select('#', ...)
+	end
+	local successParams = json.decode.util.merge({}, json.decode.default, {
+		functionCalls = {
+			f = func
+		}, multiArgumentFunctions = true
+	})
+	local failParams = json.decode.util.merge({}, successParams, {
+		multiArgumentFunctions = false
+	})
+	local successDecoder = json.decode.getDecoder(successParams)
+	local failDecoder = json.decode.getDecoder(failParams)
+	for args, count in pairs(argumentRets) do
+		local f = "f(" .. args .. ")"
+		local decodedCount = successDecoder(f)
+		assert_equal(count, decodedCount, "Failed to decode correct count")
+		if count ~= 1 then
+			assert_error(function()
+				failDecoder(f)
+			end)
+		end
+	end
+end
