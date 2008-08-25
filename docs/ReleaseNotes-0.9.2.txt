@@ -1,0 +1,12 @@
+luajson v0.9.2 Release Notes
+============================
+
+User Visible Changes
+--------------------
+
+Plans for next release
+----------------------
+
+Updates since 0.9.1
+===================
+
