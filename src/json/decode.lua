@@ -3,7 +3,6 @@
 	Author: Thomas Harning Jr <harningt@gmail.com>
 ]]
 local lpeg = require("lpeg")
-local jsonutil = require("json.util")
 
 local error = error
 
@@ -14,35 +13,20 @@ local util = require("json.decode.util")
 
 local setmetatable, getmetatable = setmetatable, getmetatable
 local assert = assert
-local print = print
-local tonumber = tonumber
 local ipairs, pairs = ipairs, pairs
-local string = string
-local tostring = tostring
-local type = type
 
 local require = require
 module("json.decode")
-
-local nullValue = jsonutil.null
-local undefinedValue = jsonutil.null
 
 local ignored = util.ignored
 
 local VALUE, TABLE, ARRAY = util.VALUE, util.TABLE, util.ARRAY
 
--- For null and undefined, use the util.null value to preserve null-ness
-local booleanCapture =
-	lpeg.P("true") * lpeg.Cc(true)
-	+ lpeg.P("false") * lpeg.Cc(false)
-
-local nullCapture = lpeg.P("null") * lpeg.Cc(nullValue)
-local undefinedCapture = lpeg.P("undefined") * lpeg.Cc(undefinedValue)
-
 local modulesToLoad = {
 	"strings",
 	"number",
-	"calls"
+	"calls",
+	"others"
 }
 local loadedModules = {
 }
@@ -50,7 +34,7 @@ local loadedModules = {
 default = {
 	object = object.default,
 	array  = array.default,
-	allowUndefined = true
+	initialObject = false
 }
 strict = {
 	object = object.strict,
@@ -68,18 +52,16 @@ end
 local function buildDecoder(mode)
 	local arrayCapture = array.buildCapture(mode.array)
 	local objectCapture = object.buildCapture(mode.object)
-	local valueCapture = (
-		booleanCapture
-		+ nullCapture
-	)
+	local valueCapture
 	for name, mod in pairs(loadedModules) do
 		local capture = mod.buildCapture(mode[name])
 		if capture then
-			valueCapture = valueCapture + capture
+			if valueCapture then
+				valueCapture = valueCapture + capture
+			else
+				valueCapture = capture
+			end
 		end
-	end
-	if mode.allowUndefined then
-		valueCapture = valueCapture + undefinedCapture
 	end
 	valueCapture = valueCapture + lpeg.V(TABLE) + lpeg.V(ARRAY)
 	valueCapture = ignored * valueCapture * ignored
