@@ -7,11 +7,8 @@ local jsonutil = require("json.util")
 
 local error = error
 
-local number = require("json.decode.number")
-local strings = require("json.decode.strings")
 local object = require("json.decode.object")
 local array = require("json.decode.array")
-local calls = require("json.decode.calls")
 
 local util = require("json.decode.util")
 
@@ -24,6 +21,7 @@ local string = string
 local tostring = tostring
 local type = type
 
+local require = require
 module("json.decode")
 
 local nullValue = jsonutil.null
@@ -41,40 +39,47 @@ local booleanCapture =
 local nullCapture = lpeg.P("null") * lpeg.Cc(nullValue)
 local undefinedCapture = lpeg.P("undefined") * lpeg.Cc(undefinedValue)
 
+local modulesToLoad = {
+	"strings",
+	"number",
+	"calls"
+}
+local loadedModules = {
+}
+
 default = {
 	object = object.default,
 	array  = array.default,
-	number = number.default,
-	string = strings.default,
-	calls = calls.default,
 	allowUndefined = true
 }
 strict = {
 	object = object.strict,
 	array  = array.strict,
-	number = number.strict,
-	string = strings.strict,
-	calls = calls.strict,
 	initialObject = true
 }
+
+for _,name in ipairs(modulesToLoad) do
+	local mod = require("json.decode." .. name)
+	default[name] = mod.default
+	strict[name] = mod.strict
+	loadedModules[name] = mod
+end
 
 local function buildDecoder(mode)
 	local arrayCapture = array.buildCapture(mode.array)
 	local objectCapture = object.buildCapture(mode.object)
-	local numberCapture = number.buildCapture(mode.number)
-	local stringCapture = strings.buildCapture(mode.string)
 	local valueCapture = (
-		stringCapture
-		+ numberCapture
-		+ booleanCapture
+		booleanCapture
 		+ nullCapture
 	)
+	for name, mod in pairs(loadedModules) do
+		local capture = mod.buildCapture(mode[name])
+		if capture then
+			valueCapture = valueCapture + capture
+		end
+	end
 	if mode.allowUndefined then
 		valueCapture = valueCapture + undefinedCapture
-	end
-	local functionCall = calls.buildCapture(mode.calls)
-	if functionCall then
-		valueCapture = valueCapture + functionCall
 	end
 	valueCapture = valueCapture + lpeg.V(TABLE) + lpeg.V(ARRAY)
 	valueCapture = ignored * valueCapture * ignored
