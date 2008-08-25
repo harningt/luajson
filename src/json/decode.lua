@@ -11,6 +11,7 @@ local number = require("json.decode.number")
 local strings = require("json.decode.strings")
 local object = require("json.decode.object")
 local array = require("json.decode.array")
+local calls = require("json.decode.calls")
 
 local util = require("json.decode.util")
 
@@ -45,6 +46,7 @@ default = {
 	array  = array.default,
 	number = number.default,
 	string = strings.default,
+	calls = calls.default,
 	allowUndefined = true
 }
 strict = {
@@ -52,6 +54,7 @@ strict = {
 	array  = array.strict,
 	number = number.strict,
 	string = strings.strict,
+	calls = calls.strict,
 	initialObject = true
 }
 
@@ -69,31 +72,9 @@ local function buildDecoder(mode)
 	if mode.allowUndefined then
 		valueCapture = valueCapture + undefinedCapture
 	end
-	if mode.functionCalls then
-		for name, func in pairs(mode.functionCalls) do
-			if type(name) ~= 'string' and not lpeg.type(name) == 'pattern'then
-				error("Invalid functionCalls name: " .. tostring(name) .. " not a string or LPEG pattern")
-			end
-			if type(func) ~= 'function' then
-				error("Invalid functionCalls item: " .. name .. " not a function")
-			end
-			local nameCallCapture
-			if type(name) == 'string' then
-				nameCallCapture = lpeg.P(name .. "(") * lpeg.Cc(name)
-			else
-				-- Name matcher expected to produce a capture
-				nameCallCapture = name * "("
-			end
-			-- Call func over nameCallCapture and value to permit function receiving name
-			local argumentCapture
-			if not mode.multiArgumentFunctions then
-				argumentCapture = lpeg.V(VALUE)
-			else -- Allow zero or more arguments separated by commas
-				argumentCapture = (lpeg.V(VALUE) * (lpeg.P(",") *  lpeg.V(VALUE))^0) + 0
-			end
-
-			valueCapture = valueCapture + (nameCallCapture * argumentCapture) / func * ")"
-		end
+	local functionCall = calls.buildCapture(mode.calls)
+	if functionCall then
+		valueCapture = valueCapture + functionCall
 	end
 	valueCapture = valueCapture + lpeg.V(TABLE) + lpeg.V(ARRAY)
 	valueCapture = ignored * valueCapture * ignored

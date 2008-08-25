@@ -7,7 +7,7 @@ local encode = json.encode
 -- DECODE NOT 'local' due to requirement for testutil to access it
 decode = json.decode.getDecoder(false)
 
-module("lunit-functions", lunit.testcase, package.seeall)
+module("lunit-calls", lunit.testcase, package.seeall)
 
 function setup()
 	-- Ensure that the decoder is reset
@@ -30,9 +30,9 @@ function test_identity()
 		return (...)
 	end
 	local strict = json.decode.util.merge({}, json.decode.default, {
-		functionCalls = {
+		calls = { defs = {
 			call = testFunction
-		}
+		} }
 	})
 	local decode = json.decode.getDecoder(strict)
 	for i, v in ipairs(values) do
@@ -56,9 +56,9 @@ function test_function_failure()
 		error("CANNOT CONTINUE")
 	end
 	local strict = json.decode.util.merge({}, json.decode.default, {
-		functionCalls = {
+		calls = { defs = {
 			call = testFunction
-		}
+		} }
 	})
 	local decode = json.decode.getDecoder(strict)
 	for i, v in ipairs(values) do
@@ -77,9 +77,9 @@ function test_not_a_function_fail()
 	for _, v in ipairs(notFunction) do
 		assert_error(function()
 			local strict = json.decode.util.merge({}, json.decode.default, {
-				functionCalls = {
+				calls = { defs = {
 					call = v
-				}
+				} }
 			})
 			json.decode.getDecoder(strict)
 		end)
@@ -94,9 +94,9 @@ function test_name_not_string()
 	for _, v in ipairs(notString) do
 		assert_error(function()
 			local strict = json.decode.util.merge({}, json.decode.default, {
-				functionCalls = {
+				calls = { defs = {
 					[v] = function() end
-				}
+				} }
 			})
 			json.decode.getDecoder(strict)
 		end)
@@ -118,9 +118,9 @@ function test_name_matches_string_or_pattern()
 		end
 		matched = false
 		local strict = json.decode.util.merge({}, json.decode.default, {
-			functionCalls = {
+			calls = { defs = {
 				[pattern] = mustBeCalled
-			}
+			} }
 		})
 		json.decode.getDecoder(strict)(value .. "(true)")
 		assert_true(matched, "Value <" .. value .. "> did not match the given pattern")
@@ -139,12 +139,14 @@ function test_multi_arguments()
 		return select('#', ...)
 	end
 	local successParams = json.decode.util.merge({}, json.decode.default, {
-		functionCalls = {
+		calls = { defs = {
 			f = func
-		}, multiArgumentFunctions = true
+		}, multiArgument = true }
 	})
-	local failParams = json.decode.util.merge({}, successParams, {
-		multiArgumentFunctions = false
+	local failParams = json.decode.util.merge({}, json.decode.default, {
+		calls = { defs = {
+			f = func
+		}, multiArgument = false }
 	})
 	local successDecoder = json.decode.getDecoder(successParams)
 	local failDecoder = json.decode.getDecoder(failParams)
