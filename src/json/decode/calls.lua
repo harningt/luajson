@@ -7,6 +7,8 @@ local error = error
 local util = require("json.decode.util")
 local VALUE = util.VALUE
 
+local getmetatable = getmetatable
+
 module("json.decode.calls")
 
 default = {
@@ -16,13 +18,25 @@ default = {
 
 strict = default
 
+local isPattern
+if lpeg.type then
+	function isPattern(value)
+		return lpeg.type(value) == 'pattern'
+	end
+else
+	local metaAdd = getmetatable(lpeg.P("")).__add
+	function isPattern(value)
+		return getmetatable(value).__add == metaAdd
+	end
+end
+
 function buildCapture(options)
 	if not options.defs or (nil == next(options.defs)) then -- No calls, don't bother to parse
 		return nil
 	end
 	local callCapture
 	for name, func in pairs(options.defs) do
-		if type(name) ~= 'string' and lpeg.type(name) ~= 'pattern' then
+		if type(name) ~= 'string' and not isPattern(name) then
 			error("Invalid functionCalls name: " .. tostring(name) .. " not a string or LPEG pattern")
 		end
 		if type(func) ~= 'function' then
