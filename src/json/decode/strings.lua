@@ -20,29 +20,40 @@ local knownReplacements = {
 	['/'] = "/",
 	['"'] = '"'
 }
-local function unicodeParse(code1, code2)
+-- NOTE: Technically incorrect, correct one will be incorporated eventually
+local function nullDecodeUnicode(code1, code2)
 	code1, code2 = tonumber(code1, 16), tonumber(code2, 16)
 	return string.char(code1, code2)
 end
 
 local doSimpleSub = lpeg.C(lpeg.S("rnfbt/\\z\"")) / knownReplacements
-local doUniSub = (lpeg.P('u') * lpeg.C(util.hexpair) * lpeg.C(util.hexpair) + lpeg.P(false)) / unicodeParse
-local doSub = doSimpleSub + doUniSub
+local doUniSub = (lpeg.P('u') * lpeg.C(util.hexpair) * lpeg.C(util.hexpair) + lpeg.P(false))
+local doSub = doSimpleSub
 
 defaultOptions = {
-	stopParse = '"\\',
-	escapeMatch = doSub + lpeg.C(1)
+	badChars = '"',
+	additionalEscapes = lpeg.C(1), -- any escape char not handled will be dumped as-is
+	escapeCheck = false, -- no check on valid characters
+	decodeUnicode = nullDecodeUnicode
 }
 default = {}
 strict = {
-	stopParse = '"\\\r\n\f\b\t',
-	escapeMatch = #lpeg.S('rnfbt/\\"u') * doSub
+	badChars = '"\r\n\f\b\t',
+	additionalEscapes = false, -- no additional escapes
+	escapeCheck = #lpeg.S('rnfbt/\\"u') --only these chars are allowed to be escaped
 }
 function buildMatch(options)
 	options = options and util.merge({}, defaultOptions, options) or defaultOptions
-	local stopParse = options.stopParse
-	local escapeMatch = options.escapeMatch	
-	return lpeg.P('"') * lpeg.Cs(((1 - lpeg.S(stopParse)) + (lpeg.P("\\") / "" * escapeMatch))^0) * lpeg.P('"')
+	local badChars = options.badChars
+	local escapeMatch = doSub
+	escapeMatch = escapeMatch + doUniSub / options.decodeUnicode
+	if options.additionalEscapes then
+		escapeMatch = escapeMatch + options.additionalEscapes
+	end
+	if options.escapeCheck then
+		escapeMatch = options.escapeCheck * escapeMatch
+	end
+	return lpeg.P('"') * lpeg.Cs(((1 - lpeg.S("\\" .. badChars)) + (lpeg.P("\\") / "" * escapeMatch))^0) * lpeg.P('"')
 end
 function buildCapture(options)
 	return buildMatch(options)
