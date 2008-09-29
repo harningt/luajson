@@ -37,7 +37,11 @@ for i = 1, 255 do
 		encodingMap[c] = string.format('\\u%.4X', i)
 	end
 end
+local stringPreprocess = nil
 local function encodeString(s)
+	if stringPreprocess then
+		s = stringPreprocess(s)
+	end
 	return '"' .. string.gsub(s, '[\\"/%c%z]', encodingMap) .. '"'
 end
 
