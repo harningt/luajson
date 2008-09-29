@@ -138,7 +138,15 @@ end
 	return encoder(item)
 end
 
-function encode(data)
+local defaultOptions = {
+	strings = {
+		preProcess = false
+	}
+}
+
+function encode(data, options)
+	options = options or defaultOptions
+	stringPreprocess = options and options.strings and options.strings.preProcess
 	alreadyEncoded = {}
 	return encodeValue(data)
 end

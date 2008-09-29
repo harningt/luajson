@@ -13,6 +13,17 @@ function setup()
 	_G["decode"] = json.decode.getDecoder(false)
 end
 
+function test_encoder_preprocess()
+	local opts = {
+		strings = {
+			preProcess = function(str)
+				return str:gsub("world", "land")
+			end
+		}
+	}
+	assert_equal([["Hello land"]], json.encode("Hello world", opts))
+end
+
 function test_post_process()
 	local opts = json.decode.util.merge({}, json.decode.default, {
 		strings = {
