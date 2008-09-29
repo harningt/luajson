@@ -34,7 +34,8 @@ defaultOptions = {
 	badChars = '"',
 	additionalEscapes = lpeg.C(1), -- any escape char not handled will be dumped as-is
 	escapeCheck = false, -- no check on valid characters
-	decodeUnicode = nullDecodeUnicode
+	decodeUnicode = nullDecodeUnicode,
+	postProcess = false  -- post-processing for strings after decoding, such as for UTF8 handling
 }
 default = {}
 strict = {
@@ -53,7 +54,12 @@ function buildMatch(options)
 	if options.escapeCheck then
 		escapeMatch = options.escapeCheck * escapeMatch
 	end
-	return lpeg.P('"') * lpeg.Cs(((1 - lpeg.S("\\" .. badChars)) + (lpeg.P("\\") / "" * escapeMatch))^0) * lpeg.P('"')
+	local captureString = lpeg.P('"') * lpeg.Cs(((1 - lpeg.S("\\" .. badChars)) + (lpeg.P("\\") / "" * escapeMatch))^0)
+	if options.postProcess then
+		captureString = captureString / options.postProcess
+	end
+	captureString = captureString * lpeg.P('"')
+	return captureString
 end
 function buildCapture(options)
 	return buildMatch(options)
