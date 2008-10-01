@@ -77,7 +77,8 @@ local defaultOptions = util_merge({}, {
 	array  = array.default,
 	object = object.default,
 	calls  = calls.default,
-	number = number.default
+	number = number.default,
+	initialObject = false
 }, others.default)
 
 default = nil
@@ -86,11 +87,16 @@ strict = util_merge({}, {
 	array  = array.strict,
 	object = object.strict,
 	calls  = calls.strict,
-	number = number.strict
+	number = number.strict,
+	initialObject = true -- Require an object at the root
 }, others.strict)
 
 function encode(data, options)
 	options = options and util_merge({}, defaultOptions, options) or defaultOptions
+	if options.initialObject then
+		local errorMessage = "Invalid arguments: expects a JSON Object or Array at the root"
+		assert(type(data) == 'table' and not call.isCall(data, options), errorMessage)
+	end
 	alreadyEncoded = {}
 	return encodeValue(data, options)
 end
