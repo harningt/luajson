@@ -51,7 +51,7 @@ strict = {
 		Must be set to false
 ]]
 function buildMatch(options)
-	options = util.merge({}, defaultOptions, options)
+	options = options and util.merge({}, defaultOptions, options) or defaultOptions
 	local ret
 	if options.hex then
 		ret = hex + (options.strict and strictInt or int)
