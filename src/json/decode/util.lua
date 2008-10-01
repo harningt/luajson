@@ -12,7 +12,7 @@ space = lpeg.S(" \n\r\t\f")
 identifier = lpeg.R("AZ","az","__") * lpeg.R("AZ","az", "__", "09") ^0
 
 hex = lpeg.R("09","AF","af")
-hexpair = hex * hex 
+hexpair = hex * hex
 
 comments = {
 	cpp = lpeg.P("//") * (1 - lpeg.P("\n"))^0 * lpeg.P("\n"),
@@ -34,8 +34,11 @@ end
 
 function merge(t, ...)
 	for i = 1,select('#', ...) do
-		for k,v in pairs(select(i, ...)) do
-			t[k] = v
+		local currentTable = select(i, ...)
+		if currentTable then
+			for k,v in pairs(currentTable) do
+				t[k] = v
+			end
 		end
 	end
 	return t
