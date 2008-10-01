@@ -11,6 +11,7 @@ local null = util.null
 local require = require
 
 local strings = require("json.encode.strings")
+local number = require("json.encode.number")
 local others = require("json.encode.others")
 
 module("json.encode")
@@ -20,7 +21,6 @@ module("json.encode")
 local calls = require("json.encode.calls")
 local array = require("json.encode.array")
 local object = require("json.encode.object")
-
 
 local function encodeFunction(val, options)
 	if val ~= null and calls.isCall(val, options) then
@@ -46,7 +46,7 @@ end
 
 local encodeMapping = {
 	['table'  ] = encodeTable,
-	['number' ] = others.encodeNumber,
+	['number' ] = number.encode,
 	['boolean'] = others.encodeBoolean,
 	['function'] = encodeFunction,
 	['string' ] = strings.encode,
