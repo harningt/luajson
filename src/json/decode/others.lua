@@ -16,7 +16,7 @@ local undefinedCapture = lpeg.P("undefined")
 local defaultOptions = {
 	allowUndefined = true,
 	null = jsonutil.null,
-	undefined = jsonutil.null
+	undefined = jsonutil.undefined
 }
 
 default = nil -- Let the buildCapture optimization take place

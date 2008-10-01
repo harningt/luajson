@@ -7,6 +7,7 @@ local assert = assert
 local getmetatable, setmetatable = getmetatable, setmetatable
 local util = require("json.util")
 local null = util.null
+local undefined = util.undefined
 
 local require = require
 
@@ -28,7 +29,12 @@ local function encodeFunction(val, options)
 	if val ~= null and calls.isCall(val, options) then
 		return calls.encode(val, options)
 	end
-	return 'null'
+	if val == null then
+		return others.encodeNil(val, options)
+	elseif val == undefined then
+		return others.encodeUndefined(val, options)
+	end
+	return others.encodeNil(val, options)
 end
 
 local alreadyEncoded -- Table set at the beginning of every
@@ -55,7 +61,7 @@ local encodeMapping = {
 	['nil'] = others.encodeNil -- For the case that nils are encountered count them as nulls
 }
 function isEncodable(item, options)
-	local isNotEncodableFunction = type(item) == 'function' and (item ~= null and not calls.isCall(item, options))
+	local isNotEncodableFunction = type(item) == 'function' and (item ~= undefined and item ~= null and not calls.isCall(item, options))
 	return encodeMapping[type(item)] and not isNotEncodableFunction
 end
 

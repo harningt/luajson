@@ -41,6 +41,11 @@ function null()
 	return null
 end
 
+-- Marker for 'undefined' values
+function undefined()
+	return undefined
+end
+
 local ArrayMT = {}
 
 --[[

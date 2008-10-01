@@ -24,3 +24,9 @@ function encodeNil(value, options)
 	options = options and util_merge({}, defaultOptions, options) or defaultOptions
 	return 'null'
 end
+
+function encodeUndefined(value, options)
+	options = options and util_merge({}, defaultOptions, options) or defaultOptions
+	assert(options.allowUndefined, "Invalid value: Unsupported 'Undefines' parameter")
+	return 'undefined'
+end
