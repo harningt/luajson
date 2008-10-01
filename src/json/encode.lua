@@ -14,6 +14,8 @@ local strings = require("json.encode.strings")
 local number = require("json.encode.number")
 local others = require("json.encode.others")
 
+local util_merge = require("json.decode.util").merge
+
 module("json.encode")
 
 -- Load these modules after defining that json.encode exists
@@ -64,17 +66,25 @@ function encodeValue(item, options)
 	return encoder(item, options)
 end
 
-local defaultOptions = {
-	strings = {
-		preProcess = false
-	},
-	array = {
-		isArray = util.IsArray
-	}
-}
+local defaultOptions = util_merge({}, {
+	strings = strings.default,
+	array  = array.default,
+	object = object.default,
+	calls  = calls.default,
+	number = number.default
+}, others.default)
+
+default = nil
+strict = util_merge({}, {
+	strings = strings.strict,
+	array  = array.strict,
+	object = object.strict,
+	calls  = calls.strict,
+	number = number.strict
+}, others.strict)
 
 function encode(data, options)
-	options = options or defaultOptions
+	options = options and util_merge({}, defaultOptions, options) or defaultOptions
 	alreadyEncoded = {}
 	return encodeValue(data, options)
 end

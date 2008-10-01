@@ -1,5 +1,6 @@
 local string_char = string.char
 
+local util_merge = require("json.decode.util").merge
 module("json.encode.strings")
 
 local encodingMap = {
@@ -25,8 +26,17 @@ for i = 1, 255 do
 	end
 end
 
+local defaultOptions = {
+	preProcess = false
+}
+
+default = nil
+strict = nil
+
 function encode(s, options)
-	local stringPreprocess = options and options.strings and options.strings.preProcess
+	options = options and options.strings
+	options = options and util_merge({}, defaultOptions, options) or defaultOptions
+	local stringPreprocess = options and options.preProcess
 	if stringPreprocess then
 		s = stringPreprocess(s)
 	end

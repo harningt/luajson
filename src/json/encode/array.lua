@@ -7,10 +7,22 @@ local assert = assert
 local table_concat = table.concat
 local math_floor, math_modf = math.floor, math.modf
 
+local util_merge = require("json.decode.util").merge
+local util_IsArray = require("json.util").IsArray
+
 module("json.encode.array")
 
+local defaultOptions = {
+	isArray = util_IsArray
+}
+
+default = nil
+strict = nil
+
 function isArray(val, options)
-	local externalIsArray = options and options.array and options.array.isArray
+	options = options and options.array
+	options = options and util_merge({}, defaultOptions, options) or defaultOptions
+	local externalIsArray = options and options.isArray
 	local isEncodable = jsonencode.isEncodable
 
 	if externalIsArray then
@@ -42,6 +54,8 @@ function isArray(val, options)
 end
 
 function encode(tab, options)
+	options = options and options.array
+	options = options and util.merge({}, defaultOptions, options) or defaultOptions
 	local encodeValue = jsonencode.encodeValue
 	local retVal = {}
 	for i = 1,(tab.n or #tab) do

@@ -4,8 +4,20 @@ local table_concat = table.concat
 
 local select = select
 local getmetatable, setmetatable = getmetatable, setmetatable
+local assert = assert
 
+local util_merge = require("json.decode.util").merge
 module("json.encode.calls")
+
+
+local defaultOptions = {
+	defs = nil,
+	multiArgument = false
+}
+
+-- No real default-option handling needed...
+default = nil
+strict = nil
 
 function buildCall(name, ...)
 	return setmetatable({}, {
@@ -33,8 +45,13 @@ end
 		parameters == array of parameters to encode
 ]]
 function encode(value, options)
+	options = options and util_merge({}, defaultOptions, options) or defaultOptions
 	local name, params = decodeCall(value)
-	for i = 1, (params.n or #params) do
+	local paramLen = params.n or #params
+	if not options.multiArgument then
+		assert(paramLen == 1, "Invalid input: encoder configured to support single-parameter calls")
+	end
+	for i = 1, paramLen do
 		local val = params[i]
 		if val == nil then
 			val = jsonutil.null
