@@ -25,7 +25,7 @@ function test_encoder_preprocess()
 end
 
 function test_post_process()
-	local opts = json.decode.util.merge({}, json.decode.default, {
+	local opts = {
 		strings = {
 			postProcess = function(value)
 				-- Test that value processed is after escape handling
@@ -33,7 +33,7 @@ function test_post_process()
 				return "arg"
 			end
 		}
-	})
+	}
 	local decode = json.decode.getDecoder(opts)
 	local ret = decode([["test\n"]])
 	-- Test that returned values are used

@@ -42,7 +42,7 @@ math.randomseed(0xDEADBEEF)
 for i = -300,300,60 do
 	numbers[#numbers + 1] = math.random() * math.pow(10, i)
 	numbers[#numbers + 1] = -math.random() * math.pow(10, i)
-end	
+end
 
 local function get_number_tester(f)
 	return function ()
@@ -80,9 +80,9 @@ end
 local strict = json.decode.util.merge({}, json.decode.strict, {initialObject = false})
 local strictDecoder = json.decode.getDecoder(strict)
 
-local numberValue = json.decode.util.merge({}, json.decode.number.default, {hex = true})
+local numberValue = {hex = true}
 
-local hex = json.decode.util.merge({}, json.decode.default, {number = numberValue})
+local hex = {number = numberValue}
 local hexDecoder = json.decode.getDecoder(hex)
 
 function test_hex()

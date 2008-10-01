@@ -29,11 +29,11 @@ function test_identity()
 		assert_equal('call', capturedName)
 		return (...)
 	end
-	local strict = json.decode.util.merge({}, json.decode.default, {
+	local strict = {
 		calls = { defs = {
 			call = testFunction
 		} }
-	})
+	}
 	local decode = json.decode.getDecoder(strict)
 	for i, v in ipairs(values) do
 		local str = "call(" .. encode(v) .. ")"
@@ -55,11 +55,11 @@ function test_function_failure()
 	local function testFunction(...)
 		error("CANNOT CONTINUE")
 	end
-	local strict = json.decode.util.merge({}, json.decode.default, {
+	local strict = {
 		calls = { defs = {
 			call = testFunction
 		} }
-	})
+	}
 	local decode = json.decode.getDecoder(strict)
 	for i, v in ipairs(values) do
 		local str = "call(" .. encode(v) .. ")"
@@ -76,11 +76,11 @@ function test_not_a_function_fail()
 	}
 	for _, v in ipairs(notFunction) do
 		assert_error(function()
-			local strict = json.decode.util.merge({}, json.decode.default, {
+			local strict = {
 				calls = { defs = {
 					call = v
 				} }
-			})
+			}
 			json.decode.getDecoder(strict)
 		end)
 	end
@@ -93,11 +93,11 @@ function test_name_not_string()
 	}
 	for _, v in ipairs(notString) do
 		assert_error(function()
-			local strict = json.decode.util.merge({}, json.decode.default, {
+			local strict = {
 				calls = { defs = {
 					[v] = function() end
 				} }
-			})
+			}
 			json.decode.getDecoder(strict)
 		end)
 	end
@@ -117,11 +117,11 @@ function test_name_matches_string_or_pattern()
 			matched = true
 		end
 		matched = false
-		local strict = json.decode.util.merge({}, json.decode.default, {
+		local strict = {
 			calls = { defs = {
 				[pattern] = mustBeCalled
 			} }
-		})
+		}
 		json.decode.getDecoder(strict)(value .. "(true)")
 		assert_true(matched, "Value <" .. value .. "> did not match the given pattern")
 	end
@@ -138,16 +138,16 @@ function test_multi_arguments()
 	local function func(capturedName, ...)
 		return select('#', ...)
 	end
-	local successParams = json.decode.util.merge({}, json.decode.default, {
+	local successParams = {
 		calls = { defs = {
 			f = func
 		}, multiArgument = true }
-	})
-	local failParams = json.decode.util.merge({}, json.decode.default, {
+	}
+	local failParams = {
 		calls = { defs = {
 			f = func
 		}, multiArgument = false }
-	})
+	}
 	local successDecoder = json.decode.getDecoder(successParams)
 	local failDecoder = json.decode.getDecoder(failParams)
 	for args, count in pairs(argumentRets) do
