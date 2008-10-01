@@ -31,11 +31,14 @@ local modulesToLoad = {
 local loadedModules = {
 }
 
-default = {
+local defaultOptions = {
 	object = object.default,
 	array  = array.default,
 	initialObject = false
 }
+
+default = nil -- Let the buildCapture optimization take place
+
 strict = {
 	object = object.strict,
 	array  = array.strict,
@@ -44,12 +47,13 @@ strict = {
 
 for _,name in ipairs(modulesToLoad) do
 	local mod = require("json.decode." .. name)
-	default[name] = mod.default
+	defaultOptions[name] = mod.default
 	strict[name] = mod.strict
 	loadedModules[name] = mod
 end
 
 local function buildDecoder(mode)
+	mode = mode and util.merge({}, defaultOptions, mode) or defaultOptions
 	local arrayCapture = array.buildCapture(mode.array)
 	local objectCapture = object.buildCapture(mode.object)
 	local valueCapture

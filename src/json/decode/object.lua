@@ -28,7 +28,7 @@ local defaultOptions = {
 	trailingComma = true
 }
 
-default = {}
+default = nil -- Let the buildCapture optimization take place
 
 strict = {
 	number = false,

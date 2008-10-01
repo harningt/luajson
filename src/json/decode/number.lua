@@ -34,7 +34,7 @@ local defaultOptions = {
 	hex = false
 }
 
-default = {}
+default = nil -- Let the buildCapture optimization take place
 strict = {
 	nan = false,
 	inf = false,

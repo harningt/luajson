@@ -30,21 +30,25 @@ local doSimpleSub = lpeg.C(lpeg.S("rnfbt/\\z\"")) / knownReplacements
 local doUniSub = (lpeg.P('u') * lpeg.C(util.hexpair) * lpeg.C(util.hexpair) + lpeg.P(false))
 local doSub = doSimpleSub
 
-defaultOptions = {
+local defaultOptions = {
 	badChars = '"',
 	additionalEscapes = lpeg.C(1), -- any escape char not handled will be dumped as-is
 	escapeCheck = false, -- no check on valid characters
 	decodeUnicode = nullDecodeUnicode,
 	postProcess = false  -- post-processing for strings after decoding, such as for UTF8 handling
 }
-default = {}
+
+default = nil -- Let the buildCapture optimization take place
+
 strict = {
 	badChars = '"\r\n\f\b\t',
 	additionalEscapes = false, -- no additional escapes
 	escapeCheck = #lpeg.S('rnfbt/\\"u') --only these chars are allowed to be escaped
 }
+
 function buildMatch(options)
 	options = options and util.merge({}, defaultOptions, options) or defaultOptions
+
 	local badChars = options.badChars
 	local escapeMatch = doSub
 	escapeMatch = escapeMatch + doUniSub / options.decodeUnicode

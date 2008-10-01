@@ -11,12 +11,14 @@ local getmetatable = getmetatable
 
 module("json.decode.calls")
 
-default = {
+local defaultOptions = {
 	defs = nil,
 	multiArgument = false
 }
 
-strict = default
+-- No real default-option handling needed...
+default = nil
+strict = nil
 
 local isPattern
 if lpeg.type then
@@ -31,7 +33,7 @@ else
 end
 
 function buildCapture(options)
-	if not options.defs or (nil == next(options.defs)) then -- No calls, don't bother to parse
+	if not options or not options.defs or (nil == next(options.defs)) then -- No calls, don't bother to parse
 		return nil
 	end
 	local callCapture

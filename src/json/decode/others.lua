@@ -13,18 +13,19 @@ local booleanCapture =
 local nullCapture = lpeg.P("null")
 local undefinedCapture = lpeg.P("undefined")
 
-
-default = {
+local defaultOptions = {
 	allowUndefined = true,
 	null = jsonutil.null,
 	undefined = jsonutil.null
 }
 
-strict = util.merge({}, default, {
+default = nil -- Let the buildCapture optimization take place
+strict = {
 	allowUndefined = false
-})
+}
 
 function buildCapture(options)
+	options = options and util.merge({}, defaultOptions, options) or defaultOptions
 	local valueCapture = (
 		booleanCapture
 		+ nullCapture * lpeg.Cc(options.null)

@@ -42,7 +42,7 @@ local defaultOptions = {
 	depthLimiter = nil
 }
 
-default = {}
+default = nil -- Let the buildCapture optimization take place
 strict = {
 	trailingComma = false,
 	depthLimiter = util.buildDepthLimit(20)
