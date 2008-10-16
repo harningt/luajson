@@ -12,16 +12,28 @@ local tonumber = tonumber
 local unpack = unpack
 local print = print
 local tostring = tostring
+
+local rawset = rawset
+
+local DecimalLpegVersion = util.DecimalLpegVersion
+
 module("json.decode.object")
 local ignored = util.ignored
 
-local function initObject()
-	return {}
+
+-- BEGIN LPEG < 0.9 SUPPORT
+local initObject, applyObjectKey
+if DecimalLpegVersion < 0.9 then
+	function initObject()
+		return {}
+	end
+	function applyObjectKey(tab, key, val)
+		tab[key] = val
+		return tab
+	end
 end
-local function applyObjectKey(tab, key, val)
-	tab[key] = val
-	return tab
-end
+-- END LPEG < 0.9 SUPPORT
+
 local defaultOptions = {
 	number = true,
 	identifier = true,
@@ -37,6 +49,10 @@ strict = {
 	depthLimiter = util.buildDepthLimit(20)
 }
 
+local function buildItemSequence(objectItem)
+	return (objectItem * (ignored * lpeg.P(",") * ignored * objectItem)^0) + 0
+end
+
 function buildCapture(options)
 	options = options and util.merge({}, defaultOptions, options) or defaultOptions
 	local incDepth, decDepth
@@ -50,10 +66,18 @@ function buildCapture(options)
 	if options.number then
 		key = key + number.int / tonumber
 	end
-	local objectItem = (key * ignored * lpeg.P(":") * ignored * lpeg.V(util.VALUE)) / applyObjectKey
-	local objectItems = objectItem * (ignored * lpeg.P(",") * ignored * objectItem)^0
-	-- Build loading mechanisms
-	objectItems = lpeg.Ca(lpeg.Cc(false) / initObject * (objectItems + 0))
+	local objectItems
+	local objectItem = (key * ignored * lpeg.P(":") * ignored * lpeg.V(util.VALUE))
+	-- BEGIN LPEG < 0.9 SUPPORT
+	if DecimalLpegVersion < 0.9 then
+		objectItems = buildItemSequence(objectItem / applyObjectKey)
+		objectItems = lpeg.Ca(lpeg.Cc(false) / initObject * objectItems)
+	-- END LPEG < 0.9 SUPPORT
+	else
+		objectItems = buildItemSequence(lpeg.Cg(objectItem))
+		objectItems = lpeg.Cf(lpeg.Ct(0) * objectItems, rawset)
+	end
+
 
 	local capture = lpeg.P("{") * ignored
 	if incDepth then
