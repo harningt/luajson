@@ -77,7 +77,7 @@ local function buildDecoder(mode)
 	}) * ignored * -1
 	return function(data)
 		util.doInit()
-		return assert(lpeg.match(grammar, data), "Invalid JSON data")
+		return (assert(lpeg.match(grammar, data), "Invalid JSON data"))
 	end
 end
 
