@@ -5,6 +5,7 @@
 local lpeg = require("lpeg")
 local select = select
 local pairs, ipairs = pairs, ipairs
+local tonumber = tonumber
 module("json.decode.util")
 
 space = lpeg.S(" \n\r\t\f")
@@ -72,3 +73,8 @@ function buildDepthLimit(limit)
 	end
 	return {incDepth, decDepth}
 end
+
+
+-- Parse the lpeg version skipping patch-values
+-- LPEG <= 0.7 have no version value... so 0.7 is value
+DecimalLpegVersion = lpeg.version and tonumber(lpeg.version():match("^(%d+%.%d+)")) or 0.7
