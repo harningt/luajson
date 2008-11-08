@@ -7,6 +7,7 @@ local util = require("json.decode.util")
 
 local tonumber = tonumber
 local string = string
+local floor = math.floor
 
 module("json.decode.strings")
 local knownReplacements = {
@@ -26,6 +27,23 @@ local function nullDecodeUnicode(code1, code2)
 	return string.char(code1, code2)
 end
 
+-- according to the table at http://da.wikipedia.org/wiki/UTF-8
+local function utf8DecodeUnicode(code1, code2)
+	code1, code2 = tonumber(code1, 16), tonumber(code2, 16)
+	if code1 == 0 and code2 < 0x80 then
+		return string.char(code2)
+	end
+	if code1 < 0x08 then
+		return string.char(
+			0xC0 + code1 * 4 + floor(code2 / 64),
+			0x80 + code2 % 64)
+	end
+	return string.char(
+		0xE0 + floor(code1 / 16),
+		0x80 + (code1 % 16) * 4 + floor(code2 / 64),
+		0x80 + code2 % 64)
+end
+
 local doSimpleSub = lpeg.C(lpeg.S("rnfbt/\\z\"")) / knownReplacements
 local doUniSub = (lpeg.P('u') * lpeg.C(util.hexpair) * lpeg.C(util.hexpair) + lpeg.P(false))
 local doSub = doSimpleSub
@@ -34,7 +52,7 @@ local defaultOptions = {
 	badChars = '"',
 	additionalEscapes = lpeg.C(1), -- any escape char not handled will be dumped as-is
 	escapeCheck = false, -- no check on valid characters
-	decodeUnicode = nullDecodeUnicode,
+	decodeUnicode = utf8DecodeUnicode,
 	postProcess = false  -- post-processing for strings after decoding, such as for UTF8 handling
 }
 
