@@ -41,16 +41,23 @@ function test_post_process()
 end
 
 local utf16_matches = {
+	-- 1-byte
 	{ '"\\u0000"', string.char(0x00) },
 	{ '"\\u007F"', string.char(0x7F) },
+	-- 2-byte
+	{ '"\\u0080"', string.char(0xC2, 0x80) },
 	{ '"\\u00A2"', string.char(0xC2, 0xA2) },
+	{ '"\\u07FF"', string.char(0xDF, 0xBF) },
+	-- 3-byte
+	{ '"\\u0800"', string.char(0xE0, 0xA0, 0x80) },
 	{ '"\\u20AC"', string.char(0xE2, 0x82, 0xAC) },
 	{ '"\\uFFFF"', string.char(0xEF, 0xBF, 0xBF) }
 }
 
 function test_utf16_decode()
-	for _, v in ipairs(utf16_matches) do
+	for i, v in ipairs(utf16_matches) do
 		-- Test that the default \u decoder outputs UTF8
-		assert_equal(v[2], json.decode(v[1]))
+		local num = tostring(i) .. ' '
+		assert_equal(num .. v[2], num .. json.decode(v[1]))
 	end
 end
