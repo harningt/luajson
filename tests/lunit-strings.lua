@@ -39,3 +39,18 @@ function test_post_process()
 	-- Test that returned values are used
 	assert_equal("arg", ret)
 end
+
+local utf16_matches = {
+	{ '"\\u0000"', string.char(0x00) },
+	{ '"\\u007F"', string.char(0x7F) },
+	{ '"\\u00A2"', string.char(0xC2, 0xA2) },
+	{ '"\\u20AC"', string.char(0xE2, 0x82, 0xAC) },
+	{ '"\\uFFFF"', string.char(0xEF, 0xBF, 0xBF) }
+}
+
+function test_utf16_decode()
+	for _, v in ipairs(utf16_matches) do
+		-- Test that the default \u decoder outputs UTF8
+		assert_equal(v[2], json.decode(v[1]))
+	end
+end
