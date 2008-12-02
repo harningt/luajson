@@ -100,6 +100,11 @@ function encode(data, options)
 	alreadyEncoded = {}
 	return encodeValue(data, options)
 end
+function getEncoder(options)
+	return function(data)
+		return encode(data, options)
+	end
+end
 
 local mt = getmetatable(_M) or {}
 mt.__call = function(self, ...)
