@@ -7,6 +7,7 @@ local util = require("json.decode.util")
 
 local tonumber = tonumber
 local string = string
+local string_char = string.char
 local floor = math.floor
 
 module("json.decode.strings")
@@ -31,14 +32,14 @@ end
 local function utf8DecodeUnicode(code1, code2)
 	code1, code2 = tonumber(code1, 16), tonumber(code2, 16)
 	if code1 == 0 and code2 < 0x80 then
-		return string.char(code2)
+		return string_char(code2)
 	end
 	if code1 < 0x08 then
-		return string.char(
+		return string_char(
 			0xC0 + code1 * 4 + floor(code2 / 64),
 			0x80 + code2 % 64)
 	end
-	return string.char(
+	return string_char(
 		0xE0 + floor(code1 / 16),
 		0x80 + (code1 % 16) * 4 + floor(code2 / 64),
 		0x80 + code2 % 64)
