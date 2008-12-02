@@ -40,6 +40,23 @@ function test_post_process()
 	assert_equal("arg", ret)
 end
 
+function test_strict_quotes()
+	local opts = {
+		strings = {
+			strict_quotes = true
+		}
+	}
+	assert_error(function()
+		local decoder = json.decode.getDecoder(opts)
+		decoder("'hello'")
+	end)
+	opts.strings.strict_quotes = false
+	assert_equal("hello", json.decode.getDecoder(opts)("'hello'"))
+	-- Quote test
+	assert_equal("he'\"llo'", json.decode.getDecoder(opts)("'he\\'\"llo\\''"))
+
+end
+
 local utf16_matches = {
 	-- 1-byte
 	{ '"\\u0000"', string.char(0x00) },

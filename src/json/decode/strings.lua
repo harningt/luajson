@@ -9,6 +9,7 @@ local tonumber = tonumber
 local string = string
 local string_char = string.char
 local floor = math.floor
+local table_concat = table.concat
 
 module("json.decode.strings")
 local knownReplacements = {
@@ -50,24 +51,38 @@ local doUniSub = (lpeg.P('u') * lpeg.C(util.hexpair) * lpeg.C(util.hexpair) + lp
 local doSub = doSimpleSub
 
 local defaultOptions = {
-	badChars = '"',
+	badChars = '',
 	additionalEscapes = lpeg.C(1), -- any escape char not handled will be dumped as-is
 	escapeCheck = false, -- no check on valid characters
 	decodeUnicode = utf8DecodeUnicode,
+	strict_quotes = false,
 	postProcess = false  -- post-processing for strings after decoding, such as for UTF8 handling
 }
 
 default = nil -- Let the buildCapture optimization take place
 
 strict = {
-	badChars = '"\r\n\f\b\t',
+	badChars = '\r\n\f\b\t',
 	additionalEscapes = false, -- no additional escapes
-	escapeCheck = #lpeg.S('rnfbt/\\"u') --only these chars are allowed to be escaped
+	escapeCheck = #lpeg.S('rnfbt/\\"\'u'), --only these chars are allowed to be escaped
+	strict_quotes = true
 }
+
+local function buildCaptureString(quote, badChars, escapeMatch, postProcess)
+	local captureString = lpeg.P(quote) * lpeg.Cs(((1 - lpeg.S("\\" .. badChars .. quote)) + (lpeg.P("\\") / "" * escapeMatch))^0)
+	if postProcess then
+		captureString = captureString / postProcess
+	end
+	captureString = captureString * lpeg.P(quote)
+	return captureString
+end
 
 function buildMatch(options)
 	options = options and util.merge({}, defaultOptions, options) or defaultOptions
-
+	local quotes = { '"' }
+	if not options.strict_quotes then
+		quotes[#quotes + 1] = "'"
+	end
 	local badChars = options.badChars
 	local escapeMatch = doSub
 	escapeMatch = escapeMatch + doUniSub / options.decodeUnicode
@@ -77,11 +92,15 @@ function buildMatch(options)
 	if options.escapeCheck then
 		escapeMatch = options.escapeCheck * escapeMatch
 	end
-	local captureString = lpeg.P('"') * lpeg.Cs(((1 - lpeg.S("\\" .. badChars)) + (lpeg.P("\\") / "" * escapeMatch))^0)
-	if options.postProcess then
-		captureString = captureString / options.postProcess
+	local captureString
+	for i = 1, #quotes do
+		local cap = buildCaptureString(quotes[i], badChars, escapeMatch, options.postProcess)
+		if captureString == nil then
+			captureString = cap
+		else
+			captureString = captureString + cap
+		end
 	end
-	captureString = captureString * lpeg.P('"')
 	return captureString
 end
 function buildCapture(options)
