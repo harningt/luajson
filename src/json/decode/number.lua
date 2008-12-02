@@ -8,13 +8,13 @@ local util = require("json.decode.util")
 
 module("json.decode.number")
 
-local space = util.space
+local simple_space = lpeg.S(" \t")
 
 local digit  = lpeg.R("09")
 local digits = digit^1
 
 -- Deviation from JSON spec: Leading zeroes, inf number negatives w/ space
-int = lpeg.P('-')^0 * space^0 * digits
+int = lpeg.P('-')^0 * simple_space^0 * digits
 local int = int
 local strictInt = (lpeg.P('-') + 0) * (lpeg.R("19") * digits + digit)
 

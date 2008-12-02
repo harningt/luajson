@@ -14,11 +14,10 @@ local util = require("json.decode.util")
 local setmetatable, getmetatable = setmetatable, getmetatable
 local assert = assert
 local ipairs, pairs = ipairs, pairs
+local string_char = string.char
 
 local require = require
 module("json.decode")
-
-local ignored = util.ignored
 
 local VALUE, TABLE, ARRAY = util.VALUE, util.TABLE, util.ARRAY
 
@@ -34,6 +33,7 @@ local loadedModules = {
 local defaultOptions = {
 	object = object.default,
 	array  = array.default,
+	unicodeWhitespace = true,
 	initialObject = false
 }
 
@@ -42,6 +42,7 @@ default = nil -- Let the buildCapture optimization take place
 strict = {
 	object = object.strict,
 	array  = array.strict,
+	unicodeWhitespace = true,
 	initialObject = true
 }
 
@@ -54,11 +55,15 @@ end
 
 local function buildDecoder(mode)
 	mode = mode and util.merge({}, defaultOptions, mode) or defaultOptions
-	local arrayCapture = array.buildCapture(mode.array)
-	local objectCapture = object.buildCapture(mode.object)
+	local ignored = mode.unicodeWhitespace and util.unicode_ignored or util.ascii_ignored
+	-- Store 'ignored' in the global options table
+	mode.ignored = ignored
+
+	local arrayCapture = array.buildCapture(mode.array, mode)
+	local objectCapture = object.buildCapture(mode.object, mode)
 	local valueCapture
 	for name, mod in pairs(loadedModules) do
-		local capture = mod.buildCapture(mode[name])
+		local capture = mod.buildCapture(mode[name], mode)
 		if capture then
 			if valueCapture then
 				valueCapture = valueCapture + capture
@@ -77,7 +82,9 @@ local function buildDecoder(mode)
 	}) * ignored * -1
 	return function(data)
 		util.doInit()
-		return (assert(lpeg.match(grammar, data), "Invalid JSON data"))
+		local ret, err = lpeg.match(grammar, data)
+		assert(nil ~= ret, err or "Invalid JSON data")
+		return ret
 	end
 end
 

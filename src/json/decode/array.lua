@@ -15,7 +15,6 @@ local tonumber = tonumber
 local unpack = unpack
 
 module("json.decode.array")
-local ignored = util.ignored
 
 -- Utility function to help manage slighly sparse arrays
 local function processArray(array)
@@ -33,9 +32,6 @@ local function processArray(array)
 	end
 	return array
 end
--- arrayItem == element
-local arrayItem = lpeg.V(util.VALUE)
-local arrayElements = lpeg.Ct(arrayItem * (ignored * lpeg.P(',') * ignored * arrayItem)^0 + 0) / processArray
 
 local defaultOptions = {
 	trailingComma = true,
@@ -48,7 +44,12 @@ strict = {
 	depthLimiter = util.buildDepthLimit(20)
 }
 
-function buildCapture(options)
+function buildCapture(options, global_options)
+	local ignored = global_options.ignored
+	-- arrayItem == element
+	local arrayItem = lpeg.V(util.VALUE)
+	local arrayElements = lpeg.Ct(arrayItem * (ignored * lpeg.P(',') * ignored * arrayItem)^0 + 0) / processArray
+
 	options = options and util.merge({}, defaultOptions, options) or defaultOptions
 	local incDepth, decDepth
 	if options.depthLimiter then
