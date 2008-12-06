@@ -3,107 +3,126 @@
 	Author: Thomas Harning Jr <harningt@gmail.com>
 ]]
 local type = type
-local assert = assert
+local assert, error = assert, error
 local getmetatable, setmetatable = getmetatable, setmetatable
 local util = require("json.util")
-local null = util.null
-local undefined = util.undefined
 
+local ipairs, pairs = ipairs, pairs
 local require = require
-
-local strings = require("json.encode.strings")
-local number = require("json.encode.number")
-local others = require("json.encode.others")
 
 local util_merge = require("json.decode.util").merge
 
 module("json.encode")
 
--- Load these modules after defining that json.encode exists
---  calls, object, and array need encodeValue and isEncodable
-local calls = require("json.encode.calls")
-local array = require("json.encode.array")
-local object = require("json.encode.object")
-
-local function encodeFunction(val, options)
-	if val ~= null and calls.isCall(val, options) then
-		return calls.encode(val, options)
-	end
-	if val == null then
-		return others.encodeNil(val, options)
-	elseif val == undefined then
-		return others.encodeUndefined(val, options)
-	end
-	return others.encodeNil(val, options)
-end
-
-local alreadyEncoded -- Table set at the beginning of every
-	-- encoding operation to empty to detect recursiveness
-local function encodeTable(tab, options)
-	assert(not alreadyEncoded[tab], "Recursive table detected")
-	alreadyEncoded[tab] = true
-	-- Pass off encoding to appropriate encoder
-	if calls.isCall(tab, options) then
-		return calls.encode(tab, options)
-	elseif array.isArray(tab, options) then
-		return array.encode(tab, options)
-	else
-		return object.encode(tab, options)
-	end
-end
-
-local encodeMapping = {
-	['table'  ] = encodeTable,
-	['number' ] = number.encode,
-	['boolean'] = others.encodeBoolean,
-	['function'] = encodeFunction,
-	['string' ] = strings.encode,
-	['nil'] = others.encodeNil -- For the case that nils are encountered count them as nulls
+--[[
+	List of encoding modules to load.
+	Loaded in sequence such that earlier encoders get priority when
+	duplicate type-handlers exist.
+]]
+local modulesToLoad = {
+	"strings",
+	"number",
+	"calls",
+	"others",
+	"array",
+	"object"
 }
-function isEncodable(item, options)
-	local isNotEncodableFunction = type(item) == 'function' and (item ~= undefined and item ~= null and not calls.isCall(item, options))
-	return encodeMapping[type(item)] and not isNotEncodableFunction
-end
+-- Modules that have been loaded
+local loadedModules = {}
 
-function encodeValue(item, options)
-	local itemType = type(item)
-	local encoder = encodeMapping[itemType]
-	assert(encoder, "Invalid item to encode: " .. itemType)
-	return encoder(item, options)
-end
-
-local defaultOptions = util_merge({}, {
-	strings = strings.default,
-	array  = array.default,
-	object = object.default,
-	calls  = calls.default,
-	number = number.default,
-	initialObject = false
-}, others.default)
-
+-- Default configuration options to apply
+local defaultOptions = {}
+-- Configuration bases for client apps
 default = nil
-strict = util_merge({}, {
-	strings = strings.strict,
-	array  = array.strict,
-	object = object.strict,
-	calls  = calls.strict,
-	number = number.strict,
+strict = {
 	initialObject = true -- Require an object at the root
-}, others.strict)
+}
 
-function encode(data, options)
-	options = options and util_merge({}, defaultOptions, options) or defaultOptions
-	if options.initialObject then
-		local errorMessage = "Invalid arguments: expects a JSON Object or Array at the root"
-		assert(type(data) == 'table' and not call.isCall(data, options), errorMessage)
-	end
-	alreadyEncoded = {}
-	return encodeValue(data, options)
+-- For each module, load it and its defaults
+for _,name in ipairs(modulesToLoad) do
+	local mod = require("json.encode." .. name)
+	defaultOptions[name] = mod.default
+	strict[name] = mod.strict
+	loadedModules[name] = mod
 end
-function getEncoder(options)
-	return function(data)
-		return encode(data, options)
+
+-- Merges values, assumes all tables are arrays, inner values flattened, optionally constructing output
+local function flattenOutput(out, values)
+	out = not out and {} or type(out) == 'table' and out or {out}
+	if type(values) == 'table' then
+		for _, v in ipairs(values) do
+			out[#out + 1] = v
+		end
+	else
+		out[#out + 1] = values
 	end
+	return out
+end
+
+-- Prepares the encoding map from the already provided modules and new config
+local function prepareEncodeMap(options)
+	local map = {}
+	for _, name in ipairs(modulesToLoad) do
+		local encodermap = loadedModules[name].getEncoder(options[name])
+		for valueType, encoderSet in pairs(encodermap) do
+			map[valueType] = flattenOutput(map[valueType], encoderSet)
+		end
+	end
+	return map
+end
+
+--[[
+	Encode a value with a given encoding map and state
+]]
+local function encodeWithMap(value, map, state)
+	local t = type(value)
+	local encoderList = assert(map[t], "Failed to encode value, unhandled type: " .. t)
+	for _, encoder in ipairs(encoderList) do
+		local ret = encoder(value, state)
+		if false ~= ret then
+			return ret
+		end
+	end
+	error("Failed to encode value, encoders for " .. t .. " deny encoding")
+end
+
+--[[
+	Retreive an initial encoder instance based on provided options
+	the initial encoder is responsible for initializing state
+		State has at least these values configured: encode, check_unique
+]]
+function getEncoder(options)
+	options = options and util_merge({}, defaultOptions, options) or defaultOptions
+	local encoderMap = prepareEncodeMap(options)
+	local function encode(value, state)
+		if options.initialObject then
+			local errorMessage = "Invalid arguments: expects a JSON Object or Array at the root"
+			assert(type(value) == 'table' and not call.isCall(value, options), errorMessage)
+		end
+		return encodeWithMap(value, encoderMap, state)
+	end
+	local function initialEncode(value)
+		local alreadyEncoded = {}
+		local function check_unique(value)
+			assert(not alreadyEncoded[value], "Recursive encoding of value")
+			alreadyEncoded[value] = true
+		end
+		local state = {
+			encode = encode,
+			check_unique = check_unique
+		}
+		return encode(value, state)
+	end
+	return initialEncode
+end
+
+-- CONSTRUCT STATE WITH FOLLOWING (at least)
+--[[
+	encoder
+	check_unique -- used by inner encoders to make sure value is unique
+]]
+function encode(data, options)
+	return getEncoder(options)(data)
 end
 
 local mt = getmetatable(_M) or {}

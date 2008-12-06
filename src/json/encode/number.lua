@@ -19,10 +19,7 @@ strict = {
 	inf = false
 }
 
-function encode(number, options)
-	-- Load up number-only options
-	options = options and options.number
-	options = options and util.merge({}, defaultOptions, options) or defaultOptions
+local function encodeNumber(number, options)
 	local str = tostring(number)
 	if str == "nan" then
 		assert(options.nan, "Invalid number: NaN not enabled")
@@ -37,4 +34,13 @@ function encode(number, options)
 		return "-Infinity"
 	end
 	return str
+end
+
+function getEncoder(options)
+	options = options and util.merge({}, defaultOptions, options) or defaultOptions
+	return {
+		number = function(number, state)
+			return encodeNumber(number, options)
+		end
+	}
 end

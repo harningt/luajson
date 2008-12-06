@@ -3,6 +3,7 @@ local tostring = tostring
 local assert = assert
 local jsonutil = require("json.util")
 local util_merge = require("json.decode.util").merge
+local type = type
 
 module("json.encode.others")
 
@@ -12,7 +13,7 @@ encodeBoolean = tostring
 local defaultOptions = {
 	allowUndefined = true,
 	null = jsonutil.null,
-	undefined = jsonutil.null
+	undefined = jsonutil.undefined
 }
 
 default = nil -- Let the buildCapture optimization take place
@@ -20,13 +21,31 @@ strict = {
 	allowUndefined = false
 }
 
-function encodeNil(value, options)
+function getEncoder(options)
 	options = options and util_merge({}, defaultOptions, options) or defaultOptions
-	return 'null'
-end
-
-function encodeUndefined(value, options)
-	options = options and util_merge({}, defaultOptions, options) or defaultOptions
-	assert(options.allowUndefined, "Invalid value: Unsupported 'Undefines' parameter")
-	return 'undefined'
+	local function encodeOthers(value, state)
+		if value == options.null then
+			return 'null'
+		elseif value == options.undefined then
+			assert(options.allowUndefined, "Invalid value: Unsupported 'Undefines' parameter")
+			return 'undefined'
+		else
+			return false
+		end
+	end
+	local function encodeBoolean(value, state)
+		return value and 'true' or 'false'
+	end
+	local nullType = type(options.null)
+	local undefinedType = options.undefined and type(options.undefined)
+	-- Make sure that all of the types handled here are handled
+	local ret = {
+		boolean = encodeBoolean,
+		['nil'] = function() return 'null' end,
+		[nullType] = encodeOthers
+	}
+	if undefinedType then
+		ret[undefinedType] = encodeOthers
+	end
+	return ret
 end

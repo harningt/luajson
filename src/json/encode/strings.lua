@@ -33,12 +33,16 @@ local defaultOptions = {
 default = nil
 strict = nil
 
-function encode(s, options)
-	options = options and options.strings
+function getEncoder(options)
 	options = options and util_merge({}, defaultOptions, options) or defaultOptions
 	local stringPreprocess = options and options.preProcess
-	if stringPreprocess then
-		s = stringPreprocess(s)
+	local function encodeString(s, state)
+		if stringPreprocess then
+			s = stringPreprocess(s)
+		end
+		return '"' .. s:gsub('[\\"/%c%z]', encodingMap) .. '"'
 	end
-	return '"' .. s:gsub('[\\"/%c%z]', encodingMap) .. '"'
+	return {
+		string = encodeString
+	}
 end

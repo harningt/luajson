@@ -27,7 +27,7 @@ function buildCall(name, ...)
 		}
 	})
 end
-function isCall(value, options)
+function isCall(value)
 	local mt = getmetatable(value)
 	return mt and mt.callData
 end
@@ -38,25 +38,36 @@ local function decodeCall(value)
 	end
 	return mt.callData.name, mt.callData.parameters
 end
+
 --[[
-	Encode 'value' as a function call
+	Encodes 'value' as a function call
 	Must have parameters in the 'callData' field of the metatable
 		name == name of the function call
 		parameters == array of parameters to encode
 ]]
-function encode(value, options)
+function getEncoder(options)
 	options = options and util_merge({}, defaultOptions, options) or defaultOptions
-	local name, params = decodeCall(value)
-	local paramLen = params.n or #params
-	if not options.multiArgument then
-		assert(paramLen == 1, "Invalid input: encoder configured to support single-parameter calls")
-	end
-	for i = 1, paramLen do
-		local val = params[i]
-		if val == nil then
-			val = jsonutil.null
+	local function encodeCall(value, state)
+		if not isCall(value) then
+			return false
 		end
-		params[i] = jsonencode.encode(val, options)
+		local encode = state.encode
+		local name, params = decodeCall(value)
+		local paramLen = params.n or #params
+		if not options.multiArgument then
+			assert(paramLen == 1, "Invalid input: encoder configured to support single-parameter calls")
+		end
+		for i = 1, paramLen do
+			local val = params[i]
+			if val == nil then
+				val = jsonutil.null
+			end
+			params[i] = encode(val, state)
+		end
+		return name .. '(' .. table_concat(params, ',') .. ')'
 	end
-	return name .. '(' .. table_concat(params, ',') .. ')'
+	return {
+		table = encodeCall,
+		['function'] = encodeCall
+	}
 end
