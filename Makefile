@@ -22,9 +22,9 @@ distdir:
 
 VERSION=luajson-$(shell git describe --abbrev=4 HEAD 2>/dev/null)
 dist-bzip2: distdir
-	git archive --format=tar --prefix=$(VERSION)/ HEAD | bzip2 > $(DIST_DIR)/$(VERSION).tar.bz2
+	git archive --format=tar --prefix=$(VERSION)/ HEAD | bzip2 -9v > $(DIST_DIR)/$(VERSION).tar.bz2
 dist-gzip: distdir
-	git archive --format=tar --prefix=$(VERSION)/ HEAD | gzip > $(DIST_DIR)/$(VERSION).tar.gz
+	git archive --format=tar --prefix=$(VERSION)/ HEAD | gzip -9v > $(DIST_DIR)/$(VERSION).tar.gz
 dist-zip: distdir
 	git archive --format=zip --prefix=$(VERSION)/ HEAD > $(DIST_DIR)/$(VERSION).zip
 
