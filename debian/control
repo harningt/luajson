@@ -10,6 +10,6 @@ Homepage: http://www.eharning.us/wiki/luajson/
 
 Package: liblua5.1-json
 Architecture: all
-Depends: ${misc:Depends}, lua5.1, liblua5.1-lpeg2
+Depends: ${misc:Depends}, lua5.1, liblua5.1-lpeg1
 Description: JSON decoder/encoder for Lua
  LuaJSON is a customizable JSON decoder/encoder using LPEG for parsing.
