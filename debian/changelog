@@ -1,5 +1,5 @@
-PACKAGE (VERSION) UNRELEASED; urgency=low
+lua-json (0.10-1) unstable; urgency=low
 
-  * Initial release. (Closes: #XXXXXX)
+  * Initial release. 
 
  -- Bernd Zeimetz <bzed@debian.org>  Tue, 09 Dec 2008 22:33:51 +0100

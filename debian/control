@@ -4,8 +4,8 @@ Priority: optional
 Maintainer: Bernd Zeimetz <bzed@debian.org>
 Build-Depends: debhelper (>= 5)
 Standards-Version: 3.8.0
-Vcs-Svn: 
-Vcs-Browser: 
+Vcs-Git: git://git.recluse.de/debian/pkg-liblua-json.git
+Vcs-Browser: http://git.recluse.de/debian/pkg-liblua-json.git/
 Homepage: http://www.eharning.us/wiki/luajson/
 
 Package: liblua5.1-json
