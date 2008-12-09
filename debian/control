@@ -1,0 +1,15 @@
+Source: lua-json
+Section: interpreters
+Priority: optional
+Maintainer: Bernd Zeimetz <bzed@debian.org>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.8.0
+Vcs-Svn: 
+Vcs-Browser: 
+Homepage: http://www.eharning.us/wiki/luajson/
+
+Package: liblua5.1-json
+Architecture: all
+Depends: ${misc:Depends}, lua5.1, liblua5.1-lpeg2
+Description: JSON decoder/encoder for Lua
+ LuaJSON is a customizable JSON decoder/encoder using LPEG for parsing.
