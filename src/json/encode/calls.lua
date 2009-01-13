@@ -7,6 +7,7 @@ local getmetatable, setmetatable = getmetatable, setmetatable
 local assert = assert
 
 local util_merge = require("json.decode.util").merge
+
 module("json.encode.calls")
 
 
@@ -57,14 +58,19 @@ function getEncoder(options)
 		if not options.multiArgument then
 			assert(paramLen == 1, "Invalid input: encoder configured to support single-parameter calls")
 		end
-		for i = 1, paramLen do
-			local val = params[i]
-			if val == nil then
-				val = jsonutil.null
+		local compositeEncoder = state.outputEncoder.composite
+		local valueEncoder = [[
+		for i = 1, (composite.n or #composite) do
+			local val = composite[i]
+			PUTINNER(i ~= 1)
+			val = encode(val, state)
+			val = val or ''
+			if val then
+				PUTVALUE(val)
 			end
-			params[i] = encode(val, state)
 		end
-		return name .. '(' .. table_concat(params, ',') .. ')'
+		]]
+		return compositeEncoder(valueEncoder, name .. '(', ')', ',', params, encode, state)
 	end
 	return {
 		table = encodeCall,

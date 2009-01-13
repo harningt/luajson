@@ -1,3 +1,5 @@
+local jsonutil = require("json.util")
+
 local type = type
 local pairs = pairs
 local assert = assert
@@ -65,12 +67,19 @@ function getEncoder(options)
 		-- Make sure this value hasn't been encoded yet
 		state.check_unique(tab)
 		local encode = state.encode
-		local retVal = {}
-		-- Encode the output from 1 to 'n' or length, mapped in JS to 0 to length - 1
-		for i = 1, (tab.n or #tab) do
-			retVal[#retVal + 1] = encode(tab[i], state)
+		local compositeEncoder = state.outputEncoder.composite
+		local valueEncoder = [[
+		for i = 1, (composite.n or #composite) do
+			local val = composite[i]
+			PUTINNER(i ~= 1)
+			val = encode(val, state)
+			val = val or ''
+			if val then
+				PUTVALUE(val)
+			end
 		end
-		return '[' .. table_concat(retVal, ',') .. ']'
+		]]
+		return compositeEncoder(valueEncoder, '[', ']', ',', tab, encode, state)
 	end
 	return { table = encodeArray }
 end

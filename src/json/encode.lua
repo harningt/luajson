@@ -10,6 +10,8 @@ local util = require("json.util")
 local ipairs, pairs = ipairs, pairs
 local require = require
 
+local output = require("json.encode.output")
+
 local util_merge = require("json.decode.util").merge
 
 module("json.encode")
@@ -107,11 +109,16 @@ function getEncoder(options)
 			assert(not alreadyEncoded[value], "Recursive encoding of value")
 			alreadyEncoded[value] = true
 		end
+		local outputEncoder = options.output and options.output() or output.getDefault()
 		local state = {
 			encode = encode,
-			check_unique = check_unique
+			check_unique = check_unique,
+			outputEncoder = outputEncoder
 		}
-		return encode(value, state)
+		local ret = encode(value, state)
+		if nil ~= ret then
+			return outputEncoder.simple and outputEncoder.simple(ret) or ret
+		end
 	end
 	return initialEncode
 end

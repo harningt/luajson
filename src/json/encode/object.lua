@@ -19,17 +19,30 @@ strict = nil
 	Encode a table as a JSON Object ( keys = strings, values = anything else )
 ]]
 local function encodeTable(tab, options, state)
+	-- Make sure this value hasn't been encoded yet
+	state.check_unique(tab)
 	local encode = state.encode
-	local retVal = {}
-	-- Is table
-	for i, v in pairs(tab) do
-		local ti = type(i)
+	local compositeEncoder = state.outputEncoder.composite
+	local valueEncoder = [[
+	local first = true
+	for k, v in pairs(composite) do
+		local ti = type(k)
 		assert(ti == 'string' or ti == 'number' or ti == 'boolean', "Invalid object index type: " .. ti)
-		i = encode(tostring(i), state)
-
-		retVal[#retVal + 1] = i .. ':' .. encode(v, state)
+		local name = encode(tostring(k), state)
+		if first then
+			first = false
+		else
+			name = ',' .. name
+		end
+		PUTVALUE(name .. ':')
+		local val = encode(v, state)
+		val = val or ''
+		if val then
+			PUTVALUE(val)
+		end
 	end
-	return '{' .. table_concat(retVal, ',') .. '}'
+	]]
+	return compositeEncoder(valueEncoder, '{', '}', nil, tab, encode, state)
 end
 
 function getEncoder(options)
