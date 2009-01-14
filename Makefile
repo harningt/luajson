@@ -31,9 +31,12 @@ dist-zip: distdir
 # Config to make sure that Lua uses the contained Lua code
 LUA_PATH_SETUP=LUA_PATH="?/init.lua;../src/?.lua;../src/?/init.lua;$(LUA_PATH);"
 LUA_SETUP=LUA_OLD_INIT="$(LUA_INIT)" LUA_INIT="@hook_require.lua" $(LUA_PATH_SETUP)
-check:
+check-regression:
 	cd tests && $(LUA_SETUP) lua regressionTest.lua
+check-unit:
 	cd tests && $(LUA_SETUP) lunit lunit-*.lua
+check: check-regression check-unit
+
 
 distcheck: dist-bzip2
 	mkdir -p tmp
