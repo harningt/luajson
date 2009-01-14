@@ -28,7 +28,7 @@ local function RoundTripTest(parseFunc, encodeFunc, jsonData, luaData, fullRound
 		assert(not success, "Round trip encoding test result not as expected")
 		return true
 	else
-		assert(success, "Couldn't encode the lua data")
+		assert(success, "Couldn't encode the lua data..." .. tostring(dataString))
 	end
 	local success, result = pcall(parseFunc, dataString)
 	if not success then
