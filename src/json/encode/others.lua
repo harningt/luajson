@@ -27,7 +27,7 @@ function getEncoder(options)
 		if value == options.null then
 			return 'null'
 		elseif value == options.undefined then
-			assert(options.allowUndefined, "Invalid value: Unsupported 'Undefines' parameter")
+			assert(options.allowUndefined, "Invalid value: Unsupported 'Undefined' parameter")
 			return 'undefined'
 		else
 			return false
