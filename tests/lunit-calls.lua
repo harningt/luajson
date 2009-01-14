@@ -105,8 +105,29 @@ function test_permitted()
 		}
 	}
 	local decoder = json.decode.getDecoder(strict)
-	assert(decoder("call(1)"))
+	assert(decoder("call(1)").name == 'call')
 end
+
+function test_not_defined_fail()
+	local decoder = json.decode.getDecoder({
+		calls = {
+			allowUndefined = false
+		}
+	})
+	assert_error(function()
+		decoder("call(1)")
+	end)
+end
+
+function test_not_defined_succeed()
+	local decoder = json.decode.getDecoder({
+		calls = {
+			allowUndefined = true
+		}
+	})
+	assert(decoder("call(1)").name == 'call')
+end
+
 -- Test for a name that is not a string
 function test_name_not_string()
 	local notString = {
@@ -114,10 +135,11 @@ function test_name_not_string()
 	}
 	for _, v in ipairs(notString) do
 		assert_error(function()
+			local defs = {
+				[v] = function() end
+			}
 			local strict = {
-				calls = { defs = {
-					[v] = function() end
-				} }
+				calls = { defs = defs }
 			}
 			json.decode.getDecoder(strict)
 		end)
