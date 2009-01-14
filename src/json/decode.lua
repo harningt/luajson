@@ -82,7 +82,6 @@ local function buildDecoder(mode)
 		[ARRAY] = arrayCapture
 	}) * ignored * -1
 	return function(data)
-		util.doInit()
 		local ret, err = lpeg.match(grammar, data)
 		assert(nil ~= ret, err or "Invalid JSON data")
 		return ret

@@ -44,8 +44,7 @@ default = nil -- Let the buildCapture optimization take place
 strict = {
 	number = false,
 	identifier = false,
-	trailingComma = false,
-	depthLimiter = util.buildDepthLimit(20)
+	trailingComma = false
 }
 
 local function buildItemSequence(objectItem, ignored)
@@ -55,10 +54,6 @@ end
 function buildCapture(options, global_options)
 	local ignored = global_options.ignored
 	options = options and merge({}, defaultOptions, options) or defaultOptions
-	local incDepth, decDepth
-	if options.depthLimiter then
-		incDepth, decDepth = unpack(options.depthLimiter)
-	end
 	local key = strings.buildCapture(global_options.strings, global_options)
 	if options.identifier then
 		key = key + lpeg.C(util.identifier)
@@ -80,16 +75,10 @@ function buildCapture(options, global_options)
 
 
 	local capture = lpeg.P("{") * ignored
-	if incDepth then
-		capture = capture * lpeg.P(incDepth)
-	end
 	capture = capture * objectItems * ignored
 	if options.trailingComma then
 		capture = capture * (lpeg.P(",") + 0) * ignored
 	end
 	capture = capture * lpeg.P("}")
-	if decDepth then
-		capture = capture * lpeg.P(decDepth)
-	end
 	return capture
 end

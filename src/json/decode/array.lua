@@ -34,14 +34,12 @@ local function processArray(array)
 end
 
 local defaultOptions = {
-	trailingComma = true,
-	depthLimiter = nil
+	trailingComma = true
 }
 
 default = nil -- Let the buildCapture optimization take place
 strict = {
-	trailingComma = false,
-	depthLimiter = util.buildDepthLimit(20)
+	trailingComma = false
 }
 
 function buildCapture(options, global_options)
@@ -51,22 +49,12 @@ function buildCapture(options, global_options)
 	local arrayElements = lpeg.Ct(arrayItem * (ignored * lpeg.P(',') * ignored * arrayItem)^0 + 0) / processArray
 
 	options = options and jsonutil.merge({}, defaultOptions, options) or defaultOptions
-	local incDepth, decDepth
-	if options.depthLimiter then
-		incDepth, decDepth = unpack(options.depthLimiter)
-	end
 	local capture = lpeg.P("[")
-	if incDepth then
-		capture = capture * lpeg.P(incDepth)
-	end
 	capture = capture * ignored
 		* arrayElements * ignored
 	if options.trailingComma then
 		capture = capture * (lpeg.P(",") + 0) * ignored
 	end
 	capture = capture * lpeg.P("]")
-	if decDepth then
-		capture = capture * lpeg.P(decDepth)
-	end
 	return capture
 end

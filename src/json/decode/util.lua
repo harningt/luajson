@@ -53,36 +53,6 @@ unicode_ignored = (unicode_space + comment)^0
 
 VALUE, TABLE, ARRAY = 2, 3, 4
 
-inits = {}
-
-function doInit()
-	for _, v in ipairs(inits) do
-		v()
-	end
-end
-
--- Current depth is persistent
--- If more complex depth management needed, a new system would need to be setup
-local currentDepth = 0
-
-function buildDepthLimit(limit)
-	local function init()
-		currentDepth = 0
-	end
-	inits[#inits + 1] = init
-
-	local function incDepth(s, i)
-		currentDepth = currentDepth + 1
-		return currentDepth < limit and i or false
-	end
-	local function decDepth(s, i)
-		currentDepth = currentDepth - 1
-		return i
-	end
-	return {incDepth, decDepth}
-end
-
-
 -- Parse the lpeg version skipping patch-values
 -- LPEG <= 0.7 have no version value... so 0.7 is value
 DecimalLpegVersion = lpeg.version and tonumber(lpeg.version():match("^(%d+%.%d+)")) or 0.7
