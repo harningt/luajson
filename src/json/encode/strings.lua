@@ -5,15 +5,15 @@ local util_merge = require("json.decode.util").merge
 module("json.encode.strings")
 
 local normalEncodingMap = {
-	['\\'] = '\\\\',
 	['"'] = '\\"',
-	['\n'] = '\\n',
-	['\t'] = '\\t',
+	['\\'] = '\\\\',
+	['/'] = '\\/',
 	['\b'] = '\\b',
-	['\v'] = '\\v',
 	['\f'] = '\\f',
+	['\n'] = '\\n',
 	['\r'] = '\\r',
-	['/'] = '\\/'
+	['\t'] = '\\t',
+	['\v'] = '\\v' -- not in official spec, on report, removing
 }
 
 local xEncodingMap = {}
@@ -37,7 +37,9 @@ end
 local defaultOptions = {
 	preProcess = false,
 	xEncode = false, -- Encode single-bytes as \xXX
-	encodeSet = '\\"/%c%z',
+	-- / is not required to be quoted but it helps with certain decoding
+	-- Required encoded characters, " \, and 00-1F  (0 - 31)
+	encodeSet = '\\"/%z\1-\031',
 	encodeSetAppend = nil -- Chars to append to the default set
 }
 
