@@ -97,18 +97,20 @@ function getEncoder(options)
 	options = options and util_merge({}, defaultOptions, options) or defaultOptions
 	local encoderMap = prepareEncodeMap(options)
 	local function encode(value, state)
-		if options.initialObject then
-			local errorMessage = "Invalid arguments: expects a JSON Object or Array at the root"
-			assert(type(value) == 'table' and not call.isCall(value, options), errorMessage)
-		end
 		return encodeWithMap(value, encoderMap, state)
 	end
 	local function initialEncode(value)
+		if options.initialObject then
+			local errorMessage = "Invalid arguments: expects a JSON Object or Array at the root"
+			assert(type(value) == 'table' and not calls.isCall(value, options), errorMessage)
+		end
+
 		local alreadyEncoded = {}
 		local function check_unique(value)
 			assert(not alreadyEncoded[value], "Recursive encoding of value")
 			alreadyEncoded[value] = true
 		end
+
 		local outputEncoder = options.output and options.output() or output.getDefault()
 		local state = {
 			encode = encode,
