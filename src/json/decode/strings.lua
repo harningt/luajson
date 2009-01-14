@@ -13,15 +13,17 @@ local table_concat = table.concat
 
 module("json.decode.strings")
 local knownReplacements = {
-	n = "\n",
-	r = "\r",
-	f = "\f",
-	t = "\t",
-	b = "\b",
-	z = "\z",
-	['\\'] = "\\",
-	['/'] = "/",
-	['"'] = '"'
+	["'"] = "'",
+	['"'] = '"',
+	['\\'] = '\\',
+	['/'] = '/',
+	b = '\b',
+	f = '\f',
+	n = '\n',
+	r = '\r',
+	t = '\t',
+	v = '\v',
+	z = '\z'
 }
 -- NOTE: Technically incorrect, correct one will be incorporated eventually
 local function nullDecodeUnicode(code1, code2)
@@ -46,8 +48,14 @@ local function utf8DecodeUnicode(code1, code2)
 		0x80 + code2 % 64)
 end
 
-local doSimpleSub = lpeg.C(lpeg.S("rnfbt/\\z\"")) / knownReplacements
+local function decodeX(code)
+	code = tonumber(code, 16)
+	return string_char(code)
+end
+
+local doSimpleSub = lpeg.C(lpeg.S("'\"\\/bfnrtvz")) / knownReplacements
 local doUniSub = (lpeg.P('u') * lpeg.C(util.hexpair) * lpeg.C(util.hexpair) + lpeg.P(false))
+local doXSub = (lpeg.P('x') * lpeg.C(util.hexpair))
 local doSub = doSimpleSub
 
 local defaultOptions = {
@@ -62,9 +70,9 @@ local defaultOptions = {
 default = nil -- Let the buildCapture optimization take place
 
 strict = {
-	badChars = '\r\n\f\b\t',
+	badChars = '\b\f\n\r\t\v',
 	additionalEscapes = false, -- no additional escapes
-	escapeCheck = #lpeg.S('rnfbt/\\"\'u'), --only these chars are allowed to be escaped
+	escapeCheck = #lpeg.S('bfnrtv/\\"u'), --only these chars are allowed to be escaped
 	strict_quotes = true
 }
 
@@ -85,6 +93,7 @@ function buildMatch(options)
 	end
 	local badChars = options.badChars
 	local escapeMatch = doSub
+	escapeMatch = escapeMatch + doXSub / decodeX
 	escapeMatch = escapeMatch + doUniSub / options.decodeUnicode
 	if options.additionalEscapes then
 		escapeMatch = escapeMatch + options.additionalEscapes
