@@ -164,3 +164,21 @@ function test_whitespace_ignore()
 		end
 	end
 end
+
+function test_u_encoding()
+	local encoder = json.encode.getEncoder()
+	local decoder = json.decode.getDecoder()
+	for i = 0, 255 do
+		local char = string.char(i)
+		assert_equal(char, decoder(encoder(char)))
+	end
+end
+
+function test_x_encoding()
+	local encoder = json.encode.getEncoder({ strings = { xEncode = true } })
+	local decoder = json.decode.getDecoder()
+	for i = 0, 255 do
+		local char = string.char(i)
+		assert_equal(char, decoder(encoder(char)))
+	end
+end
