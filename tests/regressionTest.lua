@@ -22,9 +22,14 @@ local function putTempData(data)
 end
 
 -- Ensure that the encoder/decoder can round-trip valid JSON
-local function RoundTripTest(parseFunc, encodeFunc, jsonData, luaData, fullRoundTrip)
-	local dataString = encodeFunc(luaData)
-	assert(dataString, "Couldn't encode the lua data")
+local function RoundTripTest(parseFunc, encodeFunc, jsonData, luaData, fullRoundTrip, failRoundTrip)
+	local success, dataString = pcall(encodeFunc, luaData)
+	if failRoundTrip then
+		assert(not success, "Round trip encoding test result not as expected")
+		return true
+	else
+		assert(success, "Couldn't encode the lua data")
+	end
 	local success, result = pcall(parseFunc, dataString)
 	if not success then
 		print("Could not parse the generated JSON of (", luaData)
@@ -46,7 +51,7 @@ local function RoundTripTest(parseFunc, encodeFunc, jsonData, luaData, fullRound
 	return true
 end
 
-local function testFile(fileName, parseFunc, encodeFunc, expectSuccess, fullRoundTrip)
+local function testFile(fileName, parseFunc, encodeFunc, expectSuccess, fullRoundTrip, failRoundTrip)
 	local data = getFileData(fileName)
 	if not data then return end
 	io.write(".")
@@ -55,7 +60,7 @@ local function testFile(fileName, parseFunc, encodeFunc, expectSuccess, fullRoun
 		print("Wrongly " .. (expectSuccess and "Failed" or "Succeeded") .. " on : " .. fileName .. "(" .. tostring(result) .. ")")
 		success = false
 	elseif succeed then
-		if not RoundTripTest(parseFunc, encodeFunc, data, result, fullRoundTrip) then
+		if not RoundTripTest(parseFunc, encodeFunc, data, result, fullRoundTrip, failRoundTrip) then
 			print("FAILED TO ROUND TRIP: " .. fileName)
 			success = false
 		end
@@ -98,6 +103,9 @@ local strict_encode = json.util.merge({}, json.encode.strict, {
 	}
 })
 TestParser(json.decode.getDecoder(strict), json.encode.getEncoder(strict_encode), {"test/pass"}, {"test/fail_strict","test/fail_all"}, {"test/roundtrip"})
+
+print("Testing (mostly) strict encoder with non-strict decodings")
+testDirectories(json.decode.getDecoder(), json.encode.getEncoder(json.encode.strict), {"test/fail_strict_encode"}, true, true, true)
 
 if not success then
 	os.exit(1)
