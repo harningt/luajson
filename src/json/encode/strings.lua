@@ -28,7 +28,7 @@ end
 -- some letters > 1 byte, but base case is 1)
 for i = 0, 255 do
 	local c = string_char(i)
-	if c:match('[%c\128-\255]') and not normalEncodingMap[c] then
+	if c:match('[%z\1-\031\128-\255]') and not normalEncodingMap[c] then
 		-- WARN: UTF8 specializes values >= 0x80 as parts of sequences...
 		--       without \x encoding, do not allow encoding > 7F
 		normalEncodingMap[c] = ('\\u%.4X'):format(i)
