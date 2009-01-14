@@ -184,7 +184,7 @@ function test_x_encoding()
 end
 
 function test_strict_decoding()
-	local encoder = json.encode.getEncoder()
+	local encoder = json.encode.getEncoder(json.encode.strict)
 	local decoder = json.decode.getDecoder(json.decode.strict)
 	for i = 0, 255 do
 		local char = string.char(i)
