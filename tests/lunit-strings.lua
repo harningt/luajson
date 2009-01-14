@@ -182,3 +182,13 @@ function test_x_encoding()
 		assert_equal(char, decoder(encoder(char)))
 	end
 end
+
+function test_strict_decoding()
+	local encoder = json.encode.getEncoder()
+	local decoder = json.decode.getDecoder(json.decode.strict)
+	for i = 0, 255 do
+		local char = string.char(i)
+		-- Must wrap character in array due to decoder strict-ness
+		assert_equal(char, decoder(encoder({char}))[1])
+	end
+end
