@@ -12,7 +12,8 @@ local require = require
 
 local output = require("json.encode.output")
 
-local util_merge = require("json.util").merge
+local util = require("json.util")
+local util_merge, isCall = util.merge, util.isCall
 
 module("json.encode")
 
@@ -102,7 +103,7 @@ function getEncoder(options)
 	local function initialEncode(value)
 		if options.initialObject then
 			local errorMessage = "Invalid arguments: expects a JSON Object or Array at the root"
-			assert(type(value) == 'table' and not calls.isCall(value, options), errorMessage)
+			assert(type(value) == 'table' and not isCall(value, options), errorMessage)
 		end
 
 		local alreadyEncoded = {}

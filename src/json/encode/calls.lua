@@ -6,7 +6,9 @@ local select = select
 local getmetatable, setmetatable = getmetatable, setmetatable
 local assert = assert
 
-local util_merge = require("json.util").merge
+local util = require("json.util")
+
+local util_merge, isCall, decodeCall = util.merge, util.isCall, util.decodeCall
 
 module("json.encode.calls")
 
@@ -20,25 +22,6 @@ local defaultOptions = {
 default = nil
 strict = nil
 
-function buildCall(name, ...)
-	return setmetatable({}, {
-		callData = {
-			name = name,
-			parameters = {n = select('#', ...), ...}
-		}
-	})
-end
-function isCall(value)
-	local mt = getmetatable(value)
-	return mt and mt.callData
-end
-local function decodeCall(value)
-	local mt = getmetatable(value)
-	if not mt and mt.callData then
-		return
-	end
-	return mt.callData.name, mt.callData.parameters
-end
 
 --[[
 	Encodes 'value' as a function call

@@ -7,6 +7,7 @@ local print = print
 local tostring = tostring
 local pairs = pairs
 local getmetatable, setmetatable = getmetatable, setmetatable
+local select = select
 
 module("json.util")
 local function foreach(tab, func)
@@ -87,3 +88,21 @@ function InitArray(array)
 	return array
 end
 
+local CallMT = {}
+
+function isCall(value)
+	return CallMT == getmetatable(value)
+end
+
+function buildCall(name, ...)
+	local callData = {
+		name = name,
+		parameters = {n = select('#', ...), ...}
+	}
+	return setmetatable(callData, CallMT)
+end
+
+function decodeCall(callData)
+	if not isCall(callData) then return nil end
+	return callData.name, callData.parameters
+end

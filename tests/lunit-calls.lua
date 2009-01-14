@@ -72,20 +72,41 @@ end
 -- Test for a function that is not a function
 function test_not_a_function_fail()
 	local notFunction = {
-		0/0, 1/0, -1/0, 0, 1, "Hello", true, false, {}, coroutine.create(function() end)
+		0/0, 1/0, -1/0, 0, 1, "Hello", {}, coroutine.create(function() end)
 	}
 	for _, v in ipairs(notFunction) do
 		assert_error(function()
 			local strict = {
 				calls = { defs = {
 					call = v
-				} }
+				}, allowUndefined = false }
 			}
 			json.decode.getDecoder(strict)
 		end)
 	end
 end
 
+function test_not_permitted_fail()
+	local strict = {
+		calls = {
+			defs = { call = false }
+		}
+	}
+	local decoder = json.decode.getDecoder(strict)
+	assert_error(function()
+		decoder("call(1)")
+	end)
+end
+
+function test_permitted()
+	local strict = {
+		calls = {
+			defs = { call = true }
+		}
+	}
+	local decoder = json.decode.getDecoder(strict)
+	assert(decoder("call(1)"))
+end
 -- Test for a name that is not a string
 function test_name_not_string()
 	local notString = {

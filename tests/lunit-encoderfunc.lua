@@ -8,12 +8,7 @@ local setmetatable = setmetatable
 module("lunit-encoderfunc", lunit.testcase, package.seeall)
 
 local function build_call(name, parameters)
-	return setmetatable({}, {
-		callData = {
-			name = name,
-			parameters = parameters
-		}
-	})
+	return json.util.buildCall(name, unpack(parameters, parameters.n))
 end
 
 function test_param_counts()

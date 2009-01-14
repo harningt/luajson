@@ -7,18 +7,23 @@ local error = error
 local util = require("json.decode.util")
 local VALUE = util.VALUE
 
+local buildCall = require("json.util").buildCall
+
 local getmetatable = getmetatable
 
 module("json.decode.calls")
 
 local defaultOptions = {
 	defs = nil,
-	multiArgument = false
+	multiArgument = false,
+	allowUndefined = true -- Allow undefined calls to be de-serialized as call objects
 }
 
 -- No real default-option handling needed...
 default = nil
-strict = nil
+strict = {
+	allowUndefined = false
+}
 
 local isPattern
 if lpeg.type then
@@ -41,7 +46,8 @@ function buildCapture(options)
 		if type(name) ~= 'string' and not isPattern(name) then
 			error("Invalid functionCalls name: " .. tostring(name) .. " not a string or LPEG pattern")
 		end
-		if type(func) ~= 'function' then
+		-- Allow boolean or function to match up w/ encoding permissions
+		if type(func) ~= 'boolean' and type(func) ~= 'function' then
 			error("Invalid functionCalls item: " .. name .. " not a function")
 		end
 		local nameCallCapture
@@ -57,6 +63,16 @@ function buildCapture(options)
 			argumentCapture = lpeg.V(VALUE)
 		else -- Allow zero or more arguments separated by commas
 			argumentCapture = (lpeg.V(VALUE) * (lpeg.P(",") *  lpeg.V(VALUE))^0) + 0
+		end
+		-- Process 'func' if it is not a function
+		if type(func) == 'boolean' then
+			local allowed = func
+			func = function(name, ...)
+				if not allowed then
+					error("Function call on '" .. name .. "' not permitted")
+				end
+				return buildCall(name, ...)
+			end
 		end
 		local newCapture = (nameCallCapture * argumentCapture) / func * ")"
 		if not callCapture then
