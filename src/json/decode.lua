@@ -9,6 +9,7 @@ local error = error
 local object = require("json.decode.object")
 local array = require("json.decode.array")
 
+local merge = require("json.util").merge
 local util = require("json.decode.util")
 
 local setmetatable, getmetatable = setmetatable, getmetatable
@@ -54,7 +55,7 @@ for _,name in ipairs(modulesToLoad) do
 end
 
 local function buildDecoder(mode)
-	mode = mode and util.merge({}, defaultOptions, mode) or defaultOptions
+	mode = mode and merge({}, defaultOptions, mode) or defaultOptions
 	local ignored = mode.unicodeWhitespace and util.unicode_ignored or util.ascii_ignored
 	-- Store 'ignored' in the global options table
 	mode.ignored = ignored

@@ -1,6 +1,5 @@
 local lpeg = require("lpeg")
 local jsonutil = require("json.util")
-local util = require("json.decode.util")
 
 -- Container module for other JavaScript types (bool, null, undefined)
 module("json.decode.others")
@@ -25,7 +24,7 @@ strict = {
 }
 
 function buildCapture(options)
-	options = options and util.merge({}, defaultOptions, options) or defaultOptions
+	options = options and jsonutil.merge({}, defaultOptions, options) or defaultOptions
 	local valueCapture = (
 		booleanCapture
 		+ nullCapture * lpeg.Cc(options.null)

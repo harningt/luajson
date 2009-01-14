@@ -4,7 +4,7 @@
 ]]
 local lpeg = require("lpeg")
 local tonumber = tonumber
-local util = require("json.decode.util")
+local merge = require("json.util").merge
 
 module("json.decode.number")
 
@@ -51,7 +51,7 @@ strict = {
 		Must be set to false
 ]]
 function buildMatch(options)
-	options = options and util.merge({}, defaultOptions, options) or defaultOptions
+	options = options and merge({}, defaultOptions, options) or defaultOptions
 	local ret
 	if options.hex then
 		ret = hex + (options.strict and strictInt or int)

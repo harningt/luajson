@@ -1,7 +1,7 @@
 local string_char = string.char
 local pairs = pairs
 
-local util_merge = require("json.decode.util").merge
+local util_merge = require("json.util").merge
 module("json.encode.strings")
 
 local normalEncodingMap = {

@@ -7,7 +7,7 @@ local assert = assert
 local table_concat = table.concat
 local math_floor, math_modf = math.floor, math.modf
 
-local util_merge = require("json.decode.util").merge
+local util_merge = require("json.util").merge
 local util_IsArray = require("json.util").IsArray
 
 module("json.encode.array")

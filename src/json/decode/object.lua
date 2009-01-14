@@ -5,6 +5,7 @@
 local lpeg = require("lpeg")
 
 local util = require("json.decode.util")
+local merge = require("json.util").merge
 local strings = require("json.decode.strings")
 local number = require("json.decode.number")
 
@@ -53,7 +54,7 @@ end
 
 function buildCapture(options, global_options)
 	local ignored = global_options.ignored
-	options = options and util.merge({}, defaultOptions, options) or defaultOptions
+	options = options and merge({}, defaultOptions, options) or defaultOptions
 	local incDepth, decDepth
 	if options.depthLimiter then
 		incDepth, decDepth = unpack(options.depthLimiter)

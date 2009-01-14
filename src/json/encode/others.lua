@@ -2,7 +2,7 @@ local tostring = tostring
 
 local assert = assert
 local jsonutil = require("json.util")
-local util_merge = require("json.decode.util").merge
+local util_merge = require("json.util").merge
 local type = type
 
 module("json.encode.others")

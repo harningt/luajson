@@ -4,6 +4,7 @@
 ]]
 local lpeg = require("lpeg")
 local util = require("json.decode.util")
+local merge = require("json.util").merge
 
 local tonumber = tonumber
 local string = string
@@ -86,7 +87,7 @@ local function buildCaptureString(quote, badChars, escapeMatch, postProcess)
 end
 
 function buildMatch(options)
-	options = options and util.merge({}, defaultOptions, options) or defaultOptions
+	options = options and merge({}, defaultOptions, options) or defaultOptions
 	local quotes = { '"' }
 	if not options.strict_quotes then
 		quotes[#quotes + 1] = "'"

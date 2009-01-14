@@ -5,7 +5,7 @@ local type = type
 local tostring = tostring
 
 local table_concat = table.concat
-local util_merge = require("json.decode.util").merge
+local util_merge = require("json.util").merge
 
 module("json.encode.object")
 

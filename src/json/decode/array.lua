@@ -50,7 +50,7 @@ function buildCapture(options, global_options)
 	local arrayItem = lpeg.V(util.VALUE)
 	local arrayElements = lpeg.Ct(arrayItem * (ignored * lpeg.P(',') * ignored * arrayItem)^0 + 0) / processArray
 
-	options = options and util.merge({}, defaultOptions, options) or defaultOptions
+	options = options and jsonutil.merge({}, defaultOptions, options) or defaultOptions
 	local incDepth, decDepth
 	if options.depthLimiter then
 		incDepth, decDepth = unpack(options.depthLimiter)

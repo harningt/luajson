@@ -52,25 +52,6 @@ ascii_ignored = (ascii_space + comment)^0
 unicode_ignored = (unicode_space + comment)^0
 
 VALUE, TABLE, ARRAY = 2, 3, 4
-function clone(t)
-	local ret = {}
-	for k,v in pairs(t) do
-		ret[k] = v
-	end
-	return ret
-end
-
-function merge(t, ...)
-	for i = 1,select('#', ...) do
-		local currentTable = select(i, ...)
-		if currentTable then
-			for k,v in pairs(currentTable) do
-				t[k] = v
-			end
-		end
-	end
-	return t
-end
 
 inits = {}
 

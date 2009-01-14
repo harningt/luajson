@@ -6,7 +6,7 @@ local select = select
 local getmetatable, setmetatable = getmetatable, setmetatable
 local assert = assert
 
-local util_merge = require("json.decode.util").merge
+local util_merge = require("json.util").merge
 
 module("json.encode.calls")
 

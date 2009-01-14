@@ -7,6 +7,7 @@ local print = print
 local tostring = tostring
 local pairs = pairs
 local getmetatable, setmetatable = getmetatable, setmetatable
+
 module("json.util")
 local function foreach(tab, func)
 	for k, v in pairs(tab) do
@@ -35,6 +36,25 @@ function printValue(tab, name)
         end
         doPrint(name, tab)
 end
+
+function clone(t)
+	local ret = {}
+	for k,v in pairs(t) do
+		ret[k] = v
+	end
+	return ret
+end
+
+local function merge(t, from, ...)
+	if not from then
+		return t
+	end
+	for k,v in pairs(from) do
+		t[k] = v
+	end
+	return merge(t, ...)
+end
+_M.merge = merge
 
 -- Function to insert nulls into the JSON stream
 function null()

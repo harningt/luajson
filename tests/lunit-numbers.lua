@@ -77,7 +77,7 @@ function test_expression()
 end
 
 -- For strict tests, small concession must be made to allow non-array/objects as root
-local strict = json.decode.util.merge({}, json.decode.strict, {initialObject = false})
+local strict = json.util.merge({}, json.decode.strict, {initialObject = false})
 local strictDecoder = json.decode.getDecoder(strict)
 
 local numberValue = {hex = true}
