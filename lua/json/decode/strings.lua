@@ -64,8 +64,7 @@ local defaultOptions = {
 	additionalEscapes = lpeg.C(1), -- any escape char not handled will be dumped as-is
 	escapeCheck = false, -- no check on valid characters
 	decodeUnicode = utf8DecodeUnicode,
-	strict_quotes = false,
-	postProcess = false  -- post-processing for strings after decoding, such as for UTF8 handling
+	strict_quotes = false
 }
 
 default = nil -- Let the buildCapture optimization take place
@@ -77,11 +76,8 @@ strict = {
 	strict_quotes = true
 }
 
-local function buildCaptureString(quote, badChars, escapeMatch, postProcess)
+local function buildCaptureString(quote, badChars, escapeMatch)
 	local captureString = lpeg.P(quote) * lpeg.Cs(((1 - lpeg.S("\\" .. badChars .. quote)) + (lpeg.P("\\") / "" * escapeMatch))^0)
-	if postProcess then
-		captureString = captureString / postProcess
-	end
 	captureString = captureString * lpeg.P(quote)
 	return captureString
 end
@@ -104,7 +100,7 @@ function buildMatch(options)
 	end
 	local captureString
 	for i = 1, #quotes do
-		local cap = buildCaptureString(quotes[i], badChars, escapeMatch, options.postProcess)
+		local cap = buildCaptureString(quotes[i], badChars, escapeMatch)
 		if captureString == nil then
 			captureString = cap
 		else
