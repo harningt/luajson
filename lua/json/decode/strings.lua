@@ -26,11 +26,6 @@ local knownReplacements = {
 	v = '\v',
 	z = '\z'
 }
--- NOTE: Technically incorrect, correct one will be incorporated eventually
-local function nullDecodeUnicode(code1, code2)
-	code1, code2 = tonumber(code1, 16), tonumber(code2, 16)
-	return string.char(code1, code2)
-end
 
 -- according to the table at http://da.wikipedia.org/wiki/UTF-8
 local function utf8DecodeUnicode(code1, code2)
