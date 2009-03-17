@@ -76,7 +76,7 @@ local function buildDecoder(mode)
 	valueCapture = valueCapture + lpeg.V(TABLE) + lpeg.V(ARRAY)
 	valueCapture = ignored * valueCapture * ignored
 	local grammar = lpeg.P({
-		[1] = mode.initialObject and (lpeg.V(TABLE) + lpeg.V(ARRAY)) or lpeg.V(VALUE),
+		[1] = mode.initialObject and (ignored * (lpeg.V(TABLE) + lpeg.V(ARRAY))) or lpeg.V(VALUE),
 		[VALUE] = valueCapture,
 		[TABLE] = objectCapture,
 		[ARRAY] = arrayCapture
