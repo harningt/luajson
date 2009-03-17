@@ -56,3 +56,11 @@ VALUE, TABLE, ARRAY = 2, 3, 4
 -- Parse the lpeg version skipping patch-values
 -- LPEG <= 0.7 have no version value... so 0.7 is value
 DecimalLpegVersion = lpeg.version and tonumber(lpeg.version():match("^(%d+%.%d+)")) or 0.7
+
+function get_invalid_character_info(input, index)
+	local parsed = input:sub(1, index)
+	local bad_character = input:sub(index, index)
+	local _, line_number = parsed:gsub('\n',{})
+	local last_line = parsed:match("\n([^\n]+.)$") or parsed
+	return line_number, #last_line, bad_character, last_line
+end
