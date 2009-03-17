@@ -52,7 +52,6 @@ end
 local doSimpleSub = lpeg.C(lpeg.S("'\"\\/bfnrtvz")) / knownReplacements
 local doUniSub = (lpeg.P('u') * lpeg.C(util.hexpair) * lpeg.C(util.hexpair) + lpeg.P(false))
 local doXSub = (lpeg.P('x') * lpeg.C(util.hexpair))
-local doSub = doSimpleSub
 
 local defaultOptions = {
 	badChars = '',
@@ -83,8 +82,7 @@ function buildMatch(options)
 	if not options.strict_quotes then
 		quotes[#quotes + 1] = "'"
 	end
-	local badChars = options.badChars
-	local escapeMatch = doSub
+	local escapeMatch = doSimpleSub
 	escapeMatch = escapeMatch + doXSub / decodeX
 	escapeMatch = escapeMatch + doUniSub / options.decodeUnicode
 	if options.additionalEscapes then
@@ -95,7 +93,7 @@ function buildMatch(options)
 	end
 	local captureString
 	for i = 1, #quotes do
-		local cap = buildCaptureString(quotes[i], badChars, escapeMatch)
+		local cap = buildCaptureString(quotes[i], options.badChars, escapeMatch)
 		if captureString == nil then
 			captureString = cap
 		else
