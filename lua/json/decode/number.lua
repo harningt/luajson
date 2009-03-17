@@ -8,15 +8,11 @@ local merge = require("json.util").merge
 
 module("json.decode.number")
 
-local simple_space = lpeg.S(" \t")
-
 local digit  = lpeg.R("09")
 local digits = digit^1
 
--- Deviation from JSON spec: Leading zeroes, inf number negatives w/ space
-int = lpeg.P('-')^0 * simple_space^0 * digits
+int = (lpeg.P('-') + 0) * (lpeg.R("19") * digits + digit)
 local int = int
-local strictInt = (lpeg.P('-') + 0) * (lpeg.R("19") * digits + digit)
 
 local frac = lpeg.P('.') * digits
 
@@ -37,26 +33,21 @@ local defaultOptions = {
 default = nil -- Let the buildCapture optimization take place
 strict = {
 	nan = false,
-	inf = false,
-	strict = true
+	inf = false
 }
 --[[
 	Options: configuration options for number rules
 		nan: match NaN
 		inf: match Infinity
-	 strict: for integer portion, only match [-]([0-9]|[1-9][0-9]*)
 	   frac: match fraction portion (.0)
 	    exp: match exponent portion  (e1)
 	DEFAULT: nan, inf, frac, exp
-		Must be set to false
 ]]
 function buildMatch(options)
 	options = options and merge({}, defaultOptions, options) or defaultOptions
-	local ret
+	local ret = int
 	if options.hex then
-		ret = hex + (options.strict and strictInt or int)
-	else
-		ret = options.strict and strictInt or int
+		ret = hex + ret
 	end
 	if options.frac then
 		ret = ret * (frac + 0)
