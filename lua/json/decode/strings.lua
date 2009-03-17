@@ -56,8 +56,8 @@ local doSub = doSimpleSub
 
 local defaultOptions = {
 	badChars = '',
-	additionalEscapes = lpeg.C(1), -- any escape char not handled will be dumped as-is
-	escapeCheck = false, -- no check on valid characters
+	additionalEscapes = false, -- disallow untranslated escapes
+	escapeCheck = #lpeg.S('bfnrtv/\\"xu\'z'), -- no check on valid characters
 	decodeUnicode = utf8DecodeUnicode,
 	strict_quotes = false
 }
