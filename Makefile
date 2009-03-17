@@ -29,7 +29,7 @@ dist-zip: distdir
 	git archive --format=zip --prefix=$(VERSION)/ HEAD > $(DIST_DIR)/$(VERSION).zip
 
 # Config to make sure that Lua uses the contained Lua code
-LUA_PATH_SETUP=LUA_PATH="?/init.lua;../src/?.lua;../src/?/init.lua;$(LUA_PATH);"
+LUA_PATH_SETUP=LUA_PATH="?/init.lua;../lua/?.lua;../lua/?/init.lua;$(LUA_PATH);"
 LUA_SETUP=LUA_OLD_INIT="$(LUA_INIT)" LUA_INIT="@hook_require.lua" $(LUA_PATH_SETUP)
 check-regression:
 	cd tests && $(LUA_SETUP) lua regressionTest.lua
