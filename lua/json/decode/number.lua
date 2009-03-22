@@ -46,14 +46,14 @@ strict = {
 function buildMatch(options)
 	options = options and merge({}, defaultOptions, options) or defaultOptions
 	local ret = int
-	if options.hex then
-		ret = hex + ret
-	end
 	if options.frac then
 		ret = ret * (frac + 0)
 	end
 	if options.exp then
 		ret = ret * (exp + 0)
+	end
+	if options.hex then
+		ret = hex + ret
 	end
 	if options.nan then
 		ret = ret + nan

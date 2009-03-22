@@ -113,6 +113,24 @@ function test_hex_only()
 	end
 end
 
+local decimal_hexes = {
+	"0x0.1",
+	"0x.1",
+	"0x0e+1",
+	"0x0E-1"
+}
+function test_no_decimal_hex_only()
+	for _, str in ipairs(decimal_hexes) do
+		assert_error(function()
+			hexDecoder(str)
+		end)
+	end
+end
+
+function test_nearly_scientific_hex_only()
+	assert_equal(0x00E1, hexDecoder("0x00e1"))
+end
+
 local function buildStrictDecoder(f)
 	return testutil.buildPatchedDecoder(f, strictDecoder)
 end
