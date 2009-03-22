@@ -15,7 +15,6 @@ module("json.decode.calls")
 
 local defaultOptions = {
 	defs = nil,
-	multiArgument = false,
 	-- By default, do not allow undefined calls to be de-serialized as call objects
 	allowUndefined = false
 }
@@ -81,12 +80,8 @@ function buildCapture(options)
 		or not (options.defs and (nil ~= next(options.defs)) or options.allowUndefined) then
 		return nil
 	end
-	local argumentCapture
-	if not options.multiArgument then
-		argumentCapture = lpeg.V(VALUE)
-	else -- Allow zero or more arguments separated by commas
-		argumentCapture = (lpeg.V(VALUE) * (lpeg.P(",") *  lpeg.V(VALUE))^0) + 0
-	end
+	-- Allow zero or more arguments separated by commas
+	local argumentCapture = (lpeg.V(VALUE) * (lpeg.P(",") *  lpeg.V(VALUE))^0) + 0
 	local callCapture = buildDefinedCaptures(argumentCapture, options.defs)
 	if options.allowUndefined then
 		local function func(name, ...)

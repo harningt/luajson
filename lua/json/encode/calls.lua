@@ -14,8 +14,7 @@ module("json.encode.calls")
 
 
 local defaultOptions = {
-	defs = nil,
-	multiArgument = false
+	defs = nil
 }
 
 -- No real default-option handling needed...
@@ -37,10 +36,6 @@ function getEncoder(options)
 		end
 		local encode = state.encode
 		local name, params = decodeCall(value)
-		local paramLen = params.n or #params
-		if not options.multiArgument then
-			assert(paramLen == 1, "Invalid input: encoder configured to support single-parameter calls")
-		end
 		local compositeEncoder = state.outputEncoder.composite
 		local valueEncoder = [[
 		for i = 1, (composite.n or #composite) do
