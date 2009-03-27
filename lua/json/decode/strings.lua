@@ -92,7 +92,7 @@ local function buildCaptureString(quote, badChars, escapeMatch)
 	return lpeg.P(quote) * lpeg.Cs(captureString) * lpeg.P(quote)
 end
 
-function buildMatch(options)
+local function buildCapture(options)
 	options = options and merge({}, defaultOptions, options) or defaultOptions
 	local quotes = { '"' }
 	if not options.strict_quotes then
@@ -118,6 +118,14 @@ function buildMatch(options)
 	end
 	return captureString
 end
-function buildCapture(options)
-	return buildMatch(options)
+
+function register_types()
+	util.register_type("STRING")
+end
+
+function load_types(options, global_options, grammar)
+	local capture = buildCapture(options)
+	local string_id = util.types.STRING
+	grammar[string_id] = capture
+	util.append_grammar_item(grammar, "VALUE", lpeg.V(string_id))
 end

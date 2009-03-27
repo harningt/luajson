@@ -7,6 +7,10 @@ local select = select
 local pairs, ipairs = pairs, ipairs
 local tonumber = tonumber
 local string_char = string.char
+
+local error = error
+local setmetatable = setmetatable
+
 module("json.decode.util")
 
 -- 09, 0A, 0B, 0C, 0D, 20
@@ -51,7 +55,29 @@ ascii_ignored = (ascii_space + comment)^0
 
 unicode_ignored = (unicode_space + comment)^0
 
-VALUE, TABLE, ARRAY = 2, 3, 4
+local types = setmetatable({false}, {
+	__index = function(self, k)
+		error("Unknown type: " .. k)
+	end
+})
+
+function register_type(name)
+	types[#types + 1] = name
+	types[name] = #types
+	return #types
+end
+
+_M.types = types
+
+function append_grammar_item(grammar, name, capture)
+	local id = types[name]
+	local original = grammar[id]
+	if original then
+		grammar[id] = original + capture
+	else
+		grammar[id] = capture
+	end
+end
 
 -- Parse the lpeg version skipping patch-values
 -- LPEG <= 0.7 have no version value... so 0.7 is value

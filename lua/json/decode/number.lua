@@ -5,6 +5,7 @@
 local lpeg = require("lpeg")
 local tonumber = tonumber
 local merge = require("json.util").merge
+local util = require("json.decode.util")
 
 module("json.decode.number")
 
@@ -43,7 +44,7 @@ strict = {
 	    exp: match exponent portion  (e1)
 	DEFAULT: nan, inf, frac, exp
 ]]
-function buildMatch(options)
+local function buildMatch(options)
 	options = options and merge({}, defaultOptions, options) or defaultOptions
 	local ret = int
 	if options.frac then
@@ -64,6 +65,17 @@ function buildMatch(options)
 	return ret
 end
 
-function buildCapture(options)
+local function buildCapture(options)
 	return buildMatch(options) / tonumber
+end
+
+function register_types()
+	util.register_type("INTEGER")
+end
+
+function load_types(options, global_options, grammar)
+	local integer_id = util.types.INTEGER
+	local capture = buildCapture(options)
+	util.append_grammar_item(grammar, "VALUE", capture)
+	grammar[integer_id] = int / tonumber
 end

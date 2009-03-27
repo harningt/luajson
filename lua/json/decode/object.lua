@@ -6,8 +6,6 @@ local lpeg = require("lpeg")
 
 local util = require("json.decode.util")
 local merge = require("json.util").merge
-local strings = require("json.decode.strings")
-local number = require("json.decode.number")
 
 local tonumber = tonumber
 local unpack = unpack
@@ -51,18 +49,21 @@ local function buildItemSequence(objectItem, ignored)
 	return (objectItem * (ignored * lpeg.P(",") * ignored * objectItem)^0) + 0
 end
 
-function buildCapture(options, global_options)
+local function buildCapture(options, global_options)
 	local ignored = global_options.ignored
+	local string_type = lpeg.V(util.types.STRING)
+	local integer_type = lpeg.V(util.types.INTEGER)
+	local value_type = lpeg.V(util.types.VALUE)
 	options = options and merge({}, defaultOptions, options) or defaultOptions
-	local key = strings.buildCapture(global_options.strings, global_options)
+	local key = string_type
 	if options.identifier then
 		key = key + lpeg.C(util.identifier)
 	end
 	if options.number then
-		key = key + number.int / tonumber
+		key = key + integer_type
 	end
 	local objectItems
-	local objectItem = (key * ignored * lpeg.P(":") * ignored * lpeg.V(util.VALUE))
+	local objectItem = (key * ignored * lpeg.P(":") * ignored * value_type)
 	-- BEGIN LPEG < 0.9 SUPPORT
 	if DecimalLpegVersion < 0.9 then
 		objectItems = buildItemSequence(objectItem / applyObjectKey, ignored)
@@ -81,4 +82,15 @@ function buildCapture(options, global_options)
 	end
 	capture = capture * lpeg.P("}")
 	return capture
+end
+
+function register_types()
+	util.register_type("OBJECT")
+end
+
+function load_types(options, global_options, grammar)
+	local capture = buildCapture(options, global_options)
+	local object_id = util.types.OBJECT
+	grammar[object_id] = capture
+	util.append_grammar_item(grammar, "VALUE", lpeg.V(object_id))
 end

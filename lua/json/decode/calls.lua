@@ -9,7 +9,6 @@ local next, type = next, type
 local error = error
 
 local util = require("json.decode.util")
-local VALUE = util.VALUE
 
 local buildCall = require("json.util").buildCall
 
@@ -79,13 +78,14 @@ local function buildDefinedCaptures(argumentCapture, defs)
 	return callCapture
 end
 
-function buildCapture(options)
+local function buildCapture(options)
 	if not options  -- No ops, don't bother to parse
 		or not (options.defs and (nil ~= next(options.defs)) or options.allowUndefined) then
 		return nil
 	end
 	-- Allow zero or more arguments separated by commas
-	local argumentCapture = (lpeg.V(VALUE) * (lpeg.P(",") *  lpeg.V(VALUE))^0) + 0
+	local value = lpeg.V(util.types.VALUE)
+	local argumentCapture = (value * (lpeg.P(",") *  value)^0) + 0
 	local callCapture = buildDefinedCaptures(argumentCapture, options.defs)
 	if options.allowUndefined then
 		local function func(name, ...)
@@ -101,4 +101,11 @@ function buildCapture(options)
 		end
 	end
 	return callCapture
+end
+
+function load_types(options, global_options, grammar)
+	local capture = buildCapture(options, global_options)
+	if capture then
+		util.append_grammar_item(grammar, "VALUE", capture)
+	end
 end

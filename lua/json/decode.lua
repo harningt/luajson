@@ -20,9 +20,9 @@ local string_char = string.char
 local require = require
 module("json.decode")
 
-local VALUE, TABLE, ARRAY = util.VALUE, util.TABLE, util.ARRAY
-
 local modulesToLoad = {
+	"array",
+	"object",
 	"strings",
 	"number",
 	"calls",
@@ -32,8 +32,6 @@ local loadedModules = {
 }
 
 local defaultOptions = {
-	object = object.default,
-	array  = array.default,
 	unicodeWhitespace = true,
 	initialObject = false
 }
@@ -41,17 +39,21 @@ local defaultOptions = {
 default = nil -- Let the buildCapture optimization take place
 
 strict = {
-	object = object.strict,
-	array  = array.strict,
 	unicodeWhitespace = true,
 	initialObject = true
 }
 
+-- Register generic value type
+util.register_type("VALUE")
 for _,name in ipairs(modulesToLoad) do
 	local mod = require("json.decode." .. name)
 	defaultOptions[name] = mod.default
 	strict[name] = mod.strict
 	loadedModules[name] = mod
+	-- Register types
+	if mod.register_types then
+		mod.register_types()
+	end
 end
 
 local function buildDecoder(mode)
@@ -60,27 +62,20 @@ local function buildDecoder(mode)
 	-- Store 'ignored' in the global options table
 	mode.ignored = ignored
 
-	local arrayCapture = array.buildCapture(mode.array, mode)
-	local objectCapture = object.buildCapture(mode.object, mode)
-	local valueCapture
-	for name, mod in pairs(loadedModules) do
-		local capture = mod.buildCapture(mode[name], mode)
-		if capture then
-			if valueCapture then
-				valueCapture = valueCapture + capture
-			else
-				valueCapture = capture
-			end
-		end
+	local value_id = util.types.VALUE
+	local value_type = lpeg.V(value_id)
+	local object_type = lpeg.V(util.types.OBJECT)
+	local array_type = lpeg.V(util.types.ARRAY)
+	local grammar = {
+		[1] = mode.initialObject and (ignored * (object_type + array_type)) or value_type
+	}
+	for _, name in pairs(modulesToLoad) do
+		local mod = loadedModules[name]
+		mod.load_types(mode[name], mode, grammar)
 	end
-	valueCapture = valueCapture + lpeg.V(TABLE) + lpeg.V(ARRAY)
-	valueCapture = ignored * valueCapture * ignored
-	local grammar = lpeg.P({
-		[1] = mode.initialObject and (ignored * (lpeg.V(TABLE) + lpeg.V(ARRAY))) or lpeg.V(VALUE),
-		[VALUE] = valueCapture,
-		[TABLE] = objectCapture,
-		[ARRAY] = arrayCapture
-	}) * ignored * -1
+	-- HOOK VALUE TYPE WITH WHITESPACE
+	grammar[value_id] = ignored * grammar[value_id] * ignored
+	grammar = lpeg.P(grammar) * ignored * -1
 	return function(data)
 		local ret, err = lpeg.match(grammar, data)
 		assert(nil ~= ret, err or "Invalid JSON data")
