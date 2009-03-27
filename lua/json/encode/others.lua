@@ -1,3 +1,7 @@
+--[[
+	Licensed according to the included 'LICENSE' document
+	Author: Thomas Harning Jr <harningt@gmail.com>
+]]
 local tostring = tostring
 
 local assert = assert
