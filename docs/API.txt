@@ -1,0 +1,129 @@
+# LuaJSON
+
+Configuration table:
+    COMMON TO ALL APIs
+    * initialObject
+        requires that the first element be an array or object
+    * number.nan
+        whether or not NaN is an allowed value
+    * number.inf
+        whether or not Infinity is an allowed value or not
+    * allowUndefined
+        status of accepting 'Undefined' as a value
+    * null
+        placeholder for null values
+    * undefined
+        placeholder for undefined values
+
+Decoder API:
+
+Decoder-specific configuration
+
+    * unicodeWhitespace
+        Include unicode whitespace characters or not when parsing
+    * array.trailingComma, object.trailingComma
+        Whether or not to ignore the extraneous trailing comma in declaration
+    * calls.defs
+        Map of (string or LPEG pattern) => ( true/false or function) defining functions
+        If boolean value, determines if allowed or not, decoded as a call object
+        Function return-value is the decoded result.
+        Function definition:  function(name, [arguments]) : output-value
+    * calls.allowUndefined
+        If set, then undefined call definitions are decoded as call objects.
+    * number.frac
+        If set, allow decoding portion of number after decimal pt
+    * number.exp
+        If set, allow decoding values with an exponent (ex: 1e2)
+    * number.hex
+        If set, allow decoding hexadecimal numbers (ex:   0xDEADBEEF)
+    * object.number
+        If set, allow numbers as object keys
+    * object.identifier
+        If set, allow 'identifiers' as object keys (matching [A-Za-z_][A-Za-z0-9_]*)
+    * strings.badChars
+        Set of characters that should not be present in a string
+    * strings.additionalEscapes
+        Lpeg expression to handle output (ex:  lpeg.C(1) would take \k  and spit out k)
+    * strings.escapeCheck
+        Lpeg expression to check if a given character is allowed to be an escape value
+    * strings.decodeUnicode
+        Function receiving (XX, YY) in \uXXYY situation to output decoded unicode sequence
+    * strings.strict_quotes
+        Whether or not to disallow ' as a quote character
+
+Default configuration
+    unicodeWhitespace = true
+    initialObject = false
+    allowUndefined = true
+    array.trailingComma = true
+    number.frac = true
+    number.exp = true
+    number.hex = false
+    object.number = true
+    object.identifier = true
+    object.trailingComma = true
+    strings.badChars = '' -- No characters considered bad in a string
+    strings.additionalEscapes = false, -- disallow untranslated escapes
+    strings.escapeCheck = #lpeg.S('bfnrtv/\\"xu\'z'),
+    strings.decodeUnicode = utf8DecodeUnicode,
+    strings.strict_quotes = false
+
+Strict configuration
+    initialObject = true
+    allowUndefined = false
+    array.trailingComma = false
+    object.identifier = false
+    object.trailingComma = false
+    strings.badChars = '\b\f\n\r\t\v'
+    strings.additionalEscapes = false -- no additional escapes
+    strings.escapeCheck = #lpeg.S('bfnrtv/\\"u') --only these chars are allowed to be escaped
+    strings.strict_quotes = true
+
+
+json.decode(value, params) : decoder results
+    Uses cached decoders based on 'params' input
+
+json.decode.getDecoder(params) : decoder
+
+'decoder(value)' : decoder results
+
+Encoder API:
+
+Encoder-specific configuration
+    * output
+        function that returns an encoder specification, if null default used,
+    * array.isArray
+        function(object) - if true/false returned considered authoritative
+    * strings.preProcess
+        function(string) - if present, the return value is used as the string to encode
+    * strings.xEncode
+        if true, encode binary values using \xNN escape rather than \uNNNN
+    * strings.encodeSet
+        string containing characters that need special encoding
+    * strings.encodeSetAppend
+        string containing characters that need to be added to the special-encoding list
+
+Default configuration
+    array.isArray == json-util's isArray implementation
+    allowUndefined = true
+    number.nan = true
+    number.inf = true
+    strings.xEncode = false
+    strings.encodeSet = '\\"/%z\1-\031'
+Strict configuration
+    initialObject = true
+    allowUndefined = false
+    number.nan = false
+    number.inf = false
+
+json.encode(value, params) : encoder results
+    Uses cached encoders based on 'params' input
+
+json.encode.getEncoder(params) : encoder
+
+'encoder(value)' : encoder results
+    By default, the encoder results is a string in JSON format.  Other
+    encoders may write the results to a file or some other storage.
+
+    Validation beyond configuration-table specified items:
+        * No infinite recursion permitted
