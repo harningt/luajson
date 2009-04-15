@@ -18,7 +18,6 @@ module("json.encode.calls")
 
 
 local defaultOptions = {
-	defs = nil
 }
 
 -- No real default-option handling needed...
