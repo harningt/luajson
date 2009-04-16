@@ -89,6 +89,23 @@ local function encodeWithMap(value, map, state)
 	error("Failed to encode value, encoders for " .. t .. " deny encoding")
 end
 
+
+local function getBaseEncoder(options)
+	local encoderMap = prepareEncodeMap(options)
+	if options.preProcess then
+		local preProcess = options.preProcess
+		return function(value, state)
+			local ret = preProcess(value)
+			if nil ~= ret then
+				value = ret
+			end
+			return encodeWithMap(value, encoderMap, state)
+		end
+	end
+	return function(value, state)
+		return encodeWithMap(value, encoderMap, state)
+	end
+end
 --[[
 	Retreive an initial encoder instance based on provided options
 	the initial encoder is responsible for initializing state
@@ -96,10 +113,8 @@ end
 ]]
 function getEncoder(options)
 	options = options and util_merge({}, defaultOptions, options) or defaultOptions
-	local encoderMap = prepareEncodeMap(options)
-	local function encode(value, state)
-		return encodeWithMap(value, encoderMap, state)
-	end
+	local encode = getBaseEncoder(options)
+
 	local function initialEncode(value)
 		if options.initialObject then
 			local errorMessage = "Invalid arguments: expects a JSON Object or Array at the root"

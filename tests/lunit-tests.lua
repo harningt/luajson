@@ -29,6 +29,12 @@ function test_array_innerComma()
 	end)
 end
 
+function test_preprocess()
+	assert_equal('"Hello"', json.encode(1, {preProcess = function() return "Hello" end}))
+	assert_equal('-1', json.encode(1, {preProcess = function(x) return -x end}))
+	assert_equal('-Infinity', json.encode(1/0, {preProcess = function(x) return -x end}))
+end
+
 local strictDecoder = json.decode.getDecoder(true)
 
 local function buildStrictDecoder(f)

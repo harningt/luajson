@@ -90,16 +90,17 @@ json.decode.getDecoder(params) : decoder
 Encoder API:
 
 Encoder-specific configuration
+    * preProcess
+        function(object) : object - called on every value to be encoded, optionally altering
+            If return 'nil' then no value change occurs
     * output
         function that returns an encoder specification, if null default used,
     * array.isArray
         function(object) - if true/false returned considered authoritative
-    * strings.preProcess
-        function(string) - if present, the return value is used as the string to encode
     * strings.xEncode
         if true, encode binary values using \xNN escape rather than \uNNNN
     * strings.encodeSet
-        string containing characters that need special encoding
+        (escapes in Lua gmatch format) string containing characters that need special encoding
     * strings.encodeSetAppend
         string containing characters that need to be added to the special-encoding list
 

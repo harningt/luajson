@@ -41,7 +41,6 @@ for i = 0, 255 do
 end
 
 local defaultOptions = {
-	preProcess = false,
 	xEncode = false, -- Encode single-bytes as \xXX
 	-- / is not required to be quoted but it helps with certain decoding
 	-- Required encoded characters, " \, and 00-1F  (0 - 31)
@@ -54,16 +53,12 @@ strict = nil
 
 function getEncoder(options)
 	options = options and util_merge({}, defaultOptions, options) or defaultOptions
-	local stringPreprocess = options and options.preProcess
 	local encodeSet = options.encodeSet
 	if options.encodeSetAppend then
 		encodeSet = encodeSet .. options.encodeSetAppend
 	end
 	local encodingMap = options.xEncode and xEncodingMap or normalEncodingMap
 	local function encodeString(s, state)
-		if stringPreprocess then
-			s = stringPreprocess(s)
-		end
 		return '"' .. s:gsub('[' .. encodeSet .. ']', encodingMap) .. '"'
 	end
 	return {
