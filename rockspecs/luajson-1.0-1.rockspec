@@ -1,6 +1,8 @@
 package = "luajson"
 version = "1.0-1"
 source = {
+	url = "http://luaforge.net/frs/download.php/4105/luajson-1.0.tar.bz2",
+	md5 = "0e3ee192f93d40c4947e828668828e91"
 }
 description = {
 	summary = "customizable JSON decoder/encoder",
