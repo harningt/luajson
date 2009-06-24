@@ -31,12 +31,14 @@ local modulesToLoad = {
 local loadedModules = {
 }
 
-local defaultOptions = {
+default = {
 	unicodeWhitespace = true,
 	initialObject = false
 }
 
-default = nil -- Let the buildCapture optimization take place
+local modes_defined = { "default", "strict", "simple" }
+
+simple = {}
 
 strict = {
 	unicodeWhitespace = true,
@@ -47,14 +49,22 @@ strict = {
 util.register_type("VALUE")
 for _,name in ipairs(modulesToLoad) do
 	local mod = require("json.decode." .. name)
-	defaultOptions[name] = mod.default
-	strict[name] = mod.strict
+	for _, mode in pairs(modes_defined) do
+		if mod[mode] then
+			_M[mode][name] = mod[mode]
+		end
+	end
 	loadedModules[name] = mod
 	-- Register types
 	if mod.register_types then
 		mod.register_types()
 	end
 end
+
+-- Shift over default into defaultOptions to permit build optimization
+local defaultOptions = default
+default = nil
+
 
 local function buildDecoder(mode)
 	mode = mode and merge({}, defaultOptions, mode) or defaultOptions
