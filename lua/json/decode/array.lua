@@ -7,21 +7,18 @@ local lpeg = require("lpeg")
 local util = require("json.decode.util")
 local jsonutil = require("json.util")
 
-local ipairs = ipairs
+local table_maxn = table.maxn
+
 local unpack = unpack
 
 module("json.decode.array")
 
 -- Utility function to help manage slighly sparse arrays
 local function processArray(array)
-	array.n = #array
-	for i,v in ipairs(array) do
-		if v == jsonutil.null then
-			array[i] = nil
-		end
-	end
-	if #array == array.n then
-		array.n = nil
+	local max_n = table_maxn(array)
+	-- Only populate 'n' if it is necessary
+	if #array ~= max_n then
+		array.n = max_n
 	end
 	if jsonutil.InitArray then
 		array = jsonutil.InitArray(array) or array
