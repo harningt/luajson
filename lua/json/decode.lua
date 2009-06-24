@@ -85,10 +85,10 @@ local function buildDecoder(mode)
 	end
 	-- HOOK VALUE TYPE WITH WHITESPACE
 	grammar[value_id] = ignored * grammar[value_id] * ignored
-	grammar = lpeg.P(grammar) * ignored * -1
+	grammar = lpeg.P(grammar) * ignored * lpeg.Cp() * -1
 	return function(data)
-		local ret, err = lpeg.match(grammar, data)
-		assert(nil ~= ret, err or "Invalid JSON data")
+		local ret, next_index = lpeg.match(grammar, data)
+		assert(nil ~= next_index, "Invalid JSON data")
 		return ret
 	end
 end
