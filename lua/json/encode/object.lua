@@ -20,6 +20,14 @@ default = nil
 strict = nil
 
 --[[
+	Cleanup function to unmark a value as in the encoding process and return
+	trailing results
+]]
+local function unmarkAfterEncode(tab, state, ...)
+	state.already_encoded[tab] = nil
+	return ...
+end
+--[[
 	Encode a table as a JSON Object ( keys = strings, values = anything else )
 ]]
 local function encodeTable(tab, options, state)
@@ -46,7 +54,7 @@ local function encodeTable(tab, options, state)
 		end
 	end
 	]]
-	return compositeEncoder(valueEncoder, '{', '}', nil, tab, encode, state)
+	return unmarkAfterEncode(tab, state, compositeEncoder(valueEncoder, '{', '}', nil, tab, encode, state))
 end
 
 function getEncoder(options)

@@ -62,6 +62,14 @@ function isArray(val, options)
 	return true
 end
 
+--[[
+	Cleanup function to unmark a value as in the encoding process and return
+	trailing results
+]]
+local function unmarkAfterEncode(tab, state, ...)
+	state.already_encoded[tab] = nil
+	return ...
+end
 function getEncoder(options)
 	options = options and util_merge({}, defaultOptions, options) or defaultOptions
 	local function encodeArray(tab,  state)
@@ -83,7 +91,7 @@ function getEncoder(options)
 			end
 		end
 		]]
-		return compositeEncoder(valueEncoder, '[', ']', ',', tab, encode, state)
+		return unmarkAfterEncode(tab, state, compositeEncoder(valueEncoder, '[', ']', ',', tab, encode, state))
 	end
 	return { table = encodeArray }
 end

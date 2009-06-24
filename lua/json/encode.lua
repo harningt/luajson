@@ -109,7 +109,7 @@ end
 --[[
 	Retreive an initial encoder instance based on provided options
 	the initial encoder is responsible for initializing state
-		State has at least these values configured: encode, check_unique
+		State has at least these values configured: encode, check_unique, already_encoded
 ]]
 function getEncoder(options)
 	options = options and util_merge({}, defaultOptions, options) or defaultOptions
@@ -131,6 +131,7 @@ function getEncoder(options)
 		local state = {
 			encode = encode,
 			check_unique = check_unique,
+			already_encoded = alreadyEncoded, -- To unmark encoding when moving up stack
 			outputEncoder = outputEncoder
 		}
 		local ret = encode(value, state)
@@ -145,6 +146,7 @@ end
 --[[
 	encoder
 	check_unique -- used by inner encoders to make sure value is unique
+	already_encoded -- used to unmark a value as unique
 ]]
 function encode(data, options)
 	return getEncoder(options)(data)
