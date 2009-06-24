@@ -93,7 +93,15 @@ local function buildDecoder(mode)
 	end
 end
 
-local strictDecoder, defaultDecoder = buildDecoder(strict), buildDecoder(default)
+-- Since 'default' is nil, we cannot take map it
+local defaultDecoder = buildDecoder(default)
+local prebuilt_decoders = {}
+for _, mode in pairs(modes_defined) do
+	if _M[mode] ~= nil then
+		prebuilt_decoders[_M[mode]] = buildDecoder(_M[mode])
+	end
+end
+
 --[[
 Options:
 	number => number decode options
@@ -105,10 +113,9 @@ Options:
 ]]
 function getDecoder(mode)
 	mode = mode == true and strict or mode or default
-	if mode == strict and strictDecoder then
-		return strictDecoder
-	elseif mode == default and defaultDecoder then
-		return defaultDecoder
+	local decoder = mode == nil and defaultDecoder or prebuilt_decoders[mode]
+	if decoder then
+		return decoder
 	end
 	return buildDecoder(mode)
 end
