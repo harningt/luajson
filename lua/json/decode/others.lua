@@ -24,18 +24,23 @@ local defaultOptions = {
 }
 
 default = nil -- Let the buildCapture optimization take place
+simple = {
+	null = false,     -- Mapped to nil
+	undefined = false -- Mapped to nil
+}
 strict = {
 	allowUndefined = false
 }
 
 local function buildCapture(options)
+	-- The 'or nil' clause allows false to map to a nil value since 'nil' cannot be merged
 	options = options and jsonutil.merge({}, defaultOptions, options) or defaultOptions
 	local valueCapture = (
 		booleanCapture
-		+ nullCapture * lpeg.Cc(options.null)
+		+ nullCapture * lpeg.Cc(options.null or nil)
 	)
 	if options.allowUndefined then
-		valueCapture = valueCapture + undefinedCapture * lpeg.Cc(options.undefined)
+		valueCapture = valueCapture + undefinedCapture * lpeg.Cc(options.undefined or nil)
 	end
 	return valueCapture
 end
