@@ -67,6 +67,11 @@ local function buildDefinedCaptures(argumentCapture, defs)
 				end
 				return buildCall(name, ...)
 			end
+		else
+			local inner_func = func
+			func = function(...)
+				return (inner_func(...))
+			end
 		end
 		local newCapture = (nameCallCapture * argumentCapture) / func * ")"
 		if not callCapture then
