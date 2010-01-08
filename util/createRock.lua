@@ -29,7 +29,7 @@ build = {
 }
 ]=]
 
-local in_modules = io.popen("find lua -type f -name '*.lua' -not -iname '.*'", "r")
+local in_modules = io.popen("find lua -type f -name '*.lua' -not -iname '.*' | sort", "r")
 local modules = in_modules:read("*a")
 in_modules:close()
 
