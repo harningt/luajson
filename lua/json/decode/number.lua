@@ -20,7 +20,8 @@ local frac = lpeg.P('.') * digits
 local exp = lpeg.S("Ee") * (lpeg.S("-+") + 0) * digits
 
 local nan = lpeg.S("Nn") * lpeg.S("Aa") * lpeg.S("Nn")
-local inf = (lpeg.P('-') + 0) * lpeg.S("Ii") * lpeg.P("nfinity")
+local inf = lpeg.S("Ii") * lpeg.P("nfinity")
+local ninf = lpeg.P('-') * lpeg.S("Ii") * lpeg.P("nfinity")
 local hex = (lpeg.P("0x") + lpeg.P("0X")) * lpeg.R("09","AF","af")^1
 
 local defaultOptions = {
@@ -36,6 +37,11 @@ strict = {
 	nan = false,
 	inf = false
 }
+
+local nan_value = 0/0
+local inf_value = 1/0
+local ninf_value = -1/0
+
 --[[
 	Options: configuration options for number rules
 		nan: match NaN
@@ -44,7 +50,7 @@ strict = {
 	    exp: match exponent portion  (e1)
 	DEFAULT: nan, inf, frac, exp
 ]]
-local function buildMatch(options)
+local function buildCapture(options)
 	options = options and merge({}, defaultOptions, options) or defaultOptions
 	local ret = int
 	if options.frac then
@@ -56,17 +62,15 @@ local function buildMatch(options)
 	if options.hex then
 		ret = hex + ret
 	end
+	-- Capture number now
+	ret = ret / tonumber
 	if options.nan then
-		ret = ret + nan
+		ret = ret + nan / function() return nan_value end
 	end
 	if options.inf then
-		ret = ret + inf
+		ret = ret + ninf / function() return ninf_value end + inf / function() return inf_value end
 	end
 	return ret
-end
-
-local function buildCapture(options)
-	return buildMatch(options) / tonumber
 end
 
 function register_types()
