@@ -15,7 +15,7 @@ local util = require("json.decode.util")
 local setmetatable, getmetatable = setmetatable, getmetatable
 local assert = assert
 local ipairs, pairs = ipairs, pairs
-local string_char = string.char
+local string_char = require("string").char
 
 local require = require
 module("json.decode")

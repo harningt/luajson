@@ -1,9 +1,11 @@
 --[[
   Some Time Trails for the JSON4Lua package
 ]]--
+
 require('json')
-require('os')
-require('table')
+local os = require('os')
+local table = require('table')
+local string = require("string")
 
 local skipDecode = (...) == '--skipDecode'
 local count = tonumber(select(2, ...) or 500) or 500

@@ -5,7 +5,7 @@
 local tostring = tostring
 local assert = assert
 local util = require("json.util")
-local huge = math.huge
+local huge = require("math").huge
 
 module("json.encode.number")
 

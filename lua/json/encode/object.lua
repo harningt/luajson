@@ -8,7 +8,7 @@ local assert = assert
 local type = type
 local tostring = tostring
 
-local table_concat = table.concat
+local table_concat = require("table").concat
 local util_merge = require("json.util").merge
 
 module("json.encode.object")

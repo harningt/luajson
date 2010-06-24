@@ -1,6 +1,6 @@
 local json = require("json")
 local lunit = require("lunit")
-local math = math
+local math = require("math")
 local testutil = require("testutil")
 
 local setmetatable = setmetatable

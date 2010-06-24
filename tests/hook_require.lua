@@ -1,3 +1,4 @@
+local os = require("os")
 local old_require = require
 if os.getenv('LUA_OLD_INIT') then
 	assert(loadstring(os.getenv('LUA_OLD_INIT')))()

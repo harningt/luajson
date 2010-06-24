@@ -7,10 +7,9 @@ local util = require("json.decode.util")
 local merge = require("json.util").merge
 
 local tonumber = tonumber
-local string = string
-local string_char = string.char
-local floor = math.floor
-local table_concat = table.concat
+local string_char = require("string").char
+local floor = require("math").floor
+local table_concat = require("table").concat
 
 local error = error
 module("json.decode.strings")

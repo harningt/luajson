@@ -6,7 +6,7 @@ local lpeg = require("lpeg")
 local select = select
 local pairs, ipairs = pairs, ipairs
 local tonumber = tonumber
-local string_char = string.char
+local string_char = require("string").char
 
 local error = error
 local setmetatable = setmetatable

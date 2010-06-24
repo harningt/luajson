@@ -8,6 +8,8 @@ local type = type
 local pairs = pairs
 local assert = assert
 
+local table = require("table")
+local math = require("math")
 local table_concat = table.concat
 local math_floor, math_modf = math.floor, math.modf
 

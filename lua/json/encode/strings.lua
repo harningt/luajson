@@ -2,7 +2,7 @@
 	Licensed according to the included 'LICENSE' document
 	Author: Thomas Harning Jr <harningt@gmail.com>
 ]]
-local string_char = string.char
+local string_char = require("string").char
 local pairs = pairs
 
 local util_merge = require("json.util").merge

@@ -1,4 +1,6 @@
 #!/usr/bin/env lua
+local io = require("io")
+local table = require("table")
 local authors = {}
 
 local currentAuthor

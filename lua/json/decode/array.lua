@@ -7,7 +7,7 @@ local lpeg = require("lpeg")
 local util = require("json.decode.util")
 local jsonutil = require("json.util")
 
-local table_maxn = table.maxn
+local table_maxn = require("table").maxn
 
 local unpack = unpack
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env lua
+local io = require("io")
 local from, tover = ...
 if not from or not tover then
 	print("Format: prepareNextRelease.lua <from-tag> <tover-tag>")

@@ -1,7 +1,8 @@
 local json = require("json")
 local lunit = require("lunit")
-local math = math
+local math = require("math")
 local testutil = require("testutil")
+local string = require("string")
 
 local encode = json.encode
 -- DECODE NOT 'local' due to requirement for testutil to access it

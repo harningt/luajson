@@ -4,10 +4,10 @@
 ]]
 local type = type
 local assert, error = assert, error
-local table_concat = table.concat
+local table_concat = require("table").concat
 local loadstring = loadstring
 
-local io = io
+local io = require("io")
 
 local setmetatable = setmetatable
 

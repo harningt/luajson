@@ -4,6 +4,7 @@
 ]]
 local jsonutil = require("json.util")
 
+local table = require("table")
 local table_concat = table.concat
 
 local select = select

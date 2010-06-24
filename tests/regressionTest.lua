@@ -1,5 +1,7 @@
 -- Additional path that may be required
 require("json")
+local io = require("io")
+local os = require("os")
 
 require("lfs")
 

@@ -1,3 +1,5 @@
+local io = require("io")
+
 local version = assert((...), "Requires rock version on command-line")
 
 local template = [=[

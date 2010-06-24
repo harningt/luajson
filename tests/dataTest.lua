@@ -1,3 +1,4 @@
+local io = require("io")
 require("json")
 local f = io.open("data.txt")
 local data = f:read('*a')
