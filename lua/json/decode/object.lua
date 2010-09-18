@@ -68,10 +68,11 @@ local function buildCapture(options, global_options)
 	if DecimalLpegVersion < 0.9 then
 		objectItems = buildItemSequence(objectItem / applyObjectKey, ignored)
 		objectItems = lpeg.Ca(lpeg.Cc(false) / initObject * objectItems)
+		-- TODO: support options.setObjectKey?
 	-- END LPEG < 0.9 SUPPORT
 	else
 		objectItems = buildItemSequence(lpeg.Cg(objectItem), ignored)
-		objectItems = lpeg.Cf(lpeg.Ct(0) * objectItems, rawset)
+		objectItems = lpeg.Cf(lpeg.Ct(0) * objectItems, global_options.setObjectKey or rawset)
 	end
 
 

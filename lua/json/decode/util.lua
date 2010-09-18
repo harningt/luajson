@@ -7,6 +7,7 @@ local select = select
 local pairs, ipairs = pairs, ipairs
 local tonumber = tonumber
 local string_char = require("string").char
+local rawset = rawset
 
 local error = error
 local setmetatable = setmetatable
@@ -89,4 +90,9 @@ function get_invalid_character_info(input, index)
 	local _, line_number = parsed:gsub('\n',{})
 	local last_line = parsed:match("\n([^\n]+.)$") or parsed
 	return line_number, #last_line, bad_character, last_line
+end
+
+function setObjectKeyForceNumber(t, key, value)
+	key = tonumber(key) or key
+	return rawset(t, key, value)
 end

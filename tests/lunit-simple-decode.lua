@@ -46,3 +46,20 @@ function test_decode_object_default_with_null()
 	assert_equal(json.util.null, result.x)
 	assert_not_nil(next(result))
 end
+
+function test_decode_object_with_stringized_numeric_keys_default()
+	local result = assert(json.decode('{"1": "one"}'))
+	assert_equal("one", result["1"])
+	assert_equal(nil, result[1])
+end
+
+function test_decode_object_with_stringized_numeric_keys_force_numeric()
+	local result = assert(
+			json.decode(
+					'{"1": "one"}',
+					{ setObjectKey = assert(json.decode.util.setObjectKeyForceNumber) }
+				)
+		)
+	assert_equal(nil, result["1"])
+	assert_equal("one", result[1])
+end
