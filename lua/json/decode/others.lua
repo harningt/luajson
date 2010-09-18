@@ -6,6 +6,8 @@ local lpeg = require("lpeg")
 local jsonutil = require("json.util")
 local util = require("json.decode.util")
 
+local rawset = rawset
+
 -- Container module for other JavaScript types (bool, null, undefined)
 module("json.decode.others")
 
@@ -20,7 +22,8 @@ local undefinedCapture = lpeg.P("undefined")
 local defaultOptions = {
 	allowUndefined = true,
 	null = jsonutil.null,
-	undefined = jsonutil.undefined
+	undefined = jsonutil.undefined,
+	setObjectKey = rawset
 }
 
 default = nil -- Let the buildCapture optimization take place
