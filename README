@@ -12,7 +12,7 @@ Bug reports:
 
 Requirements
 	Lua 5.1
-	LPeg (Tested with 0.7, 0.8 ... 0.6 should work)
+	LPeg (Tested with 0.7, 0.8, 0.9 ... 0.6 mostly works)
 	For regressionTest:
 		lfs (Tested with 1.4.1)
 	For lunit-tests:
