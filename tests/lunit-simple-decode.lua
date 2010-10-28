@@ -57,7 +57,7 @@ function test_decode_object_with_stringized_numeric_keys_force_numeric()
 	local result = assert(
 			json.decode(
 					'{"1": "one"}',
-					{ setObjectKey = assert(json.decode.util.setObjectKeyForceNumber) }
+					{ object = { setObjectKey = assert(json.decode.util.setObjectKeyForceNumber) } }
 				)
 		)
 	assert_equal(nil, result["1"])
