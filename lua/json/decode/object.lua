@@ -14,13 +14,11 @@ local tostring = tostring
 
 local rawset = rawset
 
-local DecimalLpegVersion = util.DecimalLpegVersion
-
 module("json.decode.object")
 
 -- BEGIN LPEG < 0.9 SUPPORT
 local initObject, applyObjectKey
-if DecimalLpegVersion < 0.9 then
+if not (lpeg.Cg and lpeg.Cf and lpeg.Ct) then
 	function initObject()
 		return {}
 	end
@@ -65,7 +63,7 @@ local function buildCapture(options, global_options)
 	local objectItems
 	local objectItem = (key * ignored * lpeg.P(":") * ignored * value_type)
 	-- BEGIN LPEG < 0.9 SUPPORT
-	if DecimalLpegVersion < 0.9 then
+	if not (lpeg.Cg and lpeg.Cf and lpeg.Ct) then
 		objectItems = buildItemSequence(objectItem / applyObjectKey, ignored)
 		objectItems = lpeg.Ca(lpeg.Cc(false) / initObject * objectItems)
 	-- END LPEG < 0.9 SUPPORT

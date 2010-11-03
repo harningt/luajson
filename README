@@ -3,6 +3,13 @@ LuaJSON
 
 Author:	Thomas Harning Jr. <harningt@gmail.com>
 
+Source code:
+    http://repo.or.cz/luajson
+
+Bug reports:
+    http://github.com/harningt/luajson
+    harningt@gmail.com
+
 Requirements
 	Lua 5.1
 	LPeg (Tested with 0.7, 0.8 ... 0.6 should work)
