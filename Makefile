@@ -2,11 +2,19 @@
 # Makefile to prepare releases and run tests
 #
 
-.PHONY: all clean check dist dist-all dist-bzip2 dist-gzip dist-zip distcheck
+DISTOPS= dist distclean dist-all dist-bzip2 dist-gzip dist-tar dist-zip
+.PHONY: all clean check $(DISTOPS) distcheck install
 
-DIST_DIR=dist
 LUA_BIN=lua
+LUNIT_BIN=lunit
+VERSION=luajson-$(shell git describe --abbrev=4 HEAD 2>/dev/null)
 
+MKDIR=mkdir -p
+PREFIX ?= /usr/local
+INSTALL_TOP= $(PREFIX)
+
+INSTALL_LMOD= $(INSTALL_TOP)/share/lua/5.1
+INSTALL_CMOD= $(INSTALL_TOP)/lib/lua/5.1
 
 all:
 	@echo Building nothing - no binaries
@@ -14,32 +22,35 @@ all:
 clean:
 	@echo Cleaning nothing - no binaries
 
-
-dist dist-all: distdir dist-bzip2 dist-gzip dist-zip
-
-distdir:
-	mkdir -p dist
-
-VERSION=luajson-$(shell git describe --abbrev=4 HEAD 2>/dev/null)
-dist-bzip2: distdir
-	git archive --format=tar --prefix=$(VERSION)/ HEAD | bzip2 -9v > $(DIST_DIR)/$(VERSION).tar.bz2
-dist-gzip: distdir
-	git archive --format=tar --prefix=$(VERSION)/ HEAD | gzip -9v > $(DIST_DIR)/$(VERSION).tar.gz
-dist-zip: distdir
-	git archive --format=zip --prefix=$(VERSION)/ HEAD > $(DIST_DIR)/$(VERSION).zip
+$(DISTOPS):
+	$(MAKE) $(MFLAGS) -C dist $@
 
 # Config to make sure that Lua uses the contained Lua code
 LUA_PATH_SETUP=LUA_PATH="?/init.lua;../lua/?.lua;../lua/?/init.lua;$(LUA_PATH);"
 LUA_SETUP=LUA_OLD_INIT="$(LUA_INIT)" LUA_INIT="@hook_require.lua" $(LUA_PATH_SETUP)
+
 check-regression:
-	cd tests && $(LUA_SETUP) lua regressionTest.lua
+	cd tests && $(LUA_SETUP) $(LUA_BIN) regressionTest.lua
 check-unit:
-	cd tests && $(LUA_SETUP) lunit lunit-*.lua
+	cd tests && $(LUA_SETUP) $(LUNIT_BIN) lunit-*.lua
+
 check: check-regression check-unit
 
-
-distcheck: dist-bzip2
-	mkdir -p tmp
-	tar -C tmp -xf $(DIST_DIR)/$(VERSION).tar.bz2
+distcheck-tar: dist-tar
+	$(MKDIR) tmp
+	tar -C tmp -xf dist/$(VERSION).tar
 	cd tmp/$(VERSION) && make check
 	rm -rf tmp
+
+distcheck-zip: dist-zip
+	$(MKDIR) tmp
+	unzip -q -d tmp dist/$(VERSION).zip
+	cd tmp/$(VERSION) && make check
+	rm -rf tmp
+
+distcheck: distcheck-zip distcheck-tar
+
+
+install:
+	$(MKDIR) $(DESTDIR)$(INSTALL_LMOD)
+	cp -p -r lua/* $(DESTDIR)$(INSTALL_LMOD)
