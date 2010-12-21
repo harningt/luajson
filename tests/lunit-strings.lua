@@ -156,6 +156,33 @@ function test_x_encoding()
 	end
 end
 
+local multibyte_encoding_values = {
+	-- 2-byte
+	{ '"\\u0080"', string.char(0xC2, 0x80) },
+	{ '"\\u00A2"', string.char(0xC2, 0xA2) },
+	{ '"\\u07FF"', string.char(0xDF, 0xBF) },
+	-- 3-byte
+	{ '"\\u0800"', string.char(0xE0, 0xA0, 0x80) },
+	{ '"\\u20AC"', string.char(0xE2, 0x82, 0xAC) },
+	{ '"\\uFEFF"', string.char(0xEF, 0xBB, 0xBF) },
+	{ '"\\uFFFF"', string.char(0xEF, 0xBF, 0xBF) }
+}
+
+function test_custom_encoding()
+	local function processor(s)
+		return require("utf8_processor").process(s)
+	end
+	local encoder = json.encode.getEncoder({
+		strings = {
+			processor = processor
+		}
+	})
+	for i, v in ipairs(multibyte_encoding_values) do
+		local encoded = encoder(v[2])
+		assert_equal(v[1], encoded, "Failed to encode value using custom encoder")
+	end
+end
+
 function test_strict_decoding()
 	local encoder = json.encode.getEncoder(json.encode.strict)
 	local decoder = json.decode.getDecoder(json.decode.strict)
