@@ -42,6 +42,7 @@ end
 
 local defaultOptions = {
 	xEncode = false, -- Encode single-bytes as \xXX
+	processor = nil, -- Simple processor for the string prior to quoting
 	-- / is not required to be quoted but it helps with certain decoding
 	-- Required encoded characters, " \, and 00-1F  (0 - 31)
 	encodeSet = '\\"/%z\1-\031',
@@ -58,8 +59,16 @@ function getEncoder(options)
 		encodeSet = encodeSet .. options.encodeSetAppend
 	end
 	local encodingMap = options.xEncode and xEncodingMap or normalEncodingMap
-	local function encodeString(s, state)
-		return '"' .. s:gsub('[' .. encodeSet .. ']', encodingMap) .. '"'
+	local encodeString
+	if options.processor then
+		local processor = options.processor
+		encodeString = function(s, state)
+			return '"' .. processor(s:gsub('[' .. encodeSet .. ']', encodingMap)) .. '"'
+		end
+	else
+		encodeString = function(s, state)
+			return '"' .. s:gsub('[' .. encodeSet .. ']', encodingMap) .. '"'
+		end
 	end
 	return {
 		string = encodeString
