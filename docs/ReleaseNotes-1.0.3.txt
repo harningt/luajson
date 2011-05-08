@@ -1,0 +1,21 @@
+luajson v1.0.3 Release Notes
+============================
+
+User Visible Changes
+--------------------
+LPeg 0.10 now supported.  The only problem was the mechanism for
+version detection.  I now use object detection which should better
+work for future version updates.
+
+Plans for next release
+----------------------
+See 1.2.x series for future plans.
+
+Updates since 1.0.2
+===================
+
+Thomas Harning Jr (2):
+	decode/object:
+		compatibility fix for LPeg 0.10 - function-checking vs number parsing
+	docs:
+		adds reference for where bug reporting should go
