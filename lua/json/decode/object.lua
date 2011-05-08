@@ -47,11 +47,33 @@ local function buildItemSequence(objectItem, ignored)
 	return (objectItem * (ignored * lpeg.P(",") * ignored * objectItem)^0) + 0
 end
 
-local function buildCapture(options, global_options)
+local function buildCapture(options, global_options, state)
 	local ignored = global_options.ignored
 	local string_type = lpeg.V(util.types.STRING)
 	local integer_type = lpeg.V(util.types.INTEGER)
 	local value_type = lpeg.V(util.types.VALUE)
+	-- If match-time capture supported, use it to remove stack limit for JSON
+	if lpeg.Cmt then
+		value_type = lpeg.Cmt(lpeg.Cp(), function(str, i)
+			-- Decode one value then return
+			local END_MARKER = {}
+			local pattern =
+				-- Found empty segment
+				#lpeg.P('}' * lpeg.Cc(END_MARKER) * lpeg.Cp())
+				-- Found a value + captured, check for required , or } + capture next pos
+				+ state.VALUE_MATCH * #(lpeg.P(',') + lpeg.P('}')) * lpeg.Cp()
+			local capture, i = pattern:match(str, i)
+			if END_MARKER == capture then
+				return i
+			elseif (i == nil and capture == nil) then
+				return false
+			else
+				return i, capture
+			end
+		end)
+	end
+
+
 	options = options and merge({}, defaultOptions, options) or defaultOptions
 	local key = string_type
 	if options.identifier then
@@ -95,8 +117,8 @@ function register_types()
 	util.register_type("OBJECT")
 end
 
-function load_types(options, global_options, grammar)
-	local capture = buildCapture(options, global_options)
+function load_types(options, global_options, grammar, state)
+	local capture = buildCapture(options, global_options, state)
 	local object_id = util.types.OBJECT
 	grammar[object_id] = capture
 	util.append_grammar_item(grammar, "VALUE", lpeg.V(object_id))

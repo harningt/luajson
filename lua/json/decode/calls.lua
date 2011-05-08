@@ -83,13 +83,32 @@ local function buildDefinedCaptures(argumentCapture, defs)
 	return callCapture
 end
 
-local function buildCapture(options)
+local function buildCapture(options, global_options, state)
 	if not options  -- No ops, don't bother to parse
 		or not (options.defs and (nil ~= next(options.defs)) or options.allowUndefined) then
 		return nil
 	end
 	-- Allow zero or more arguments separated by commas
 	local value = lpeg.V(util.types.VALUE)
+	if lpeg.Cmt then
+		value = lpeg.Cmt(lpeg.Cp(), function(str, i)
+			-- Decode one value then return
+			local END_MARKER = {}
+			local pattern =
+				-- Found empty segment
+				#lpeg.P(')' * lpeg.Cc(END_MARKER) * lpeg.Cp())
+				-- Found a value + captured, check for required , or ) + capture next pos
+				+ state.VALUE_MATCH * #(lpeg.P(',') + lpeg.P(')')) * lpeg.Cp()
+			local capture, i = pattern:match(str, i)
+			if END_MARKER == capture then
+				return i
+			elseif (i == nil and capture == nil) then
+				return false
+			else
+				return i, capture
+			end
+		end)
+	end
 	local argumentCapture = (value * (lpeg.P(",") *  value)^0) + 0
 	local callCapture = buildDefinedCaptures(argumentCapture, options.defs)
 	if options.allowUndefined then
@@ -108,8 +127,8 @@ local function buildCapture(options)
 	return callCapture
 end
 
-function load_types(options, global_options, grammar)
-	local capture = buildCapture(options, global_options)
+function load_types(options, global_options, grammar, state)
+	local capture = buildCapture(options, global_options, state)
 	if capture then
 		util.append_grammar_item(grammar, "VALUE", capture)
 	end

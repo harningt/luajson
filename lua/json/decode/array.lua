@@ -35,10 +35,30 @@ strict = {
 	trailingComma = false
 }
 
-local function buildCapture(options, global_options)
+local function buildCapture(options, global_options, state)
 	local ignored = global_options.ignored
 	-- arrayItem == element
 	local arrayItem = lpeg.V(util.types.VALUE)
+	-- If match-time capture supported, use it to remove stack limit for JSON
+	if lpeg.Cmt then
+		arrayItem = lpeg.Cmt(lpeg.Cp(), function(str, i)
+			-- Decode one value then return
+			local END_MARKER = {}
+			local pattern =
+				-- Found empty segment
+				#lpeg.P(']' * lpeg.Cc(END_MARKER) * lpeg.Cp())
+				-- Found a value + captured, check for required , or ] + capture next pos
+				+ state.VALUE_MATCH * #(lpeg.P(',') + lpeg.P(']')) * lpeg.Cp()
+			local capture, i = pattern:match(str, i)
+			if END_MARKER == capture then
+				return i
+			elseif (i == nil and capture == nil) then
+				return false
+			else
+				return i, capture
+			end
+		end)
+	end
 	local arrayElements = lpeg.Ct(arrayItem * (ignored * lpeg.P(',') * ignored * arrayItem)^0 + 0) / processArray
 
 	options = options and jsonutil.merge({}, defaultOptions, options) or defaultOptions
@@ -56,8 +76,8 @@ function register_types()
 	util.register_type("ARRAY")
 end
 
-function load_types(options, global_options, grammar)
-	local capture = buildCapture(options, global_options)
+function load_types(options, global_options, grammar, state)
+	local capture = buildCapture(options, global_options, state)
 	local array_id = util.types.ARRAY
 	grammar[array_id] = capture
 	util.append_grammar_item(grammar, "VALUE", lpeg.V(array_id))
