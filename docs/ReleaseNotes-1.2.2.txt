@@ -1,0 +1,35 @@
+luajson v1.2.2 Release Notes
+============================
+
+User Visible Changes
+--------------------
+Addressed issue #14, increasing the decoding max stack depth to ~190 using
+nested parsing.  This should help deal with deeply-nested objects until
+a better solution is achieved.
+Addressed issue #15, the 'preProcess' function receives an additional
+parameter 'isObjectKey' to help it determine what sort of processing
+should be done.
+Adds a 'string' processor function that can be used to specially handle
+string values and custom escape values, such as for forcing ASCII by
+encoding all UTF-8 values using escape codes.
+
+Plans for next release
+----------------------
+Future enhancements in the 1.2 series include linearizing the parsing
+layer to make deep nesting less costly in terms of stack space.
+For the next series, better error handling is a goal.
+
+Updates since 1.2.1
+===================
+
+Thomas Harning Jr (16):
+	base:
+		splits out Makefile to multiple files to manage distinct goals and adds install target
+	decoder:
+		updates decoders for nested data types to use Cmt when available to handle deep nesting by directly matching inside
+	encoder/strings:
+		adds simple processor+tests - with example use case of encoding multi-byte utf8 values
+	encoder/tests:
+		communicates the status that a value is an object key to the preProcess function if present
+	tests:
+		adds decoder test for maximum depth of parser
