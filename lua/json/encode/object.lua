@@ -40,7 +40,7 @@ local function encodeTable(tab, options, state)
 	for k, v in pairs(composite) do
 		local ti = type(k)
 		assert(ti == 'string' or ti == 'number' or ti == 'boolean', "Invalid object index type: " .. ti)
-		local name = encode(tostring(k), state)
+		local name = encode(tostring(k), state, true)
 		if first then
 			first = false
 		else

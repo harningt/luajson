@@ -50,3 +50,23 @@ function test_recursive_array()
 		json.encode(obj)
 	end)
 end
+
+function test_custom_encode()
+	local obj = { x = "y" }
+	local sawX
+	local function preProcessor(value, isObjectKey)
+		if value == "x" then
+			sawX = true
+			assert_true(isObjectKey)
+		else
+			assert_false(isObjectKey)
+		end
+		return value
+	end
+	local encoder = json.encode.getEncoder({
+		preProcess = preProcessor
+	})
+	assert_nil(sawX)
+	encoder(obj)
+	assert_true(sawX)
+end

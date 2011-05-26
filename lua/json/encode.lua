@@ -77,11 +77,11 @@ end
 --[[
 	Encode a value with a given encoding map and state
 ]]
-local function encodeWithMap(value, map, state)
+local function encodeWithMap(value, map, state, isObjectKey)
 	local t = type(value)
 	local encoderList = assert(map[t], "Failed to encode value, unhandled type: " .. t)
 	for _, encoder in ipairs(encoderList) do
-		local ret = encoder(value, state)
+		local ret = encoder(value, state, isObjectKey)
 		if false ~= ret then
 			return ret
 		end
@@ -94,15 +94,15 @@ local function getBaseEncoder(options)
 	local encoderMap = prepareEncodeMap(options)
 	if options.preProcess then
 		local preProcess = options.preProcess
-		return function(value, state)
-			local ret = preProcess(value)
+		return function(value, state, isObjectKey)
+			local ret = preProcess(value, isObjectKey or false)
 			if nil ~= ret then
 				value = ret
 			end
 			return encodeWithMap(value, encoderMap, state)
 		end
 	end
-	return function(value, state)
+	return function(value, state, isObjectKey)
 		return encodeWithMap(value, encoderMap, state)
 	end
 end
