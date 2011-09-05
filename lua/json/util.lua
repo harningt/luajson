@@ -8,6 +8,7 @@ local tostring = tostring
 local pairs = pairs
 local getmetatable, setmetatable = getmetatable, setmetatable
 local select = select
+local next = next
 
 local is_52 = _VERSION == "Lua 5.2"
 local _G = _G
@@ -89,9 +90,16 @@ local function IsArray(value)
 	if type(value) ~= 'table' then return false end
 	local ret = getmetatable(value) == ArrayMT
 	if not ret then
-		if #value == 0 then return false end
+		if nil == next(value) then
+			-- the table is empty, we treate it as empty array
+			return true
+		else
+			-- value has content, and #value == 0, it is a hash, not an array
+			if #value == 0 then return false end
+		end
 	else
-		return ret
+		-- has ArrayMT as its metatable, it is array
+		return true
 	end
 end
 local function InitArray(array)
