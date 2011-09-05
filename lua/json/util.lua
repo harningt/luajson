@@ -8,6 +8,7 @@ local tostring = tostring
 local pairs = pairs
 local getmetatable, setmetatable = getmetatable, setmetatable
 local select = select
+local next = next
 
 module("json.util")
 local function foreach(tab, func)
