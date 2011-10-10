@@ -2,8 +2,6 @@
 	Licensed according to the included 'LICENSE' document
 	Author: Thomas Harning Jr <harningt@gmail.com>
 ]]
-local jsonutil = require("json.util")
-
 local table = require("table")
 local table_concat = table.concat
 
@@ -11,9 +9,9 @@ local select = select
 local getmetatable, setmetatable = getmetatable, setmetatable
 local assert = assert
 
-local util = require("json.util")
+local jsonutil = require("json.util")
 
-local util_merge, isCall, decodeCall = util.merge, util.isCall, util.decodeCall
+local isCall, decodeCall = jsonutil.isCall, jsonutil.decodeCall
 
 local is_52 = _VERSION == "Lua 5.2"
 local _G = _G
@@ -26,8 +24,11 @@ local defaultOptions = {
 }
 
 -- No real default-option handling needed...
-local default = nil
-local strict = nil
+local modeOptions = {}
+
+local function mergeOptions(options, mode)
+	jsonutil.doOptionMerge(options, false, 'calls', defaultOptions, mode and modeOptions[mode])
+end
 
 
 --[[
@@ -37,7 +38,7 @@ local strict = nil
 		parameters == array of parameters to encode
 ]]
 local function getEncoder(options)
-	options = options and util_merge({}, defaultOptions, options) or defaultOptions
+	options = options and jsonutil.merge({}, defaultOptions, options) or defaultOptions
 	local function encodeCall(value, state)
 		if not isCall(value) then
 			return false
@@ -65,8 +66,7 @@ local function getEncoder(options)
 end
 
 local calls = {
-	default = default,
-	strict = strict,
+	mergeOptions = mergeOptions,
 	getEncoder = getEncoder
 }
 

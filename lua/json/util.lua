@@ -52,14 +52,20 @@ local function clone(t)
 	return ret
 end
 
-local function merge(t, from, ...)
-	if not from then
+local function inner_merge(t, remaining, from, ...)
+	if remaining == 0 then
 		return t
 	end
-	for k,v in pairs(from) do
-		t[k] = v
+	if from then
+		for k,v in pairs(from) do
+			t[k] = v
+		end
 	end
-	return merge(t, ...)
+	return inner_merge(t, remaining - 1, ...)
+end
+
+local function merge(t, ...)
+	return inner_merge(t, select('#', ...), ...)
 end
 
 -- Function to insert nulls into the JSON stream
@@ -112,6 +118,19 @@ local function decodeCall(callData)
 	return callData.name, callData.parameters
 end
 
+local function doOptionMerge(options, nested, name, defaultOptions, modeOptions)
+	if nested then
+		modeOptions = modeOptions and modeOptions[name]
+		defaultOptions = defaultOptions and defaultOptions[name]
+	end
+	options[name] = merge(
+		{},
+		defaultOptions,
+		modeOptions,
+		options[name]
+	)
+end
+
 local json_util = {
 	printValue = printValue,
 	clone = clone,
@@ -122,7 +141,8 @@ local json_util = {
 	InitArray = InitArray,
 	isCall = isCall,
 	buildCall = buildCall,
-	decodeCall = decodeCall
+	decodeCall = decodeCall,
+	doOptionMerge = doOptionMerge
 }
 
 if not is_52 then

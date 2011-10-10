@@ -60,9 +60,9 @@ json_decode.strict = {
 util.register_type("VALUE")
 for _,name in ipairs(modulesToLoad) do
 	local mod = require("json.decode." .. name)
-	for _, mode in pairs(modes_defined) do
-		if mod[mode] then
-			json_decode[mode][name] = mod[mode]
+	if mod.mergeOptions then
+		for _, mode in pairs(modes_defined) do
+			mod.mergeOptions(json_decode[mode], mode)
 		end
 	end
 	loadedModules[name] = mod
@@ -72,13 +72,8 @@ for _,name in ipairs(modulesToLoad) do
 	end
 end
 
--- Shift over default into defaultOptions to permit build optimization
-local defaultOptions = json_decode.default
-json_decode.default = nil
-
-
 local function buildDecoder(mode)
-	mode = mode and merge({}, defaultOptions, mode) or defaultOptions
+	mode = mode and merge({}, json_decode.default, mode) or json_decode.default
 	local ignored = mode.unicodeWhitespace and util.unicode_ignored or util.ascii_ignored
 	-- Store 'ignored' in the global options table
 	mode.ignored = ignored

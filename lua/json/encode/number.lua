@@ -4,7 +4,7 @@
 ]]
 local tostring = tostring
 local assert = assert
-local util = require("json.util")
+local jsonutil = require("json.util")
 local huge = require("math").huge
 
 local is_52 = _VERSION == "Lua 5.2"
@@ -19,11 +19,16 @@ local defaultOptions = {
 	inf = true
 }
 
-local default = nil -- Let the buildCapture optimization take place
-local strict = {
+local modeOptions = {}
+modeOptions.strict = {
 	nan = false,
 	inf = false
 }
+
+local function mergeOptions(options, mode)
+	jsonutil.doOptionMerge(options, false, 'number', defaultOptions, mode and modeOptions[mode])
+end
+
 
 local function encodeNumber(number, options)
 	if number ~= number then
@@ -42,7 +47,7 @@ local function encodeNumber(number, options)
 end
 
 local function getEncoder(options)
-	options = options and util.merge({}, defaultOptions, options) or defaultOptions
+	options = options and jsonutil.merge({}, defaultOptions, options) or defaultOptions
 	return {
 		number = function(number, state)
 			return encodeNumber(number, options)
@@ -51,8 +56,7 @@ local function getEncoder(options)
 end
 
 local number = {
-	default = default,
-	strict = strict,
+	mergeOptions = mergeOptions,
 	getEncoder = getEncoder
 }
 

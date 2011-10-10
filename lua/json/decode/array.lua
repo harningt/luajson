@@ -46,10 +46,15 @@ local defaultOptions = {
 	trailingComma = true
 }
 
-local default = nil -- Let the buildCapture optimization take place
-local strict = {
+local modeOptions = {}
+
+modeOptions.strict = {
 	trailingComma = false
 }
+
+local function mergeOptions(options, mode)
+	jsonutil.doOptionMerge(options, false, 'array', defaultOptions, mode and modeOptions[mode])
+end
 
 local function buildCapture(options, global_options, state)
 	local ignored = global_options.ignored
@@ -100,8 +105,7 @@ local function load_types(options, global_options, grammar, state)
 end
 
 local array = {
-	default = default,
-	strict = strict,
+	mergeOptions = mergeOptions,
 	register_types = register_types,
 	load_types = load_types
 }

@@ -6,7 +6,6 @@ local tostring = tostring
 
 local assert = assert
 local jsonutil = require("json.util")
-local util_merge = require("json.util").merge
 local type = type
 
 local is_52 = _VERSION == "Lua 5.2"
@@ -25,13 +24,17 @@ local defaultOptions = {
 	undefined = jsonutil.undefined
 }
 
-local default = nil -- Let the buildCapture optimization take place
-local strict = {
+local modeOptions = {}
+
+modeOptions.strict = {
 	allowUndefined = false
 }
 
+local function mergeOptions(options, mode)
+	jsonutil.doOptionMerge(options, false, 'others', defaultOptions, mode and modeOptions[mode])
+end
 local function getEncoder(options)
-	options = options and util_merge({}, defaultOptions, options) or defaultOptions
+	options = options and jsonutil.merge({}, defaultOptions, options) or defaultOptions
 	local function encodeOthers(value, state)
 		if value == options.null then
 			return 'null'
@@ -61,8 +64,7 @@ end
 
 local others = {
 	encodeBoolean = encodeBoolean,
-	default = default,
-	strict = strict,
+	mergeOptions = mergeOptions,
 	getEncoder = getEncoder
 }
 

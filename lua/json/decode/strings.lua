@@ -3,8 +3,9 @@
 	Author: Thomas Harning Jr <harningt@gmail.com>
 ]]
 local lpeg = require("lpeg")
+local jsonutil = require("json.util")
 local util = require("json.decode.util")
-local merge = require("json.util").merge
+local merge = jsonutil.merge
 
 local tonumber = tonumber
 local string_char = require("string").char
@@ -82,14 +83,19 @@ local defaultOptions = {
 	strict_quotes = false
 }
 
-local default = nil -- Let the buildCapture optimization take place
+local modeOptions = {}
 
-local strict = {
+modeOptions.strict = {
 	badChars = '\b\f\n\r\t\v',
 	additionalEscapes = false, -- no additional escapes
 	escapeCheck = #lpeg.S('bfnrtv/\\"u'), --only these chars are allowed to be escaped
 	strict_quotes = true
 }
+
+local function mergeOptions(options, mode)
+	jsonutil.doOptionMerge(options, false, 'strings', defaultOptions, mode and modeOptions[mode])
+end
+
 
 local function buildCaptureString(quote, badChars, escapeMatch)
 	local captureChar = (1 - lpeg.S("\\" .. badChars .. quote)) + (lpeg.P("\\") / "" * escapeMatch)
@@ -137,8 +143,7 @@ local function load_types(options, global_options, grammar)
 end
 
 local strings = {
-	default = default,
-	strict = strict,
+	mergeOptions = mergeOptions,
 	register_types = register_types,
 	load_types = load_types
 }

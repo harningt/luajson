@@ -31,14 +31,19 @@ local defaultOptions = {
 	setObjectKey = rawset
 }
 
-local default = nil -- Let the buildCapture optimization take place
-local simple = {
+local modeOptions = {}
+
+modeOptions.simple = {
 	null = false,     -- Mapped to nil
 	undefined = false -- Mapped to nil
 }
-local strict = {
+modeOptions.strict = {
 	allowUndefined = false
 }
+
+local function mergeOptions(options, mode)
+	jsonutil.doOptionMerge(options, false, 'others', defaultOptions, mode and modeOptions[mode])
+end
 
 local function buildCapture(options)
 	-- The 'or nil' clause allows false to map to a nil value since 'nil' cannot be merged
@@ -59,9 +64,7 @@ local function load_types(options, global_options, grammar)
 end
 
 local others = {
-	default = default,
-	simple = simple,
-	strict = strict,
+	mergeOptions = mergeOptions,	
 	load_types = load_types
 }
 

@@ -4,7 +4,8 @@
 ]]
 local lpeg = require("lpeg")
 local tonumber = tonumber
-local merge = require("json.util").merge
+local jsonutil = require("json.util")
+local merge = jsonutil.merge
 local util = require("json.decode.util")
 
 local is_52 = _VERSION == "Lua 5.2"
@@ -36,11 +37,16 @@ local defaultOptions = {
 	hex = false
 }
 
-local default = nil -- Let the buildCapture optimization take place
-local strict = {
+local modeOptions = {}
+
+modeOptions.strict = {
 	nan = false,
 	inf = false
 }
+
+local function mergeOptions(options, mode)
+	jsonutil.doOptionMerge(options, false, 'number', defaultOptions, mode and modeOptions[mode])
+end
 
 local nan_value = 0/0
 local inf_value = 1/0
@@ -90,8 +96,7 @@ end
 
 local number = {
 	int = int,
-	default = default,
-	strict = strict,
+	mergeOptions = mergeOptions,
 	register_types = register_types,
 	load_types = load_types
 }

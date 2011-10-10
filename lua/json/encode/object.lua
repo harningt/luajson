@@ -9,7 +9,7 @@ local type = type
 local tostring = tostring
 
 local table_concat = require("table").concat
-local util_merge = require("json.util").merge
+local jsonutil = require("json.util")
 
 local is_52 = _VERSION == "Lua 5.2"
 local _G = _G
@@ -21,8 +21,11 @@ end
 local defaultOptions = {
 }
 
-local default = nil
-local strict = nil
+local modeOptions = {}
+
+local function mergeOptions(options, mode)
+	jsonutil.doOptionMerge(options, false, 'object', defaultOptions, mode and modeOptions[mode])
+end
 
 --[[
 	Cleanup function to unmark a value as in the encoding process and return
@@ -63,7 +66,7 @@ local function encodeTable(tab, options, state)
 end
 
 local function getEncoder(options)
-	options = options and util_merge({}, defaultOptions, options) or defaultOptions
+	options = options and jsonutil.merge({}, defaultOptions, options) or defaultOptions
 	return {
 		table = function(tab, state)
 			return encodeTable(tab, options, state)
@@ -72,8 +75,7 @@ local function getEncoder(options)
 end
 
 local object = {
-	default = default,
-	strict = strict,
+	mergeOptions = mergeOptions,
 	getEncoder = getEncoder
 }
 

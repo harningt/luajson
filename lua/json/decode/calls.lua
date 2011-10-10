@@ -8,9 +8,10 @@ local pairs, ipairs = pairs, ipairs
 local next, type = next, type
 local error = error
 
+local jsonutil = require("json.util")
 local util = require("json.decode.util")
 
-local buildCall = require("json.util").buildCall
+local buildCall = jsonutil.buildCall
 
 local getmetatable = getmetatable
 
@@ -28,8 +29,11 @@ local defaultOptions = {
 }
 
 -- No real default-option handling needed...
-local default = nil
-local strict = nil
+local modeOptions = {}
+
+local function mergeOptions(options, mode)
+	jsonutil.doOptionMerge(options, false, 'calls', defaultOptions, mode and modeOptions[mode])
+end
 
 local isPattern
 if lpeg.type then
@@ -140,8 +144,7 @@ local function load_types(options, global_options, grammar, state)
 end
 
 local calls = {
-	default = default,
-	strict = strict,
+	mergeOptions = mergeOptions,
 	load_types = load_types
 }
 

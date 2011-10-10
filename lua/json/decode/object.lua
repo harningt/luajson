@@ -4,6 +4,7 @@
 ]]
 local lpeg = require("lpeg")
 
+local jsonutil = require("json.util")
 local util = require("json.decode.util")
 local merge = require("json.util").merge
 
@@ -40,13 +41,17 @@ local defaultOptions = {
 	trailingComma = true
 }
 
-local default = nil -- Let the buildCapture optimization take place
+local modeOptions = {}
 
-local strict = {
+modeOptions.strict = {
 	number = false,
 	identifier = false,
 	trailingComma = false
 }
+
+local function mergeOptions(options, mode)
+	jsonutil.doOptionMerge(options, false, 'object', defaultOptions, mode and modeOptions[mode])
+end
 
 local function buildItemSequence(objectItem, ignored)
 	return (objectItem * (ignored * lpeg.P(",") * ignored * objectItem)^0) + 0
@@ -130,8 +135,7 @@ local function load_types(options, global_options, grammar, state)
 end
 
 local object = {
-	default = default,
-	strict = strict,
+	mergeOptions = mergeOptions,
 	register_types = register_types,
 	load_types = load_types
 }

@@ -13,8 +13,8 @@ local math = require("math")
 local table_concat = table.concat
 local math_floor, math_modf = math.floor, math.modf
 
-local util_merge = require("json.util").merge
-local util_IsArray = require("json.util").IsArray
+local jsonutil = require("json.util")
+local util_IsArray = jsonutil.IsArray
 
 local is_52 = _VERSION == "Lua 5.2"
 local _G = _G
@@ -27,8 +27,11 @@ local defaultOptions = {
 	isArray = util_IsArray
 }
 
-local default = nil
-local strict = nil
+local modeOptions = {}
+
+local function mergeOptions(options, mode)
+	jsonutil.doOptionMerge(options, false, 'array', defaultOptions, mode and modeOptions[mode])
+end
 
 --[[
 	Utility function to determine whether a table is an array or not.
@@ -78,7 +81,7 @@ local function unmarkAfterEncode(tab, state, ...)
 	return ...
 end
 local function getEncoder(options)
-	options = options and util_merge({}, defaultOptions, options) or defaultOptions
+	options = options and jsonutil.merge({}, defaultOptions, options) or defaultOptions
 	local function encodeArray(tab,  state)
 		if not isArray(tab, options) then
 			return false
@@ -104,8 +107,7 @@ local function getEncoder(options)
 end
 
 local array = {
-	default = default,
-	strict = strict,
+	mergeOptions = mergeOptions,
 	isArray = isArray,
 	getEncoder = getEncoder
 }

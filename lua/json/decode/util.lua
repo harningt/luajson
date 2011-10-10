@@ -14,6 +14,8 @@ local setmetatable = setmetatable
 
 local table_concat = require("table").concat
 
+local merge = require("json.util").merge
+
 local is_52 = _VERSION == "Lua 5.2"
 local _G = _G
 
