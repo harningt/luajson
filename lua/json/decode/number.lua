@@ -7,13 +7,17 @@ local tonumber = tonumber
 local merge = require("json.util").merge
 local util = require("json.decode.util")
 
-module("json.decode.number")
+local is_52 = _VERSION == "Lua 5.2"
+local _G = _G
+
+if is_52 then
+	_ENV = nil
+end
 
 local digit  = lpeg.R("09")
 local digits = digit^1
 
-int = (lpeg.P('-') + 0) * (lpeg.R("19") * digits + digit)
-local int = int
+local int = (lpeg.P('-') + 0) * (lpeg.R("19") * digits + digit)
 
 local frac = lpeg.P('.') * digits
 
@@ -32,8 +36,8 @@ local defaultOptions = {
 	hex = false
 }
 
-default = nil -- Let the buildCapture optimization take place
-strict = {
+local default = nil -- Let the buildCapture optimization take place
+local strict = {
 	nan = false,
 	inf = false
 }
@@ -73,13 +77,28 @@ local function buildCapture(options)
 	return ret
 end
 
-function register_types()
+local function register_types()
 	util.register_type("INTEGER")
 end
 
-function load_types(options, global_options, grammar)
+local function load_types(options, global_options, grammar)
 	local integer_id = util.types.INTEGER
 	local capture = buildCapture(options)
 	util.append_grammar_item(grammar, "VALUE", capture)
 	grammar[integer_id] = int / tonumber
 end
+
+local number = {
+	int = int,
+	default = default,
+	strict = strict,
+	register_types = register_types,
+	load_types = load_types
+}
+
+if not is_52 then
+	_G.json = _G.json or {}
+	_G.json.decode = _G.json.decode or {}
+	_G.json.decode.number = number
+end
+return number

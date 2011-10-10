@@ -9,9 +9,25 @@ local jsonutil = require("json.util")
 
 local table_maxn = require("table").maxn
 
-local unpack = unpack
+local is_52 = _VERSION == "Lua 5.2"
+local unpack = unpack or require("table").unpack
 
-module("json.decode.array")
+local _G = _G
+
+if is_52 then
+	local pairs, type = pairs, type
+	-- Replacement for maxn since it is removed
+	table_maxn = function(t)
+		local max = 0
+		for k in pairs(t) do
+			if type(k) == 'number' and k > max then
+				max = k
+			end
+		end
+		return max
+	end
+	_ENV = nil
+end
 
 -- Utility function to help manage slighly sparse arrays
 local function processArray(array)
@@ -30,8 +46,8 @@ local defaultOptions = {
 	trailingComma = true
 }
 
-default = nil -- Let the buildCapture optimization take place
-strict = {
+local default = nil -- Let the buildCapture optimization take place
+local strict = {
 	trailingComma = false
 }
 
@@ -72,13 +88,28 @@ local function buildCapture(options, global_options, state)
 	return capture
 end
 
-function register_types()
+local function register_types()
 	util.register_type("ARRAY")
 end
 
-function load_types(options, global_options, grammar, state)
+local function load_types(options, global_options, grammar, state)
 	local capture = buildCapture(options, global_options, state)
 	local array_id = util.types.ARRAY
 	grammar[array_id] = capture
 	util.append_grammar_item(grammar, "VALUE", lpeg.V(array_id))
 end
+
+local array = {
+	default = default,
+	strict = strict,
+	register_types = register_types,
+	load_types = load_types
+}
+
+if not is_52 then
+	_G.json = _G.json or {}
+	_G.json.decode = _G.json.decode or {}
+	_G.json.decode.array = array
+end
+
+return array

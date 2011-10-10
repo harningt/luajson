@@ -6,7 +6,13 @@ local string_char = require("string").char
 local pairs = pairs
 
 local util_merge = require("json.util").merge
-module("json.encode.strings")
+
+local is_52 = _VERSION == "Lua 5.2"
+local _G = _G
+
+if is_52 then
+	_ENV = nil
+end
 
 local normalEncodingMap = {
 	['"'] = '\\"',
@@ -49,10 +55,10 @@ local defaultOptions = {
 	encodeSetAppend = nil -- Chars to append to the default set
 }
 
-default = nil
-strict = nil
+local default = nil
+local strict = nil
 
-function getEncoder(options)
+local function getEncoder(options)
 	options = options and util_merge({}, defaultOptions, options) or defaultOptions
 	local encodeSet = options.encodeSet
 	if options.encodeSetAppend then
@@ -74,3 +80,17 @@ function getEncoder(options)
 		string = encodeString
 	}
 end
+
+local strings = {
+	default = default,
+	strict = strict,
+	getEncoder = getEncoder
+}
+
+if not is_52 then
+	_G.json = _G.json or {}
+	_G.json.encode = _G.json.encode or {}
+	_G.json.encode.strings = strings
+end
+
+return strings

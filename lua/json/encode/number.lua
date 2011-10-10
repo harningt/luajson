@@ -7,15 +7,20 @@ local assert = assert
 local util = require("json.util")
 local huge = require("math").huge
 
-module("json.encode.number")
+local is_52 = _VERSION == "Lua 5.2"
+local _G = _G
+
+if is_52 then
+	_ENV = nil
+end
 
 local defaultOptions = {
 	nan = true,
 	inf = true
 }
 
-default = nil -- Let the buildCapture optimization take place
-strict = {
+local default = nil -- Let the buildCapture optimization take place
+local strict = {
 	nan = false,
 	inf = false
 }
@@ -36,7 +41,7 @@ local function encodeNumber(number, options)
 	return tostring(number)
 end
 
-function getEncoder(options)
+local function getEncoder(options)
 	options = options and util.merge({}, defaultOptions, options) or defaultOptions
 	return {
 		number = function(number, state)
@@ -44,3 +49,17 @@ function getEncoder(options)
 		end
 	}
 end
+
+local number = {
+	default = default,
+	strict = strict,
+	getEncoder = getEncoder
+}
+
+if not is_52 then
+	_G.json = _G.json or {}
+	_G.json.encode = _G.json.encode or {}
+	_G.json.encode.number = number
+end
+
+return number

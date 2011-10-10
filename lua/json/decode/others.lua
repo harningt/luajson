@@ -9,7 +9,12 @@ local util = require("json.decode.util")
 local rawset = rawset
 
 -- Container module for other JavaScript types (bool, null, undefined)
-module("json.decode.others")
+local is_52 = _VERSION == "Lua 5.2"
+local _G = _G
+
+if is_52 then
+	_ENV = nil
+end
 
 -- For null and undefined, use the util.null value to preserve null-ness
 local booleanCapture =
@@ -26,12 +31,12 @@ local defaultOptions = {
 	setObjectKey = rawset
 }
 
-default = nil -- Let the buildCapture optimization take place
-simple = {
+local default = nil -- Let the buildCapture optimization take place
+local simple = {
 	null = false,     -- Mapped to nil
 	undefined = false -- Mapped to nil
 }
-strict = {
+local strict = {
 	allowUndefined = false
 }
 
@@ -48,7 +53,22 @@ local function buildCapture(options)
 	return valueCapture
 end
 
-function load_types(options, global_options, grammar)
+local function load_types(options, global_options, grammar)
 	local capture = buildCapture(options)
 	util.append_grammar_item(grammar, "VALUE", capture)
 end
+
+local others = {
+	default = default,
+	simple = simple,
+	strict = strict,
+	load_types = load_types
+}
+
+if not is_52 then
+	_G.json = _G.json or{}
+	_G.json.decode = _G.json.decode or {}
+	_G.json.decode.others = others
+end
+
+return others

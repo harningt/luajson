@@ -14,7 +14,12 @@ local buildCall = require("json.util").buildCall
 
 local getmetatable = getmetatable
 
-module("json.decode.calls")
+local is_52 = _VERSION == "Lua 5.2"
+local _G = _G
+
+if is_52 then
+	_ENV = nil
+end
 
 local defaultOptions = {
 	defs = nil,
@@ -23,8 +28,8 @@ local defaultOptions = {
 }
 
 -- No real default-option handling needed...
-default = nil
-strict = nil
+local default = nil
+local strict = nil
 
 local isPattern
 if lpeg.type then
@@ -127,9 +132,23 @@ local function buildCapture(options, global_options, state)
 	return callCapture
 end
 
-function load_types(options, global_options, grammar, state)
+local function load_types(options, global_options, grammar, state)
 	local capture = buildCapture(options, global_options, state)
 	if capture then
 		util.append_grammar_item(grammar, "VALUE", capture)
 	end
 end
+
+local calls = {
+	default = default,
+	strict = strict,
+	load_types = load_types
+}
+
+if not is_52 then
+	_G.json = _G.json or {}
+	_G.json.decode = _G.json.decode
+	_G.json.decode.calls = calls
+end
+
+return calls

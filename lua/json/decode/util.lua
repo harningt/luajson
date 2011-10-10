@@ -12,10 +12,50 @@ local rawset = rawset
 local error = error
 local setmetatable = setmetatable
 
-module("json.decode.util")
+local table_concat = require("table").concat
+
+local is_52 = _VERSION == "Lua 5.2"
+local _G = _G
+
+if is_52 then
+	_ENV = nil
+end
+
+local function build_report(msg)
+	local fmt = msg:gsub("%%", "%%%%") .. " @ character: %i %i:%i [%s] line:\n%s"
+	return lpeg.P(function(data, pos)
+		local line, line_index, bad_char, last_line = get_invalid_character_info(data, pos)
+		local text = fmt:format(pos, line, line_index, bad_char, last_line)
+		error(text)
+	end)
+end
+local function unexpected()
+	local msg = "unexpected character"
+	return build_report(msg)
+end
+local function expected(...)
+	local items = {...}
+	local msg
+	if #items > 1 then
+		msg = "expected one of '" .. table_concat(items, "','") .. "'"
+	else
+		msg = "expected '" .. items[1] .. "'"
+	end
+	return build_report(msg)
+end
+local function denied(item, option)
+	local msg
+	if option then
+		msg = ("'%s' denied by option set '%s'"):format(item, option)
+	else
+		msg = ("'%s' denied"):format(item)
+	end
+	return build_report(msg)
+end
 
 -- 09, 0A, 0B, 0C, 0D, 20
-ascii_space = lpeg.S("\t\n\v\f\r ")
+local ascii_space = lpeg.S("\t\n\v\f\r ")
+local unicode_space
 do
 	local chr = string_char
 	local u_space = ascii_space
@@ -37,24 +77,24 @@ do
 	u_space = u_space + lpeg.P(chr(0xE3, 0x80, 0x80))
 	-- BOM \uFEFF
 	u_space = u_space + lpeg.P(chr(0xEF, 0xBB, 0xBF))
-	_M.unicode_space = u_space
+	unicode_space = u_space
 end
 
-identifier = lpeg.R("AZ","az","__") * lpeg.R("AZ","az", "__", "09") ^0
+local identifier = lpeg.R("AZ","az","__") * lpeg.R("AZ","az", "__", "09") ^0
 
-hex = lpeg.R("09","AF","af")
-hexpair = hex * hex
+local hex = lpeg.R("09","AF","af")
+local hexpair = hex * hex
 
-comments = {
+local comments = {
 	cpp = lpeg.P("//") * (1 - lpeg.P("\n"))^0 * lpeg.P("\n"),
 	c = lpeg.P("/*") * (1 - lpeg.P("*/"))^0 * lpeg.P("*/")
 }
 
-comment = comments.cpp + comments.c
+local comment = comments.cpp + comments.c
 
-ascii_ignored = (ascii_space + comment)^0
+local ascii_ignored = (ascii_space + comment)^0
 
-unicode_ignored = (unicode_space + comment)^0
+local unicode_ignored = (unicode_space + comment)^0
 
 local types = setmetatable({false}, {
 	__index = function(self, k)
@@ -62,15 +102,13 @@ local types = setmetatable({false}, {
 	end
 })
 
-function register_type(name)
+local function register_type(name)
 	types[#types + 1] = name
 	types[name] = #types
 	return #types
 end
 
-_M.types = types
-
-function append_grammar_item(grammar, name, capture)
+local function append_grammar_item(grammar, name, capture)
 	local id = types[name]
 	local original = grammar[id]
 	if original then
@@ -82,9 +120,9 @@ end
 
 -- Parse the lpeg version skipping patch-values
 -- LPEG <= 0.7 have no version value... so 0.7 is value
-DecimalLpegVersion = lpeg.version and tonumber(lpeg.version():match("^(%d+%.%d+)")) or 0.7
+local DecimalLpegVersion = lpeg.version and tonumber(lpeg.version():match("^(%d+%.%d+)")) or 0.7
 
-function get_invalid_character_info(input, index)
+local function get_invalid_character_info(input, index)
 	local parsed = input:sub(1, index)
 	local bad_character = input:sub(index, index)
 	local _, line_number = parsed:gsub('\n',{})
@@ -92,7 +130,36 @@ function get_invalid_character_info(input, index)
 	return line_number, #last_line, bad_character, last_line
 end
 
-function setObjectKeyForceNumber(t, key, value)
+local function setObjectKeyForceNumber(t, key, value)
 	key = tonumber(key) or key
 	return rawset(t, key, value)
 end
+
+local util = {
+	unexpected = unexpected,
+	expected = expected,
+	denied = denied,
+	ascii_space = ascii_space,
+	unicode_space = unicode_space,
+	identifier = identifier,
+	hex = hex,
+	hexpair = hexpair,
+	comments = comments,
+	comment = comment,
+	ascii_ignored = ascii_ignored,
+	unicode_ignored = unicode_ignored,
+	register_type = register_type,
+	types = types,
+	append_grammar_item = append_grammar_item,
+	DecimalLpegVersion = DecimalLpegVersion,
+	get_invalid_character_info = get_invalid_character_info,
+	setObjectKeyForceNumber = setObjectKeyForceNumber
+}
+
+if not is_52 then
+	_G.json = _G.json or {}
+	_G.json.decode = _G.json.decode or {}
+	_G.json.decode.util = util
+end
+
+return util

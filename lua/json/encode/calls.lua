@@ -15,15 +15,19 @@ local util = require("json.util")
 
 local util_merge, isCall, decodeCall = util.merge, util.isCall, util.decodeCall
 
-module("json.encode.calls")
+local is_52 = _VERSION == "Lua 5.2"
+local _G = _G
 
+if is_52 then
+	_ENV = nil
+end
 
 local defaultOptions = {
 }
 
 -- No real default-option handling needed...
-default = nil
-strict = nil
+local default = nil
+local strict = nil
 
 
 --[[
@@ -32,7 +36,7 @@ strict = nil
 		name == name of the function call
 		parameters == array of parameters to encode
 ]]
-function getEncoder(options)
+local function getEncoder(options)
 	options = options and util_merge({}, defaultOptions, options) or defaultOptions
 	local function encodeCall(value, state)
 		if not isCall(value) then
@@ -59,3 +63,16 @@ function getEncoder(options)
 		['function'] = encodeCall
 	}
 end
+
+local calls = {
+	default = default,
+	strict = strict,
+	getEncoder = getEncoder
+}
+
+if not is_52 then
+	_G.json = _G.json or {}
+	_G.json.encode = _G.json.encode or {}
+	_G.json.encode.calls = calls
+end
+return calls

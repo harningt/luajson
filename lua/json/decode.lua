@@ -19,7 +19,13 @@ local ipairs, pairs = ipairs, pairs
 local string_char = require("string").char
 
 local require = require
-module("json.decode")
+
+local is_52 = _VERSION == "Lua 5.2"
+local _G = _G
+
+if is_52 then
+	_ENV = nil
+end
 
 local modulesToLoad = {
 	"array",
@@ -32,7 +38,9 @@ local modulesToLoad = {
 local loadedModules = {
 }
 
-default = {
+local json_decode = {}
+
+json_decode.default = {
 	unicodeWhitespace = true,
 	initialObject = false,
 	nothrow = false
@@ -40,9 +48,9 @@ default = {
 
 local modes_defined = { "default", "strict", "simple" }
 
-simple = {}
+json_decode.simple = {}
 
-strict = {
+json_decode.strict = {
 	unicodeWhitespace = true,
 	initialObject = true,
 	nothrow = false
@@ -54,7 +62,7 @@ for _,name in ipairs(modulesToLoad) do
 	local mod = require("json.decode." .. name)
 	for _, mode in pairs(modes_defined) do
 		if mod[mode] then
-			_M[mode][name] = mod[mode]
+			json_decode[mode][name] = mod[mode]
 		end
 	end
 	loadedModules[name] = mod
@@ -65,8 +73,8 @@ for _,name in ipairs(modulesToLoad) do
 end
 
 -- Shift over default into defaultOptions to permit build optimization
-local defaultOptions = default
-default = nil
+local defaultOptions = json_decode.default
+json_decode.default = nil
 
 
 local function buildDecoder(mode)
@@ -123,11 +131,11 @@ local function buildDecoder(mode)
 end
 
 -- Since 'default' is nil, we cannot take map it
-local defaultDecoder = buildDecoder(default)
+local defaultDecoder = buildDecoder(json_decode.default)
 local prebuilt_decoders = {}
 for _, mode in pairs(modes_defined) do
-	if _M[mode] ~= nil then
-		prebuilt_decoders[_M[mode]] = buildDecoder(_M[mode])
+	if json_decode[mode] ~= nil then
+		prebuilt_decoders[json_decode[mode]] = buildDecoder(json_decode[mode])
 	end
 end
 
@@ -140,8 +148,8 @@ Options:
 	initialObject => whether or not to require the initial object to be a table/array
 	allowUndefined => whether or not to allow undefined values
 ]]
-function getDecoder(mode)
-	mode = mode == true and strict or mode or default
+local function getDecoder(mode)
+	mode = mode == true and json_decode.strict or mode or json_decode.default
 	local decoder = mode == nil and defaultDecoder or prebuilt_decoders[mode]
 	if decoder then
 		return decoder
@@ -149,13 +157,22 @@ function getDecoder(mode)
 	return buildDecoder(mode)
 end
 
-function decode(data, mode)
+local function decode(data, mode)
 	local decoder = getDecoder(mode)
 	return decoder(data)
 end
 
-local mt = getmetatable(_M) or {}
+local mt = {}
 mt.__call = function(self, ...)
 	return decode(...)
 end
-setmetatable(_M, mt)
+
+json_decode.getDecoder = getDecoder
+json_decode.decode = decode
+setmetatable(json_decode, mt)
+if not is_52 then
+	_G.json= _G.json or {}
+	_G.json.decode = merge(json_decode, _G.json.decode)
+end
+
+return json_decode

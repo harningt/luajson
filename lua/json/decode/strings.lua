@@ -12,7 +12,14 @@ local floor = require("math").floor
 local table_concat = require("table").concat
 
 local error = error
-module("json.decode.strings")
+
+local is_52 = _VERSION == "Lua 5.2"
+local _G = _G
+
+if is_52 then
+	_ENV = nil
+end
+
 local function get_error(item)
 	local fmt_string = item .. " in string [%q] @ %i:%i"
 	return function(data, index)
@@ -75,9 +82,9 @@ local defaultOptions = {
 	strict_quotes = false
 }
 
-default = nil -- Let the buildCapture optimization take place
+local default = nil -- Let the buildCapture optimization take place
 
-strict = {
+local strict = {
 	badChars = '\b\f\n\r\t\v',
 	additionalEscapes = false, -- no additional escapes
 	escapeCheck = #lpeg.S('bfnrtv/\\"u'), --only these chars are allowed to be escaped
@@ -118,13 +125,28 @@ local function buildCapture(options)
 	return captureString
 end
 
-function register_types()
+local function register_types()
 	util.register_type("STRING")
 end
 
-function load_types(options, global_options, grammar)
+local function load_types(options, global_options, grammar)
 	local capture = buildCapture(options)
 	local string_id = util.types.STRING
 	grammar[string_id] = capture
 	util.append_grammar_item(grammar, "VALUE", lpeg.V(string_id))
 end
+
+local strings = {
+	default = default,
+	strict = strict,
+	register_types = register_types,
+	load_types = load_types
+}
+
+if not is_52 then
+	_G.json = _G.json or {}
+	_G.json.decode = _G.json.decode or {}
+	_G.json.decode.strings = strings
+end
+
+return strings

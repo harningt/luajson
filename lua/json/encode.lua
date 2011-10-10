@@ -15,7 +15,12 @@ local output = require("json.encode.output")
 local util = require("json.util")
 local util_merge, isCall = util.merge, util.isCall
 
-module("json.encode")
+local is_52 = _VERSION == "Lua 5.2"
+local _G = _G
+
+if is_52 then
+	_ENV = nil
+end
 
 --[[
 	List of encoding modules to load.
@@ -36,8 +41,8 @@ local loadedModules = {}
 -- Default configuration options to apply
 local defaultOptions = {}
 -- Configuration bases for client apps
-default = nil
-strict = {
+local default = nil
+local strict = {
 	initialObject = true -- Require an object at the root
 }
 
@@ -111,7 +116,7 @@ end
 	the initial encoder is responsible for initializing state
 		State has at least these values configured: encode, check_unique, already_encoded
 ]]
-function getEncoder(options)
+local function getEncoder(options)
 	options = options and util_merge({}, defaultOptions, options) or defaultOptions
 	local encode = getBaseEncoder(options)
 
@@ -148,12 +153,25 @@ end
 	check_unique -- used by inner encoders to make sure value is unique
 	already_encoded -- used to unmark a value as unique
 ]]
-function encode(data, options)
+local function encode(data, options)
 	return getEncoder(options)(data)
 end
 
-local mt = getmetatable(_M) or {}
+local mt = {}
 mt.__call = function(self, ...)
 	return encode(...)
 end
-setmetatable(_M, mt)
+
+local json_encode = {
+	default = default,
+	strict = strict,
+	getEncoder = getEncoder,
+	encode = encode
+}
+setmetatable(json_encode, mt)
+
+if not is_52 then
+	_G.json = _G.json or {}
+	_G.json.encode = util_merge(json_encode, _G.json.encode)
+end
+return json_encode

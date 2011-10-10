@@ -14,7 +14,12 @@ local tostring = tostring
 
 local rawset = rawset
 
-module("json.decode.object")
+local is_52 = _VERSION == "Lua 5.2"
+local _G = _G
+
+if is_52 then
+	_ENV = nil
+end
 
 -- BEGIN LPEG < 0.9 SUPPORT
 local initObject, applyObjectKey
@@ -35,9 +40,9 @@ local defaultOptions = {
 	trailingComma = true
 }
 
-default = nil -- Let the buildCapture optimization take place
+local default = nil -- Let the buildCapture optimization take place
 
-strict = {
+local strict = {
 	number = false,
 	identifier = false,
 	trailingComma = false
@@ -113,13 +118,28 @@ local function buildCapture(options, global_options, state)
 	return capture
 end
 
-function register_types()
+local function register_types()
 	util.register_type("OBJECT")
 end
 
-function load_types(options, global_options, grammar, state)
+local function load_types(options, global_options, grammar, state)
 	local capture = buildCapture(options, global_options, state)
 	local object_id = util.types.OBJECT
 	grammar[object_id] = capture
 	util.append_grammar_item(grammar, "VALUE", lpeg.V(object_id))
 end
+
+local object = {
+	default = default,
+	strict = strict,
+	register_types = register_types,
+	load_types = load_types
+}
+
+if not is_52 then
+	_G.json = _G.json or {}
+	_G.json.decode = _G.json.decode or {}
+	_G.json.decode.object = object
+end
+
+return object

@@ -9,13 +9,19 @@ local pairs = pairs
 local getmetatable, setmetatable = getmetatable, setmetatable
 local select = select
 
-module("json.util")
+local is_52 = _VERSION == "Lua 5.2"
+local _G = _G
+
+if is_52 then
+	_ENV = nil
+end
+
 local function foreach(tab, func)
 	for k, v in pairs(tab) do
 		func(k,v)
 	end
 end
-function printValue(tab, name)
+local function printValue(tab, name)
         local parsed = {}
         local function doPrint(key, value, space)
                 space = space or ''
@@ -38,7 +44,7 @@ function printValue(tab, name)
         doPrint(name, tab)
 end
 
-function clone(t)
+local function clone(t)
 	local ret = {}
 	for k,v in pairs(t) do
 		ret[k] = v
@@ -55,15 +61,14 @@ local function merge(t, from, ...)
 	end
 	return merge(t, ...)
 end
-_M.merge = merge
 
 -- Function to insert nulls into the JSON stream
-function null()
+local function null()
 	return null
 end
 
 -- Marker for 'undefined' values
-function undefined()
+local function undefined()
 	return undefined
 end
 
@@ -74,7 +79,7 @@ local ArrayMT = {}
 	Or false if it has no array component at all
 	Otherwise nil to get the normal detection component working
 ]]
-function IsArray(value)
+local function IsArray(value)
 	if type(value) ~= 'table' then return false end
 	local ret = getmetatable(value) == ArrayMT
 	if not ret then
@@ -83,18 +88,18 @@ function IsArray(value)
 		return ret
 	end
 end
-function InitArray(array)
+local function InitArray(array)
 	setmetatable(array, ArrayMT)
 	return array
 end
 
 local CallMT = {}
 
-function isCall(value)
+local function isCall(value)
 	return CallMT == getmetatable(value)
 end
 
-function buildCall(name, ...)
+local function buildCall(name, ...)
 	local callData = {
 		name = name,
 		parameters = {n = select('#', ...), ...}
@@ -102,7 +107,27 @@ function buildCall(name, ...)
 	return setmetatable(callData, CallMT)
 end
 
-function decodeCall(callData)
+local function decodeCall(callData)
 	if not isCall(callData) then return nil end
 	return callData.name, callData.parameters
 end
+
+local json_util = {
+	printValue = printValue,
+	clone = clone,
+	merge = merge,
+	null = null,
+	undefined = undefined,
+	IsArray = IsArray,
+	InitArray = InitArray,
+	isCall = isCall,
+	buildCall = buildCall,
+	decodeCall = decodeCall
+}
+
+if not is_52 then
+	_G.json = _G.json or {}
+	_G.json.util = json_util
+end
+
+return json_util
