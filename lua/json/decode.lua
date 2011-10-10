@@ -5,6 +5,7 @@
 local lpeg = require("lpeg")
 
 local error = error
+local pcall = pcall
 
 local object = require("json.decode.object")
 local array = require("json.decode.array")
@@ -33,7 +34,8 @@ local loadedModules = {
 
 default = {
 	unicodeWhitespace = true,
-	initialObject = false
+	initialObject = false,
+	nothrow = false
 }
 
 local modes_defined = { "default", "strict", "simple" }
@@ -42,7 +44,8 @@ simple = {}
 
 strict = {
 	unicodeWhitespace = true,
-	initialObject = true
+	initialObject = true,
+	nothrow = false
 }
 
 -- Register generic value type
@@ -101,11 +104,22 @@ local function buildDecoder(mode)
 	-- Only add terminator & pos capture for final grammar since it is expected that there is extra data
 	-- when using VALUE_MATCH internally
 	compiled_grammar = compiled_grammar * lpeg.Cp() * -1
-	return function(data)
+	local decoder = function(data)
 		local ret, next_index = lpeg.match(compiled_grammar, data)
 		assert(nil ~= next_index, "Invalid JSON data")
 		return ret
 	end
+	if mode.nothrow then
+		return function(data)
+			local status, rv = pcall(decoder, data)
+			if status then
+				return rv
+			else
+				return nil, rv
+			end
+		end
+	end
+	return decoder
 end
 
 -- Since 'default' is nil, we cannot take map it
