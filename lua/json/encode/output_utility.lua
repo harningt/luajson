@@ -3,7 +3,7 @@
 	Author: Thomas Harning Jr <harningt@gmail.com>
 ]]
 local setmetatable = setmetatable
-local assert, loadstring = assert, loadstring
+local assert, loadstring = assert, loadstring or load
 
 local is_52 = _VERSION == "Lua 5.2"
 local _G = _G
