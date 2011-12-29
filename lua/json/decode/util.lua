@@ -24,6 +24,14 @@ if is_52 then
 	_ENV = nil
 end
 
+local function get_invalid_character_info(input, index)
+	local parsed = input:sub(1, index)
+	local bad_character = input:sub(index, index)
+	local _, line_number = parsed:gsub('\n',{})
+	local last_line = parsed:match("\n([^\n]+.)$") or parsed
+	return line_number, #last_line, bad_character, last_line
+end
+
 local function build_report(msg)
 	local fmt = msg:gsub("%%", "%%%%") .. " @ character: %i %i:%i [%s] line:\n%s"
 	return lpeg.P(function(data, pos)
@@ -102,14 +110,6 @@ local unicode_ignored = (unicode_space + comment)^0
 -- Parse the lpeg version skipping patch-values
 -- LPEG <= 0.7 have no version value... so 0.7 is value
 local DecimalLpegVersion = lpeg.version and tonumber(lpeg.version():match("^(%d+%.%d+)")) or 0.7
-
-local function get_invalid_character_info(input, index)
-	local parsed = input:sub(1, index)
-	local bad_character = input:sub(index, index)
-	local _, line_number = parsed:gsub('\n',{})
-	local last_line = parsed:match("\n([^\n]+.)$") or parsed
-	return line_number, #last_line, bad_character, last_line
-end
 
 local function setObjectKeyForceNumber(t, key, value)
 	key = tonumber(key) or key
