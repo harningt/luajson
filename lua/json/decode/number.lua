@@ -47,10 +47,6 @@ modeOptions.strict = {
 	inf = false
 }
 
-local function mergeOptions(options, mode)
-	jsonutil.doOptionMerge(options, false, 'number', defaultOptions, mode and modeOptions[mode])
-end
-
 local nan_value = 0/0
 local inf_value = 1/0
 local ninf_value = -1/0
@@ -63,8 +59,12 @@ local ninf_value = -1/0
 	    exp: match exponent portion  (e1)
 	DEFAULT: nan, inf, frac, exp
 ]]
-local function buildCapture(options)
-	options = options and merge({}, defaultOptions, options) or defaultOptions
+local function mergeOptions(options, mode)
+	jsonutil.doOptionMerge(options, false, 'number', defaultOptions, mode and modeOptions[mode])
+end
+
+local function generateLexer(options)
+	options = options.number
 	local ret = int
 	if options.frac then
 		ret = ret * (frac + 0)
@@ -96,22 +96,10 @@ local function buildCapture(options)
 	return ret
 end
 
-local function register_types()
-	util.register_type("INTEGER")
-end
-
-local function load_types(options, global_options, grammar)
-	local integer_id = util.types.INTEGER
-	local capture = buildCapture(options)
-	util.append_grammar_item(grammar, "VALUE", capture)
-	grammar[integer_id] = int / tonumber
-end
-
 local number = {
 	int = int,
 	mergeOptions = mergeOptions,
-	register_types = register_types,
-	load_types = load_types
+	generateLexer = generateLexer
 }
 
 if not is_52 then

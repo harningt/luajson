@@ -96,7 +96,6 @@ local function mergeOptions(options, mode)
 	jsonutil.doOptionMerge(options, false, 'strings', defaultOptions, mode and modeOptions[mode])
 end
 
-
 local function buildCaptureString(quote, badChars, escapeMatch)
 	local captureChar = (1 - lpeg.S("\\" .. badChars .. quote)) + (lpeg.P("\\") / "" * escapeMatch)
 	captureChar = captureChar + (-#lpeg.P(quote) * lpeg.P(bad_character))
@@ -104,8 +103,8 @@ local function buildCaptureString(quote, badChars, escapeMatch)
 	return lpeg.P(quote) * lpeg.Cs(captureString) * lpeg.P(quote)
 end
 
-local function buildCapture(options)
-	options = options and merge({}, defaultOptions, options) or defaultOptions
+local function generateLexer(options)
+	options = options.strings
 	local quotes = { '"' }
 	if not options.strict_quotes then
 		quotes[#quotes + 1] = "'"
@@ -131,21 +130,9 @@ local function buildCapture(options)
 	return captureString
 end
 
-local function register_types()
-	util.register_type("STRING")
-end
-
-local function load_types(options, global_options, grammar)
-	local capture = buildCapture(options)
-	local string_id = util.types.STRING
-	grammar[string_id] = capture
-	util.append_grammar_item(grammar, "VALUE", lpeg.V(string_id))
-end
-
 local strings = {
 	mergeOptions = mergeOptions,
-	register_types = register_types,
-	load_types = load_types
+	generateLexer = generateLexer
 }
 
 if not is_52 then

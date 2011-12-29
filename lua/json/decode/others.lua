@@ -4,9 +4,8 @@
 ]]
 local lpeg = require("lpeg")
 local jsonutil = require("json.util")
+local merge = jsonutil.merge
 local util = require("json.decode.util")
-
-local rawset = rawset
 
 -- Container module for other JavaScript types (bool, null, undefined)
 local is_52 = _VERSION == "Lua 5.2"
@@ -27,8 +26,7 @@ local undefinedCapture = lpeg.P("undefined")
 local defaultOptions = {
 	allowUndefined = true,
 	null = jsonutil.null,
-	undefined = jsonutil.undefined,
-	setObjectKey = rawset
+	undefined = jsonutil.undefined
 }
 
 local modeOptions = {}
@@ -45,9 +43,9 @@ local function mergeOptions(options, mode)
 	jsonutil.doOptionMerge(options, false, 'others', defaultOptions, mode and modeOptions[mode])
 end
 
-local function buildCapture(options)
+local function generateLexer(options)
 	-- The 'or nil' clause allows false to map to a nil value since 'nil' cannot be merged
-	options = options and jsonutil.merge({}, defaultOptions, options) or defaultOptions
+	options = options.others
 	local valueCapture = (
 		booleanCapture
 		+ nullCapture * lpeg.Cc(options.null or nil)
@@ -60,14 +58,9 @@ local function buildCapture(options)
 	return valueCapture
 end
 
-local function load_types(options, global_options, grammar)
-	local capture = buildCapture(options)
-	util.append_grammar_item(grammar, "VALUE", capture)
-end
-
 local others = {
 	mergeOptions = mergeOptions,	
-	load_types = load_types
+	generateLexer = generateLexer
 }
 
 if not is_52 then

@@ -7,16 +7,18 @@ local lpeg = require("lpeg")
 local error = error
 local pcall = pcall
 
-local object = require("json.decode.object")
-local array = require("json.decode.array")
-
-local merge = require("json.util").merge
+local jsonutil = require("json.util")
+local merge = jsonutil.merge
 local util = require("json.decode.util")
+
+local decode_state = require("json.decode.state")
 
 local setmetatable, getmetatable = setmetatable, getmetatable
 local assert = assert
 local ipairs, pairs = ipairs, pairs
 local string_char = require("string").char
+
+local type = type
 
 local require = require
 
@@ -28,11 +30,9 @@ if is_52 then
 end
 
 local modulesToLoad = {
-	"array",
-	"object",
+	"composite",
 	"strings",
 	"number",
-	"calls",
 	"others"
 }
 local loadedModules = {
@@ -56,8 +56,6 @@ json_decode.strict = {
 	nothrow = false
 }
 
--- Register generic value type
-util.register_type("VALUE")
 for _,name in ipairs(modulesToLoad) do
 	local mod = require("json.decode." .. name)
 	if mod.mergeOptions then
@@ -65,54 +63,40 @@ for _,name in ipairs(modulesToLoad) do
 			mod.mergeOptions(json_decode[mode], mode)
 		end
 	end
-	loadedModules[name] = mod
-	-- Register types
-	if mod.register_types then
-		mod.register_types()
-	end
+	loadedModules[#loadedModules + 1] = mod
 end
 
-local function buildDecoder(mode)
-	mode = mode and merge({}, json_decode.default, mode) or json_decode.default
-	local ignored = mode.unicodeWhitespace and util.unicode_ignored or util.ascii_ignored
-	-- Store 'ignored' in the global options table
-	mode.ignored = ignored
+-- Shift over default into defaultOptions to permit build optimization
+local defaultOptions = json_decode.default
+json_decode.default = nil
 
-	local value_id = util.types.VALUE
-	local value_type = lpeg.V(value_id)
-	local object_type = lpeg.V(util.types.OBJECT)
-	local array_type = lpeg.V(util.types.ARRAY)
-	local grammar = {
-		[1] = mode.initialObject and (ignored * (object_type + array_type + util.expected("object", "array"))) or (value_type + util.expected("value"))
-	}
-	-- Additional state storage for modules
-	local state = {}
-	for _, name in pairs(modulesToLoad) do
-		local mod = loadedModules[name]
-		mod.load_types(mode[name], mode, grammar, state)
-	end
-	-- HOOK VALUE TYPE WITH WHITESPACE
-	grammar[value_id] = ignored * grammar[value_id] * ignored
-	local compiled_grammar = lpeg.P(grammar) * ignored
-	-- If match-time-capture is supported, implement Cmt workaround for deep captures
-	if lpeg.Cmt then
-		if mode.initialObject then
-			-- Patch the grammar and recompile for VALUE usage
-			grammar[1] = value_type
-			state.VALUE_MATCH = lpeg.P(grammar) * ignored
-		else
-			state.VALUE_MATCH = compiled_grammar
-		end
-	end
-	-- Only add terminator & pos capture for final grammar since it is expected that there is extra data
-	-- when using VALUE_MATCH internally
-	compiled_grammar = compiled_grammar * lpeg.Cp() * (lpeg.P(-1) + util.unexpected())
+local function generateDecoder(lexer, options)
+	-- Marker to permit detection of final end
+	local marker = {}
+	local parser = lpeg.Ct((options.ignored * lexer)^0 * lpeg.Cc(marker)) * options.ignored * (lpeg.P(-1) + util.unexpected())
 	local decoder = function(data)
-		local ret, next_index = lpeg.match(compiled_grammar, data)
-		assert(nil ~= next_index, "Invalid JSON data")
-		return ret
+		local state = decode_state.create(options)
+		local parsed = parser:match(data)
+		assert(parsed, "Invalid JSON data")
+		local i = 0
+		while true do
+			i = i + 1
+			local item = parsed[i]
+			if item == marker then break end
+			if type(item) == 'function' and item ~= jsonutil.undefined and item ~= jsonutil.null then
+				item(state)
+			else
+				state:set_value(item)
+			end
+		end
+		if options.initialObject then
+			assert(type(state.previous) == 'table', "Initial value not an object or array")
+		end
+		-- Make sure stack is empty
+		assert(state.i == 0, "Unclosed elements present")
+		return state.previous
 	end
-	if mode.nothrow then
+	if options.nothrow then
 		return function(data)
 			local status, rv = pcall(decoder, data)
 			if status then
@@ -123,6 +107,28 @@ local function buildDecoder(mode)
 		end
 	end
 	return decoder
+end
+
+local function buildDecoder(mode)
+	mode = mode and merge({}, defaultOptions, mode) or defaultOptions
+	for _, mod in ipairs(loadedModules) do
+		if mod.mergeOptions then
+			mod.mergeOptions(mode)
+		end
+	end
+	local ignored = mode.unicodeWhitespace and util.unicode_ignored or util.ascii_ignored
+	-- Store 'ignored' in the global options table
+	mode.ignored = ignored
+
+	--local grammar = {
+	--	[1] = mode.initialObject and (ignored * (object_type + array_type)) or value_type
+	--}
+	local lexer
+	for _, mod in ipairs(loadedModules) do
+		local new_lexer = mod.generateLexer(mode)
+		lexer = lexer and lexer + new_lexer or new_lexer
+	end
+	return generateDecoder(lexer, mode)
 end
 
 -- Since 'default' is nil, we cannot take map it

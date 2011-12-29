@@ -8,6 +8,7 @@ local pairs, ipairs = pairs, ipairs
 local tonumber = tonumber
 local string_char = require("string").char
 local rawset = rawset
+local jsonutil = require("json.util")
 
 local error = error
 local setmetatable = setmetatable
@@ -98,28 +99,6 @@ local ascii_ignored = (ascii_space + comment)^0
 
 local unicode_ignored = (unicode_space + comment)^0
 
-local types = setmetatable({false}, {
-	__index = function(self, k)
-		error("Unknown type: " .. k)
-	end
-})
-
-local function register_type(name)
-	types[#types + 1] = name
-	types[name] = #types
-	return #types
-end
-
-local function append_grammar_item(grammar, name, capture)
-	local id = types[name]
-	local original = grammar[id]
-	if original then
-		grammar[id] = original + capture
-	else
-		grammar[id] = capture
-	end
-end
-
 -- Parse the lpeg version skipping patch-values
 -- LPEG <= 0.7 have no version value... so 0.7 is value
 local DecimalLpegVersion = lpeg.version and tonumber(lpeg.version():match("^(%d+%.%d+)")) or 0.7
@@ -150,9 +129,6 @@ local util = {
 	comment = comment,
 	ascii_ignored = ascii_ignored,
 	unicode_ignored = unicode_ignored,
-	register_type = register_type,
-	types = types,
-	append_grammar_item = append_grammar_item,
 	DecimalLpegVersion = DecimalLpegVersion,
 	get_invalid_character_info = get_invalid_character_info,
 	setObjectKeyForceNumber = setObjectKeyForceNumber
