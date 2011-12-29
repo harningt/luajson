@@ -21,12 +21,15 @@ dependencies = {
 build = {
 	type = "module",
 	modules = {
+		["json"] = "lua/json.lua",
+		["json.decode"] = "lua/json/decode.lua",
 		["json.decode.composite"] = "lua/json/decode/composite.lua",
 		["json.decode.number"] = "lua/json/decode/number.lua",
 		["json.decode.others"] = "lua/json/decode/others.lua",
+		["json.decode.state"] = "lua/json/decode/state.lua",
 		["json.decode.strings"] = "lua/json/decode/strings.lua",
 		["json.decode.util"] = "lua/json/decode/util.lua",
-		["json.decode"] = "lua/json/decode.lua",
+		["json.encode"] = "lua/json/encode.lua",
 		["json.encode.array"] = "lua/json/encode/array.lua",
 		["json.encode.calls"] = "lua/json/encode/calls.lua",
 		["json.encode.number"] = "lua/json/encode/number.lua",
@@ -35,9 +38,7 @@ build = {
 		["json.encode.output"] = "lua/json/encode/output.lua",
 		["json.encode.output_utility"] = "lua/json/encode/output_utility.lua",
 		["json.encode.strings"] = "lua/json/encode/strings.lua",
-		["json.encode"] = "lua/json/encode.lua",
-		["json.util"] = "lua/json/util.lua",
-		["json"] = "lua/json.lua"
+		["json.util"] = "lua/json/util.lua"
 	}
 }
 
