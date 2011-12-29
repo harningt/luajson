@@ -1,0 +1,47 @@
+luajson v1.3 Release Notes
+==========================
+
+User Visible Changes
+--------------------
+A global 'nothrow' option was added to change the behavior of parsing
+to not throw, but return `nil, error`.
+Error messages were also enhanced for many cases to include better details as
+to why the parsing may have failed.
+Some examples follow:
+
+For `[1i]`
+	unexpected character @ character: 3 0:3 [i] line:
+	[1i
+For `{x:1`
+	Unclosed elements present
+
+The parser was also unrolled so that LPeg was placed more into a lexer role
+rather than full-blown parser. This solves the problem of LPeg running into
+problems in my parser due to unclosed choices at a small performance cost.
+
+Plans for next release
+----------------------
+A future release will have a stronger focus on decoder performance. It may
+mean a reduction in flexibility by removing options and breaking compatibility.
+
+
+Updates since 1.2.2
+===================
+
+Thomas Harning Jr (9):
+	all:
+		5.2 compatibility
+		update option processing system to do more pre-configuration to better prepare for future changes
+	base:
+		rockspec scm-4 added due to file layout change
+		fixes luajson-scm-4.rockspec
+	decoder:
+		adds global 'nothrow' option to protect call automatically
+		error detection enhancements from next branch
+		overhaul update to be iterative to avoid call-stack buildup w/ limits and horrible performance hit
+	tests:
+		adds null array roundtrip issue per gh-4
+Francois Perrad (2):
+	-ungrouped-
+		fix loadstring when Lua 5.2 is strict
+		fix test suite with Lua 5.2
