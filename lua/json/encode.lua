@@ -87,6 +87,11 @@ end
 	Encode a value with a given encoding map and state
 ]]
 local function encodeWithMap(value, map, state, isObjectKey)
+	local mt = getmetatable(value)
+	local __tojson = mt and mt.__tojson
+	if __tojson then
+		return __tojson(value, state.encode, state, isObjectKey)
+	end
 	local t = type(value)
 	local encoderList = assert(map[t], "Failed to encode value, unhandled type: " .. t)
 	for _, encoder in ipairs(encoderList) do
