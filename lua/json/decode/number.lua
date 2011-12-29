@@ -93,7 +93,9 @@ local function generateLexer(options)
 	else
 		ret = ret + (#ninf + #inf) * util.denied("+/-Inf", "number.inf")
 	end
-	return ret
+	return (lpeg.Carg(1) * ret) / function(state, value)
+		state:set_value(value)
+	end
 end
 
 local number = {

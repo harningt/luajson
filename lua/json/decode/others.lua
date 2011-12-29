@@ -55,7 +55,9 @@ local function generateLexer(options)
 	else
 		valueCapture = valueCapture + #undefinedCapture * util.denied("undefined", "others.allowUndefined")
 	end
-	return valueCapture
+	return (lpeg.Carg(1) * valueCapture) / function(state, value)
+		state:set_value(value)
+	end
 end
 
 local others = {

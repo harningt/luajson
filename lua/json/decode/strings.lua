@@ -127,7 +127,9 @@ local function generateLexer(options)
 			captureString = captureString + cap
 		end
 	end
-	return captureString
+	return (lpeg.Carg(1) * captureString) / function(state, value)
+		state:set_value(value)
+	end
 end
 
 local strings = {

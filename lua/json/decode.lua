@@ -73,22 +73,10 @@ json_decode.default = nil
 local function generateDecoder(lexer, options)
 	-- Marker to permit detection of final end
 	local marker = {}
-	local parser = lpeg.Ct((options.ignored * lexer)^0 * lpeg.Cc(marker)) * options.ignored * (lpeg.P(-1) + util.unexpected())
 	local decoder = function(data)
 		local state = decode_state.create(options)
-		local parsed = parser:match(data)
+		local parsed = ((options.ignored * lexer)^0 * options.ignored * -1):match(data, 1, state)
 		assert(parsed, "Invalid JSON data")
-		local i = 0
-		while true do
-			i = i + 1
-			local item = parsed[i]
-			if item == marker then break end
-			if type(item) == 'function' and item ~= jsonutil.undefined and item ~= jsonutil.null then
-				item(state)
-			else
-				state:set_value(item)
-			end
-		end
 		if options.initialObject then
 			assert(type(state.previous) == 'table', "Initial value not an object or array")
 		end

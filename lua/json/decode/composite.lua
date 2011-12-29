@@ -79,6 +79,11 @@ local function END_CALL(state)
 	state:pop()
 end
 
+local function SET_ID_KEY(state, id)
+	state:set_value(id)
+	state:set_key()
+end
+
 local function SET_KEY(state)
 	state:set_key()
 end
@@ -115,21 +120,19 @@ local function generateSingleCallLexer(name, func)
 	if type(func) ~= 'boolean' and type(func) ~= 'function' then
 		error("Invalid functionCalls item: " .. name .. " not a function")
 	end
-	local function buildCallCapture(name)
-		return function(state)
+	local function buildCallCapture(state, name)
 			if func == false then
 				error("Function call on '" .. name .. "' not permitted")
 			end
 			state:push()
 			state:new_call(name, func)
-		end
 	end
 	local nameCallCapture
 	if type(name) == 'string' then
-		nameCallCapture = lpeg.P(name .. "(") * lpeg.Cc(name) / buildCallCapture
+		nameCallCapture = lpeg.Carg(1) * lpeg.P(name .. "(") * lpeg.Cc(name) / buildCallCapture
 	else
 		-- Name matcher expected to produce a capture
-		nameCallCapture = name * "(" / buildCallCapture
+		nameCallCapture = lpeg.Carg(1) * name * "(" / buildCallCapture
 	end
 	-- Call func over nameCallCapture and value to permit function receiving name
 	return nameCallCapture
@@ -161,7 +164,7 @@ local function generateCallLexer(options)
 		lexer = lexer and lexer + namedCapture or namedCapture
 	end
 	if lexer then
-		lexer = lexer + lpeg.P(")") * lpeg.Cc(END_CALL)
+		lexer = lexer + lpeg.Carg(1) * lpeg.P(")") / END_CALL
 	end
 	return lexer
 end
@@ -170,15 +173,15 @@ local function generateLexer(options)
 	local ignored = options.ignored
 	local array_options, object_options = options.array, options.object
 	local lexer =
-		lpeg.P("[") * lpeg.Cc(BEGIN_ARRAY)
-		+ lpeg.P("]") * lpeg.Cc(END_ARRAY)
-		+ lpeg.P("{") * lpeg.Cc(BEGIN_OBJECT)
-		+ lpeg.P("}") * lpeg.Cc(END_OBJECT)
-		+ lpeg.P(":") * lpeg.Cc(SET_KEY)
-		+ lpeg.P(",") * lpeg.Cc(NEXT_VALUE)
+		lpeg.Carg(1) * lpeg.P("[") / BEGIN_ARRAY
+		+ lpeg.Carg(1) * lpeg.P("]") / END_ARRAY
+		+ lpeg.Carg(1) * lpeg.P("{") / BEGIN_OBJECT
+		+ lpeg.Carg(1) * lpeg.P("}") / END_OBJECT
+		+ lpeg.Carg(1) * lpeg.P(":") / SET_KEY
+		+ lpeg.Carg(1) * lpeg.P(",") / NEXT_VALUE
 	if object_options.identifier then
 		-- Add identifier match w/ validation check that it is in key
-		lexer = lexer + lpeg.C(util.identifier) * ignored * lpeg.P(":") * lpeg.Cc(SET_KEY)
+		lexer = lexer + lpeg.Carg(1) * lpeg.C(util.identifier) * ignored * lpeg.P(":") / SET_ID_KEY
 	end
 	local callLexers = generateCallLexer(options)
 	if callLexers then
