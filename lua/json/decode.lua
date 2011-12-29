@@ -83,7 +83,7 @@ local function buildDecoder(mode)
 	local object_type = lpeg.V(util.types.OBJECT)
 	local array_type = lpeg.V(util.types.ARRAY)
 	local grammar = {
-		[1] = mode.initialObject and (ignored * (object_type + array_type)) or value_type
+		[1] = mode.initialObject and (ignored * (object_type + array_type + util.expected("object", "array"))) or (value_type + util.expected("value"))
 	}
 	-- Additional state storage for modules
 	local state = {}
@@ -106,7 +106,7 @@ local function buildDecoder(mode)
 	end
 	-- Only add terminator & pos capture for final grammar since it is expected that there is extra data
 	-- when using VALUE_MATCH internally
-	compiled_grammar = compiled_grammar * lpeg.Cp() * -1
+	compiled_grammar = compiled_grammar * lpeg.Cp() * (lpeg.P(-1) + util.unexpected())
 	local decoder = function(data)
 		local ret, next_index = lpeg.match(compiled_grammar, data)
 		assert(nil ~= next_index, "Invalid JSON data")

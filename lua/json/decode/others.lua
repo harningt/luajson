@@ -54,6 +54,8 @@ local function buildCapture(options)
 	)
 	if options.allowUndefined then
 		valueCapture = valueCapture + undefinedCapture * lpeg.Cc(options.undefined or nil)
+	else
+		valueCapture = valueCapture + #undefinedCapture * util.denied("undefined", "others.allowUndefined")
 	end
 	return valueCapture
 end
