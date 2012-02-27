@@ -10,7 +10,7 @@ luajson - JSON encoder/decoder for Lua
 
 SYNOPSIS
 --------
-require("json")
+local json = require("json")
 
 json.decode("json-string" [, parameters])
 

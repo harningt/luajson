@@ -6,8 +6,6 @@ local decode = require("json.decode")
 local encode = require("json.encode")
 local util = require("json.util")
 
-local is_52 = _VERSION == "Lua 5.2"
-
 local _G = _G
 
 _ENV = nil
@@ -18,7 +16,6 @@ local json = {
 	util = util
 }
 
-if not is_52 then
-	_G.json = json
-end
+_G.json = json
+
 return json
