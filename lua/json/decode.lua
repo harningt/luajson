@@ -165,6 +165,7 @@ end
 
 json_decode.getDecoder = getDecoder
 json_decode.decode = decode
+json_decode.util = util
 setmetatable(json_decode, mt)
 
 return json_decode
