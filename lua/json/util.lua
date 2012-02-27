@@ -9,9 +9,6 @@ local pairs = pairs
 local getmetatable, setmetatable = getmetatable, setmetatable
 local select = select
 
-local is_52 = _VERSION == "Lua 5.2"
-local _G = _G
-
 _ENV = nil
 
 local function foreach(tab, func)
@@ -142,10 +139,5 @@ local json_util = {
 	decodeCall = decodeCall,
 	doOptionMerge = doOptionMerge
 }
-
-if not is_52 then
-	_G.json = _G.json or {}
-	_G.json.util = json_util
-end
 
 return json_util

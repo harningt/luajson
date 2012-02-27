@@ -22,9 +22,6 @@ local type = type
 
 local require = require
 
-local is_52 = _VERSION == "Lua 5.2"
-local _G = _G
-
 _ENV = nil
 
 local modulesToLoad = {
@@ -169,9 +166,5 @@ end
 json_decode.getDecoder = getDecoder
 json_decode.decode = decode
 setmetatable(json_decode, mt)
-if not is_52 then
-	_G.json= _G.json or {}
-	_G.json.decode = merge(json_decode, _G.json.decode)
-end
 
 return json_decode

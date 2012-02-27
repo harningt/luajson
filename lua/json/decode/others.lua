@@ -8,8 +8,6 @@ local merge = jsonutil.merge
 local util = require("json.decode.util")
 
 -- Container module for other JavaScript types (bool, null, undefined)
-local is_52 = _VERSION == "Lua 5.2"
-local _G = _G
 
 _ENV = nil
 
@@ -60,11 +58,5 @@ local others = {
 	mergeOptions = mergeOptions,	
 	generateLexer = generateLexer
 }
-
-if not is_52 then
-	_G.json = _G.json or{}
-	_G.json.decode = _G.json.decode or {}
-	_G.json.decode.others = others
-end
 
 return others

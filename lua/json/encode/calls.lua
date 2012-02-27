@@ -13,9 +13,6 @@ local jsonutil = require("json.util")
 
 local isCall, decodeCall = jsonutil.isCall, jsonutil.decodeCall
 
-local is_52 = _VERSION == "Lua 5.2"
-local _G = _G
-
 _ENV = nil
 
 local defaultOptions = {
@@ -68,9 +65,4 @@ local calls = {
 	getEncoder = getEncoder
 }
 
-if not is_52 then
-	_G.json = _G.json or {}
-	_G.json.encode = _G.json.encode or {}
-	_G.json.encode.calls = calls
-end
 return calls

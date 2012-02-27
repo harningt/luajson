@@ -8,9 +8,6 @@ local jsonutil = require("json.util")
 local merge = jsonutil.merge
 local util = require("json.decode.util")
 
-local is_52 = _VERSION == "Lua 5.2"
-local _G = _G
-
 _ENV = nil
 
 local digit  = lpeg.R("09")
@@ -100,9 +97,4 @@ local number = {
 	generateLexer = generateLexer
 }
 
-if not is_52 then
-	_G.json = _G.json or {}
-	_G.json.decode = _G.json.decode or {}
-	_G.json.decode.number = number
-end
 return number

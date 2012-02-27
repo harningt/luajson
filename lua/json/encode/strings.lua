@@ -8,9 +8,6 @@ local pairs = pairs
 local jsonutil = require("json.util")
 local util_merge = jsonutil.merge
 
-local is_52 = _VERSION == "Lua 5.2"
-local _G = _G
-
 _ENV = nil
 
 local normalEncodingMap = {
@@ -87,11 +84,5 @@ local strings = {
 	mergeOptions = mergeOptions,
 	getEncoder = getEncoder
 }
-
-if not is_52 then
-	_G.json = _G.json or {}
-	_G.json.encode = _G.json.encode or {}
-	_G.json.encode.strings = strings
-end
 
 return strings

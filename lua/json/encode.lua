@@ -14,9 +14,6 @@ local output = require("json.encode.output")
 local util = require("json.util")
 local util_merge, isCall = util.merge, util.isCall
 
-local is_52 = _VERSION == "Lua 5.2"
-local _G = _G
-
 _ENV = nil
 
 --[[
@@ -166,8 +163,4 @@ end
 
 setmetatable(json_encode, mt)
 
-if not is_52 then
-	_G.json = _G.json or {}
-	_G.json.encode = util_merge(json_encode, _G.json.encode)
-end
 return json_encode
