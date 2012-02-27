@@ -14,9 +14,7 @@ local jsonutil = require("json.util")
 local is_52 = _VERSION == "Lua 5.2"
 local _G = _G
 
-if is_52 then
-	_ENV = nil
-end
+_ENV = nil
 
 local defaultOptions = {
 }
