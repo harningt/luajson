@@ -17,11 +17,14 @@ local table_concat = require("table").concat
 
 local merge = require("json.util").merge
 
-local is_52 = _VERSION == "Lua 5.2"
-local _G = _G
+_ENV = nil
 
-if is_52 then
-	_ENV = nil
+local function get_invalid_character_info(input, index)
+	local parsed = input:sub(1, index)
+	local bad_character = input:sub(index, index)
+	local _, line_number = parsed:gsub('\n',{})
+	local last_line = parsed:match("\n([^\n]+.)$") or parsed
+	return line_number, #last_line, bad_character, last_line
 end
 
 local function build_report(msg)
@@ -103,14 +106,6 @@ local unicode_ignored = (unicode_space + comment)^0
 -- LPEG <= 0.7 have no version value... so 0.7 is value
 local DecimalLpegVersion = lpeg.version and tonumber(lpeg.version():match("^(%d+%.%d+)")) or 0.7
 
-local function get_invalid_character_info(input, index)
-	local parsed = input:sub(1, index)
-	local bad_character = input:sub(index, index)
-	local _, line_number = parsed:gsub('\n',{})
-	local last_line = parsed:match("\n([^\n]+.)$") or parsed
-	return line_number, #last_line, bad_character, last_line
-end
-
 local function setObjectKeyForceNumber(t, key, value)
 	key = tonumber(key) or key
 	return rawset(t, key, value)
@@ -133,11 +128,5 @@ local util = {
 	get_invalid_character_info = get_invalid_character_info,
 	setObjectKeyForceNumber = setObjectKeyForceNumber
 }
-
-if not is_52 then
-	_G.json = _G.json or {}
-	_G.json.decode = _G.json.decode or {}
-	_G.json.decode.util = util
-end
 
 return util

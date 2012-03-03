@@ -5,12 +5,7 @@
 local setmetatable = setmetatable
 local assert, loadstring = assert, loadstring or load
 
-local is_52 = _VERSION == "Lua 5.2"
-local _G = _G
-
-if is_52 then
-	_ENV = nil
-end
+_ENV = nil
 
 -- Key == weak, if main key goes away, then cache cleared
 local outputCache = setmetatable({}, {__mode = 'k'})
@@ -55,11 +50,5 @@ end
 local output_utility = {
 	prepareEncoder = prepareEncoder
 }
-
-if not is_52 then
-	_G.json = _G.json or {}
-	_G.json.encode = _G.json.encode or {}
-	_G.json.encode.output_utility = output_utility
-end
 
 return output_utility

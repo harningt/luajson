@@ -1,1 +1,1 @@
-docs/ReleaseNotes-1.2.2.txt
+docs/ReleaseNotes-1.3.txt

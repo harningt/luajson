@@ -10,7 +10,7 @@ local type = type
 local next = next
 local unpack = unpack
 
-module("json.decode.state")
+_ENV = nil
 
 local state_ops = {}
 local state_mt = {
@@ -166,7 +166,7 @@ function state_ops.set_key(self)
 end
 
 
-function create(options)
+local function create(options)
 	local ret = {
 		options = options,
 		stack = {},
@@ -181,3 +181,9 @@ function create(options)
 	}
 	return setmetatable(ret, state_mt)
 end
+
+local state = {
+	create = create
+}
+
+return state
