@@ -15,6 +15,9 @@ if is_52 then
 end
 
 local json = {
+	_VERSION = "1.3",
+	_DESCRIPTION = "LuaJSON : customizable JSON decoder/encoder",
+	_COPYRIGHT = "Copyright (c) 2007-2012 Thomas Harning Jr. <harningt@gmail.com>",
 	decode = decode,
 	encode = encode,
 	util = util
