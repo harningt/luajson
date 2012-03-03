@@ -17,12 +17,7 @@ local table_concat = require("table").concat
 
 local merge = require("json.util").merge
 
-local is_52 = _VERSION == "Lua 5.2"
-local _G = _G
-
-if is_52 then
-	_ENV = nil
-end
+_ENV = nil
 
 local function get_invalid_character_info(input, index)
 	local parsed = input:sub(1, index)
@@ -133,11 +128,5 @@ local util = {
 	get_invalid_character_info = get_invalid_character_info,
 	setObjectKeyForceNumber = setObjectKeyForceNumber
 }
-
-if not is_52 then
-	_G.json = _G.json or {}
-	_G.json.decode = _G.json.decode or {}
-	_G.json.decode.util = util
-end
 
 return util

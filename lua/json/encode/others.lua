@@ -8,12 +8,7 @@ local assert = assert
 local jsonutil = require("json.util")
 local type = type
 
-local is_52 = _VERSION == "Lua 5.2"
-local _G = _G
-
-if is_52 then
-	_ENV = nil
-end
+_ENV = nil
 
 -- Shortcut that works
 local encodeBoolean = tostring
@@ -67,11 +62,5 @@ local others = {
 	mergeOptions = mergeOptions,
 	getEncoder = getEncoder
 }
-
-if not is_52 then
-	_G.json = _G.json or {}
-	_G.json.encode = _G.json.encode or {}
-	_G.json.encode.others = others
-end
 
 return others
