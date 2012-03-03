@@ -14,12 +14,7 @@ local table_concat = require("table").concat
 
 local error = error
 
-local is_52 = _VERSION == "Lua 5.2"
-local _G = _G
-
-if is_52 then
-	_ENV = nil
-end
+_ENV = nil
 
 local function get_error(item)
 	local fmt_string = item .. " in string [%q] @ %i:%i"
@@ -134,11 +129,5 @@ local strings = {
 	mergeOptions = mergeOptions,
 	generateLexer = generateLexer
 }
-
-if not is_52 then
-	_G.json = _G.json or {}
-	_G.json.decode = _G.json.decode or {}
-	_G.json.decode.strings = strings
-end
 
 return strings
