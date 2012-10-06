@@ -11,12 +11,17 @@ Bug reports:
     harningt@gmail.com
 
 Requirements
-	Lua 5.1
-	LPeg (Tested with 0.7, 0.8, 0.9 ... 0.6 mostly works)
+	Lua 5.1, 5.2, or LuaJIT 2.0
+	LPeg (Tested with 0.7, 0.8, 0.9, 0.10 ... 0.6 mostly works)
 	For regressionTest:
 		lfs (Tested with 1.4.1)
 	For lunit-tests:
 		lunit >= 0.4
+
+Lua versions tested recently:
+    Lua 5.1.4 + strict
+    Lua 5.2.0
+    LuaJIT-2.0.0-beta10 + strict
 
 License
 	All-but tests: MIT-style, See LICENSE for details
