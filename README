@@ -19,9 +19,9 @@ Requirements
 		lunit >= 0.4
 
 Lua versions tested recently:
-    Lua 5.1.4 + strict
-    Lua 5.2.0
-    LuaJIT-2.0.0-beta10 + strict
+    Lua 5.1.4 + strict + pl.strict
+    Lua 5.2.0 + pl.strict
+    LuaJIT-2.0.0-beta10 + strict + pl.strict
 
 License
 	All-but tests: MIT-style, See LICENSE for details
