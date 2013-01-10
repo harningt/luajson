@@ -3,7 +3,7 @@ local json = require("json")
 local io = require("io")
 local os = require("os")
 
-require("lfs")
+local lfs = require("lfs")
 
 local success = true
 

@@ -17,7 +17,7 @@ local table_concat = require("table").concat
 
 local merge = require("json.util").merge
 
-_ENV = nil
+local _ENV = nil
 
 local function get_invalid_character_info(input, index)
 	local parsed = input:sub(1, index)

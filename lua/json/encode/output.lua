@@ -13,7 +13,7 @@ local setmetatable = setmetatable
 
 local output_utility = require("json.encode.output_utility")
 
-_ENV = nil
+local _ENV = nil
 
 local tableCompositeCache = setmetatable({}, {__mode = 'v'})
 

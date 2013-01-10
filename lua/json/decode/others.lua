@@ -9,7 +9,7 @@ local util = require("json.decode.util")
 
 -- Container module for other JavaScript types (bool, null, undefined)
 
-_ENV = nil
+local _ENV = nil
 
 -- For null and undefined, use the util.null value to preserve null-ness
 local booleanCapture =

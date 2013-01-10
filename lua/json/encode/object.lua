@@ -11,7 +11,7 @@ local tostring = tostring
 local table_concat = require("table").concat
 local jsonutil = require("json.util")
 
-_ENV = nil
+local _ENV = nil
 
 local defaultOptions = {
 }

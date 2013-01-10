@@ -16,7 +16,7 @@ local math_floor, math_modf = math.floor, math.modf
 local jsonutil = require("json.util")
 local util_IsArray = jsonutil.IsArray
 
-_ENV = nil
+local _ENV = nil
 
 local defaultOptions = {
 	isArray = util_IsArray

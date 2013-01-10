@@ -22,7 +22,7 @@ local type = type
 
 local require = require
 
-_ENV = nil
+local _ENV = nil
 
 local modulesToLoad = {
 	"composite",

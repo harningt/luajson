@@ -18,7 +18,7 @@ local tostring = tostring
 local error = error
 local getmetatable = getmetatable
 
-_ENV = nil
+local _ENV = nil
 
 local defaultOptions = {
 	array = {

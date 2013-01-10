@@ -1,0 +1,40 @@
+luajson v1.3.1 Release Notes
+============================
+
+User Visible Changes
+--------------------
+This release does not introduce many changes.
+François Perrad kindly produced patches to make it work better with Lua 5.2
+and handle strict modes.
+It also introduces additional documentation about what varieties of Lua
+have been tested.
+
+Plans for next release
+----------------------
+A future release will have a stronger focus on decoder performance. It may
+mean a reduction in flexibility by removing options and breaking compatibility.
+
+
+Updates since 1.3
+=================
+
+François Perrad (7):
+	-ungrouped-
+		fix with Lua 5.2 strict
+		remove the condition around `_ENV = nil`
+		remove conditional (is_52) code
+		fix tests
+		fix test with Lua 5.2.0
+	lfs :
+		fix with Lua 5.2 strict
+Thomas Harning Jr (7):
+	-ungrouped-
+		Merge pull request #21 from fperrad/compat51_52
+		Merge pull request #22 from fperrad/patch-1
+		Merge pull request #23 from fperrad/patch-2
+	all:
+		adds module metadata as suggested by fperrad
+	decoder:
+		fixes 5.2-strict mode state object
+	docs:
+		notes tested Lua versions
