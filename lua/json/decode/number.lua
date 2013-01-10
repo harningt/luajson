@@ -8,7 +8,7 @@ local jsonutil = require("json.util")
 local merge = jsonutil.merge
 local util = require("json.decode.util")
 
-_ENV = nil
+local _ENV = nil
 
 local digit  = lpeg.R("09")
 local digits = digit^1

@@ -5,7 +5,7 @@
 local setmetatable = setmetatable
 local assert, loadstring = assert, loadstring or load
 
-_ENV = nil
+local _ENV = nil
 
 -- Key == weak, if main key goes away, then cache cleared
 local outputCache = setmetatable({}, {__mode = 'k'})

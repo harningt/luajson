@@ -8,7 +8,7 @@ local assert = assert
 local jsonutil = require("json.util")
 local type = type
 
-_ENV = nil
+local _ENV = nil
 
 -- Shortcut that works
 local encodeBoolean = tostring

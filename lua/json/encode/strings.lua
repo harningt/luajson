@@ -8,7 +8,7 @@ local pairs = pairs
 local jsonutil = require("json.util")
 local util_merge = jsonutil.merge
 
-_ENV = nil
+local _ENV = nil
 
 local normalEncodingMap = {
 	['"'] = '\\"',

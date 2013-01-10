@@ -7,7 +7,7 @@ local assert = assert
 local jsonutil = require("json.util")
 local huge = require("math").huge
 
-_ENV = nil
+local _ENV = nil
 
 local defaultOptions = {
 	nan = true,

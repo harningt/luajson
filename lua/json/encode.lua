@@ -14,7 +14,7 @@ local output = require("json.encode.output")
 local util = require("json.util")
 local util_merge, isCall = util.merge, util.isCall
 
-_ENV = nil
+local _ENV = nil
 
 --[[
 	List of encoding modules to load.

@@ -14,7 +14,7 @@ local table_concat = require("table").concat
 
 local error = error
 
-_ENV = nil
+local _ENV = nil
 
 local function get_error(item)
 	local fmt_string = item .. " in string [%q] @ %i:%i"

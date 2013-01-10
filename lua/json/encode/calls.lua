@@ -13,7 +13,7 @@ local jsonutil = require("json.util")
 
 local isCall, decodeCall = jsonutil.isCall, jsonutil.decodeCall
 
-_ENV = nil
+local _ENV = nil
 
 local defaultOptions = {
 }

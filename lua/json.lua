@@ -8,7 +8,7 @@ local util = require("json.util")
 
 local _G = _G
 
-_ENV = nil
+local _ENV = nil
 
 local json = {
 	_VERSION = "1.3",

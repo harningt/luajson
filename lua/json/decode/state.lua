@@ -10,7 +10,7 @@ local type = type
 local next = next
 local unpack = unpack
 
-_ENV = nil
+local _ENV = nil
 
 local state_ops = {}
 local state_mt = {

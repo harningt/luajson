@@ -9,7 +9,7 @@ local pairs = pairs
 local getmetatable, setmetatable = getmetatable, setmetatable
 local select = select
 
-_ENV = nil
+local _ENV = nil
 
 local function foreach(tab, func)
 	for k, v in pairs(tab) do
