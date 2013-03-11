@@ -58,6 +58,9 @@ Module/Function overview:
 	--null
 			Reference value to represent 'null' in a well-defined way to
 			allow for null values to be inserted into an array/table
+	--merge (t : table, ... : tables)
+			Shallow-merges a sequence of tables onto table t by iterating over each using
+			pairs and assigning.
 
 Attribution:
 	parsing test suite from JSON_checker project of http://www.json.org/

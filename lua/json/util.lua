@@ -59,6 +59,14 @@ local function inner_merge(t, remaining, from, ...)
 	return inner_merge(t, remaining - 1, ...)
 end
 
+--[[*
+    Shallow-merges tables in order onto the first table.
+
+    @param t table to merge entries onto
+    @param ... sequence of 0 or more tables to merge onto 't'
+
+    @returns table 't' from input
+]]
 local function merge(t, ...)
 	return inner_merge(t, select('#', ...), ...)
 end
