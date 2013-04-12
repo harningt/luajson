@@ -1,7 +1,8 @@
 package = "luajson"
 version = "1.3.2-1"
 source = {
-    url = "http://cloud.github.com/downloads/harningt/luajson/luajson-1.3.2.tar.gz"
+	url = "git://github.com/harningt/luajson.git",
+	tag = "1.3.2"
 }
 description = {
 	summary = "customizable JSON decoder/encoder",
