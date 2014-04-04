@@ -15,11 +15,11 @@ local error = error
 module("json.decode.strings")
 local function get_error(item)
 	local fmt_string = item .. " in string [%q] @ %i:%i"
-	return function(data, index)
+	return lpeg.P(function(data, index)
 		local line, line_index, bad_char, last_line = util.get_invalid_character_info(data, index)
 		local err = fmt_string:format(bad_char, line, line_index)
 		error(err)
-	end
+	end) * 1
 end
 
 local bad_unicode   = get_error("Illegal unicode escape")
@@ -64,8 +64,8 @@ local function decodeX(code)
 end
 
 local doSimpleSub = lpeg.C(lpeg.S("'\"\\/bfnrtvz")) / knownReplacements
-local doUniSub = lpeg.P('u') * (lpeg.C(util.hexpair) * lpeg.C(util.hexpair) + lpeg.P(bad_unicode))
-local doXSub = lpeg.P('x') * (lpeg.C(util.hexpair) + lpeg.P(bad_hex))
+local doUniSub = lpeg.P('u') * (lpeg.C(util.hexpair) * lpeg.C(util.hexpair) + bad_unicode)
+local doXSub = lpeg.P('x') * (lpeg.C(util.hexpair) + bad_hex)
 
 local defaultOptions = {
 	badChars = '',
@@ -86,8 +86,8 @@ strict = {
 
 local function buildCaptureString(quote, badChars, escapeMatch)
 	local captureChar = (1 - lpeg.S("\\" .. badChars .. quote)) + (lpeg.P("\\") / "" * escapeMatch)
-	captureChar = captureChar + (-#lpeg.P(quote) * lpeg.P(bad_character))
-	local captureString = captureChar^0
+	-- During error, force end
+	local captureString = captureChar^0 + (-#lpeg.P(quote) * bad_character + -1)
 	return lpeg.P(quote) * lpeg.Cs(captureString) * lpeg.P(quote)
 end
 
@@ -104,7 +104,7 @@ local function buildCapture(options)
 		escapeMatch = escapeMatch + options.additionalEscapes
 	end
 	if options.escapeCheck then
-		escapeMatch = options.escapeCheck * escapeMatch + lpeg.P(bad_escape)
+		escapeMatch = options.escapeCheck * escapeMatch + bad_escape
 	end
 	local captureString
 	for i = 1, #quotes do
