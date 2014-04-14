@@ -6,7 +6,8 @@ local template = [=[
 package = "luajson"
 version = %VERSION%
 source = {
-	url = "git://github.com/harningt/luajson.git"
+	url = "git://github.com/harningt/luajson.git",
+	tag = %TAG_VERSION%
 }
 description = {
 	summary = "customizable JSON decoder/encoder",
@@ -20,7 +21,6 @@ description = {
 }
 dependencies = {
 	"lua >= 5.1",
-	"lunit >= 0.4",
 	"lpeg >= 0.8.1"
 }
 build = {
@@ -38,8 +38,10 @@ in_modules:close()
 modules = modules:gsub("lua/([^\n]*)%.lua", function(module)
 	return "\t\t[" .. ("%q"):format(module:gsub("/",".")) .. "] = " .. ("%q"):format("lua/" .. module .. ".lua") .. ","
 end)
+tag_version = version:match("^(.*)[-]")
 local out = template:gsub("%%(.-)%%", {
 	VERSION = ("%q"):format(version),
+	TAG_VERSION = ("%q"):format(tag_version),
 	MODULES = modules
 })
 print(out)

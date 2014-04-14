@@ -1,0 +1,27 @@
+luajson v1.3.2 Release Notes
+============================
+
+User Visible Changes
+--------------------
+One of the main changes in this release is compatibility with LPeg 0.12 and
+more sane _ENV manipulation to avoid problems in strict environments.
+The documentation has also been updated to reflect the behavior of the
+often-used 'merge' utility to avoid surprises in behavior.
+
+Plans for next release
+----------------------
+A future release will have a stronger focus on decoder performance. It may
+mean a reduction in flexibility by removing options and breaking compatibility.
+
+Updates since 1.3.1
+===================
+
+Thomas Harning Jr (6):
+	all:
+		sets _ENV to nil using local _ENV = nil to avoid global writing
+	decoder:
+		fixes compatibility with lpeg 0.12 by closing off 0-length captures in loops
+	docs:
+		documents testing with the Penlight 'strict' module
+		adds merge behavior documentation
+		updates LPeg testing information
