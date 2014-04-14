@@ -6,6 +6,7 @@
 
 DIST_DIR=dist
 LUA_BIN=lua
+LUNIT_BIN=lunit
 
 
 all:
@@ -34,7 +35,7 @@ LUA_SETUP=LUA_OLD_INIT="$(LUA_INIT)" LUA_INIT="@hook_require.lua" $(LUA_PATH_SET
 check-regression:
 	cd tests && $(LUA_SETUP) lua regressionTest.lua
 check-unit:
-	cd tests && $(LUA_SETUP) lunit lunit-*.lua
+	cd tests && $(LUA_SETUP) $(LUNIT_BIN) lunit-*.lua
 check: check-regression check-unit
 
 
