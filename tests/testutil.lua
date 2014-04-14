@@ -5,7 +5,7 @@ local assert_error = lunit.assert_error
 
 -- Allow module to alter decoder
 local function setDecoder(d)
-	decode = d
+	_G.decode = d
 end
 module("testutil", package.seeall)
 function buildPatchedDecoder(f, newDecoder)
