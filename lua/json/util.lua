@@ -90,7 +90,8 @@ local ArrayMT = {}
 ]]
 local function IsArray(value)
 	if type(value) ~= 'table' then return false end
-	local ret = getmetatable(value) == ArrayMT
+	local meta = getmetatable(value)
+	local ret = meta == ArrayMT or (meta ~= nil and meta.__is_luajson_array)
 	if not ret then
 		if #value == 0 then return false end
 	else
