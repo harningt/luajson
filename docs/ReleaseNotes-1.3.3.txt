@@ -1,0 +1,31 @@
+luajson v1.3.3 Release Notes
+============================
+
+User Visible Changes
+--------------------
+The main changes for this release are:
+
+ * Allow objects with metatables to declare themselves as an array by
+   setting __is_luajson_array as true in the metatable.
+ * Pass all unit tests in Lua 5.2 (lunit tests had an issue)
+
+Plans for next release
+----------------------
+As declared in v1.3.2, a future release will have a stronger focus on decoder
+performance. It may mean a reduction in flexibility by removing options and
+breaking compatibility... so this would likely be either v1.4 or v2.0
+
+
+Updates since 1.3.2
+===================
+
+Thomas Harning Jr (16):
+	all:
+		adds module metadata as suggested by fperrad
+	base:
+		fixes link for luarocks download
+		updates rock creation tool to include tag version
+	encoder:
+		if __is_luajson_array is set on a metatable, consider the value as an array
+	tests:
+		fixes lunit test to work with Lua 5.2 environment management
