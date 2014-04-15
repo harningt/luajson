@@ -11,9 +11,9 @@ local _G = _G
 local _ENV = nil
 
 local json = {
-	_VERSION = "1.3",
+	_VERSION = "1.3.4",
 	_DESCRIPTION = "LuaJSON : customizable JSON decoder/encoder",
-	_COPYRIGHT = "Copyright (c) 2007-2012 Thomas Harning Jr. <harningt@gmail.com>",
+	_COPYRIGHT = "Copyright (c) 2007-2014 Thomas Harning Jr. <harningt@gmail.com>",
 	decode = decode,
 	encode = encode,
 	util = util
