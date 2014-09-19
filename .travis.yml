@@ -1,5 +1,13 @@
 language: erlang
 
+branches:
+    only:
+        - master
+        - next
+        - 1.2.x
+        - 1.1.x
+        - 1.0.x
+
 env:
     global:
         - LUAROCKS_BASE=luarocks-2.2.0
