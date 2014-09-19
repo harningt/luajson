@@ -33,7 +33,7 @@ dist-zip: distdir
 LUA_PATH_SETUP=LUA_PATH="?/init.lua;../lua/?.lua;../lua/?/init.lua;$(LUA_PATH);"
 LUA_SETUP=LUA_OLD_INIT="$(LUA_INIT)" LUA_INIT="@hook_require.lua" $(LUA_PATH_SETUP)
 check-regression:
-	cd tests && $(LUA_SETUP) lua regressionTest.lua
+	cd tests && $(LUA_SETUP) $(LUA_BIN) regressionTest.lua
 check-unit:
 	cd tests && $(LUA_SETUP) $(LUNIT_BIN) --interpreter $(LUA_BIN) lunit-*.lua
 
