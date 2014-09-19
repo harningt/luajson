@@ -42,7 +42,7 @@ before_install:
     - cd $TRAVIS_BUILD_DIR
     - sudo -E luarocks install lunit
     - sudo -E luarocks install luafilesystem
-    - sudo -E luarocks install lpeg-$LPEG
+    - sudo -E luarocks install lpeg $LPEG
 
 script:
     - make LUA_BIN=$LUA check
