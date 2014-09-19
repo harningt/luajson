@@ -70,3 +70,8 @@ function test_custom_encode()
 	encoder(obj)
 	assert_true(sawX)
 end
+
+function test_custom_array()
+    assert_equal("[]", json.encode(setmetatable({}, {__is_luajson_array = true})))
+    assert_equal("[]", json.encode(json.util.InitArray({})))
+end
