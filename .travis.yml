@@ -1,4 +1,5 @@
-language: erlang
+# Lie about language support for broader support
+language: python
 
 branches:
     only:
