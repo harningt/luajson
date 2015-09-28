@@ -26,7 +26,10 @@ env:
         - LPEG=0.10.2-1 LUA=luajit
         - LPEG=0.12-1 LUA=lua5.1
         - LPEG=0.12-1 LUA=lua5.2
+        - LPEG=0.12-1 LUA=lua5.3
         - LPEG=0.12-1 LUA=luajit
+        - LPEG=0.12-1 LUA=luajit2.0
+        - LPEG=0.12-1 LUA=luajit2.1
 
 branches:
     only:
