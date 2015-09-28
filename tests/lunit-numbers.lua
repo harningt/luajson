@@ -46,10 +46,11 @@ local numbers = {
 	0, 1, -1, math.pi, -math.pi
 }
 math.randomseed(0xDEADBEEF)
+local pow = math.pow or load("return function(a, b) return a ^ b end")()
 -- Add sequence of numbers at low/high end of value-set
 for i = -300,300,60 do
-	numbers[#numbers + 1] = math.random() * math.pow(10, i)
-	numbers[#numbers + 1] = -math.random() * math.pow(10, i)
+	numbers[#numbers + 1] = math.random() * pow(10, i)
+	numbers[#numbers + 1] = -math.random() * pow(10, i)
 end
 
 local function get_number_tester(f)
