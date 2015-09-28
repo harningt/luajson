@@ -9,7 +9,11 @@ decode = json.decode.getDecoder(false)
 
 local error = error
 
-module("lunit-strings", lunit.testcase, package.seeall)
+if not module then
+    _ENV = lunit.module("lunit-strings", 'seeall')
+else
+    module("lunit-strings", lunit.testcase, package.seeall)
+end
 
 local function assert_table_equal(expect, t)
 	if type(expect) ~= 'table' then

@@ -4,7 +4,11 @@ local testutil = require("testutil")
 -- DECODE NOT 'local' due to requirement for testutil to access it
 decode = json.decode.getDecoder(false)
 
-module("lunit-tests", lunit.testcase, package.seeall)
+if not module then
+    _ENV = lunit.module("lunit-tests", 'seeall')
+else
+    module("lunit-tests", lunit.testcase, package.seeall)
+end
 
 function setup()
 	_G["decode"] = json.decode.getDecoder(false)

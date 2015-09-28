@@ -8,7 +8,11 @@ local encode = json.encode
 -- DECODE NOT 'local' due to requirement for testutil to access it
 decode = json.decode.getDecoder(false)
 
-module("lunit-calls", lunit.testcase, package.seeall)
+if not module then
+    _ENV = lunit.module("lunit-calls", 'seeall')
+else
+    module("lunit-calls", lunit.testcase, package.seeall)
+end
 
 function setup()
 	-- Ensure that the decoder is reset

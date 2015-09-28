@@ -2,7 +2,7 @@ local lpeg = require("lpeg")
 
 local string = string
 
-module("utf8_processor")
+local _ENV = nil
 
 local function encode_utf(codepoint)
 	if codepoint > 0x10FFFF then
@@ -45,6 +45,10 @@ local utf8 = lpeg.R("\0\127") -- Do nothing here
 local utf8_decode_pattern = lpeg.Cs(utf8^0) * -1
 
 
-function process(s)
+local function process(s)
 	return utf8_decode_pattern:match(s)
 end
+
+return {
+    process = process
+}

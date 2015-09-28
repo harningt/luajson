@@ -1,7 +1,11 @@
 local lunit = require("lunit")
 local json = require("json")
 
-module("lunit-depth", lunit.testcase, package.seeall)
+if not module then
+    _ENV = lunit.module("lunit-depth", 'seeall')
+else
+    module("lunit-depth", lunit.testcase, package.seeall)
+end
 
 local SAFE_DEPTH = 23
 local SAFE_CALL_DEPTH = 31

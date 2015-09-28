@@ -2,7 +2,11 @@ local json = require("json")
 local lunit = require("lunit")
 
 -- Test module for handling the simple decoding that behaves more like expected
-module("lunit-simple-decode", lunit.testcase, package.seeall)
+if not module then
+    _ENV = lunit.module("lunit-simple-decode", 'seeall')
+else
+    module("lunit-simple-decode", lunit.testcase, package.seeall)
+end
 
 function test_decode_simple_undefined()
 	assert_nil(json.decode('undefined', json.decode.simple))
