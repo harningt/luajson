@@ -39,7 +39,7 @@ before_install:
     - luarocks install lpeg $LPEG
 
 script:
-    - make LUA_BIN=$LUA check
+    - make LUA_BIN=lua check
 
 notifications:
     email:
