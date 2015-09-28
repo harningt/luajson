@@ -67,3 +67,7 @@ Module/Function overview:
 Attribution:
 	parsing test suite from JSON_checker project of http://www.json.org/
 	No listed license for these files in their package.
+
+Acknowledgements:
+    Used sample Travis-CI build pieces from https://github.com/moteus/lua-travis-example
+    Copyright (c) 2014 Alexey Melnichuk
