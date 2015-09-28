@@ -2,6 +2,7 @@ local json = require("json")
 local lunit = require("lunit")
 local math = require("math")
 local testutil = require("testutil")
+local unpack = require("table").unpack or unpack
 
 local setmetatable = setmetatable
 

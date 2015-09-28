@@ -8,7 +8,7 @@ local jsonutil = require("json.util")
 local assert = assert
 local type = type
 local next = next
-local unpack = unpack
+local unpack = require("table").unpack or unpack
 
 local _ENV = nil
 
