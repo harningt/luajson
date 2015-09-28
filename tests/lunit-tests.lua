@@ -4,10 +4,13 @@ local testutil = require("testutil")
 -- DECODE NOT 'local' due to requirement for testutil to access it
 decode = json.decode.getDecoder(false)
 
+local TEST_ENV
 if not module then
     _ENV = lunit.module("lunit-tests", 'seeall')
+    TEST_ENV = _ENV
 else
     module("lunit-tests", lunit.testcase, package.seeall)
+    TEST_ENV = _M
 end
 
 function setup()
@@ -48,12 +51,12 @@ local function buildFailedStrictDecoder(f)
 	return testutil.buildFailedPatchedDecoder(f, strictDecoder)
 end
 -- SETUP CHECKS FOR SEQUENCE OF DECODERS
-for k, v in pairs(_M) do
+for k, v in pairs(TEST_ENV) do
 	if k:match("^test_") and not k:match("_gen$") then
 		if k:match("_nostrict") then
-			_M[k .. "_strict_gen"] = buildFailedStrictDecoder(v)
+			TEST_ENV[k .. "_strict_gen"] = buildFailedStrictDecoder(v)
 		else
-			_M[k .. "_strict_gen"] = buildStrictDecoder(v)
+			TEST_ENV[k .. "_strict_gen"] = buildStrictDecoder(v)
 		end
 	end
 end
