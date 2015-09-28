@@ -2,6 +2,8 @@ local lpeg = require("lpeg")
 
 local string = string
 
+local floor = require("math").floor
+
 local _ENV = nil
 
 local function encode_utf(codepoint)
@@ -10,7 +12,7 @@ local function encode_utf(codepoint)
 	elseif codepoint > 0xFFFF then
 		-- Surrogate pair needed
 		codepoint = codepoint - 0x10000
-		local first, second = codepoint / 0x0400 + 0xD800, codepoint % 0x0400 + 0xDC00
+		local first, second = floor(codepoint / 0x0400) + 0xD800, codepoint % 0x0400 + 0xDC00
 		return ("\\u%.4X\\u%.4X"):format(first, second)
 	else
 		return ("\\u%.4X"):format(codepoint)
