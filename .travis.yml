@@ -37,12 +37,12 @@ branches:
 
 before_install:
     - source .travis/setenv_lua.sh
-    - luarocks install lunit
+    - luarocks install lunitx
     - luarocks install luafilesystem
     - luarocks install lpeg $LPEG
 
 script:
-    - make LUA_BIN=lua check
+    - make LUA_BIN=lua LUNIT_BIN=lunit.sh check
 
 notifications:
     email:
