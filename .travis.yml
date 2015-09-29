@@ -15,9 +15,14 @@ env:
     global:
         - LUAROCKS=2.2.2
     matrix:
+        - LPEG=1.0.0-1 LUA=luajit2.1
+        - LPEG=1.0.0-1 LUA=luajit2.0
+        - LPEG=1.0.0-1 LUA=luajit
+        - LPEG=1.0.0-1 LUA=lua5.3
+        - LPEG=1.0.0-1 LUA=lua5.2
+        - LPEG=1.0.0-1 LUA=lua5.1
         - LPEG=0.12.2-1 LUA=luajit2.1
         - LPEG=0.12.2-1 LUA=luajit2.0
-        - LPEG=0.12.2-1 LUA=luajit
         - LPEG=0.12.2-1 LUA=lua5.3
         - LPEG=0.12.2-1 LUA=lua5.2
         - LPEG=0.12.2-1 LUA=lua5.1
