@@ -52,7 +52,7 @@ script:
     - make LUA_BIN=lua LUNIT_BIN=lunit.sh LUA_INIT="require('luarocks.loader');require('luacov')" check
 
 after_success:
-    - cd tests; luacov-coveralls
+    - cd tests; luacov-coveralls -v
 
 notifications:
     email:
