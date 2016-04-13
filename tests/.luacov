@@ -35,16 +35,4 @@ return {
   -- the .lua extension)
   exclude = {
   },
-
-  -- configuration for luacov-coveralls reporter
-  coveralls = {
-
-    -- debug = true;
-
-    pathcorrect = {
-      {"^../lua/", "lua/"};
-    },
-
-  },
-
 }
