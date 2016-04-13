@@ -43,7 +43,7 @@ before_install:
     - pip install hererocks
     - hererocks here -r $LUAROCKS --$LUA
     - export PATH=$(pwd)/here/bin:$PATH
-    - luarocks install luacov-coveralls
+    - luarocks install luacov
     - luarocks install lunitx
     - luarocks install luafilesystem
     - luarocks install lpeg $LPEG
@@ -52,7 +52,7 @@ script:
     - make LUA_BIN=lua LUNIT_BIN=lunit.sh LUA_INIT="require('luarocks.loader');require('luacov')" check
 
 after_success:
-    - cd tests; luacov-coveralls -v
+    - cd tests; bash <(curl -s https://codecov.io/bash)
 
 notifications:
     email:
