@@ -52,7 +52,10 @@ script:
     - make LUA_BIN=lua LUNIT_BIN=lunit.sh LUA_INIT="require('luarocks.loader');require('luacov')" check
 
 after_success:
-    - cd tests; bash <(curl -s https://codecov.io/bash)
+    # Rework the stats file and generate
+    - sed -e "s|../lua/|lua/|" < tests/luacov.stats.out > luacov.stats.out
+    - luacov
+    - bash <(curl -s https://codecov.io/bash)
 
 notifications:
     email:

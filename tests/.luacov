@@ -15,7 +15,7 @@ return {
   reportfile = "luacov.report.json",
 
   -- Run reporter on completion? (won't work for ticks)
-  runreport = true,
+  runreport = false,
 
   -- Delete stats file after reporting?
   deletestats = false,
