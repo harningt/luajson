@@ -43,7 +43,7 @@ before_install:
     - pip install hererocks
     - hererocks here -r $LUAROCKS --$LUA
     - export PATH=$(pwd)/here/bin:$PATH
-    - luarocks install luacov
+    - luarocks install luacov 0.9.1
     - luarocks install lunitx
     - luarocks install luafilesystem
     - luarocks install lpeg $LPEG
