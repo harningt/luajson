@@ -16,3 +16,11 @@ function test_decode_nothrow_bad_data()
 	assert_nil((json.decode('["\\xzz"]', {nothrow = true})))
 end
 
+function test_decode_nothrow_ok_data()
+	assert_not_nil((json.decode('"x"', {nothrow = true})))
+	assert_not_nil((json.decode('{x:"x"}', {nothrow = true})))
+	assert_not_nil((json.decode('["x"]', {nothrow = true})))
+	assert_not_nil((json.decode('[1.0]', {nothrow = true})))
+	assert_not_nil((json.decode('["\\u00FF"]', {nothrow = true})))
+end
+
