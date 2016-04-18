@@ -106,11 +106,23 @@ end
 function test_permitted()
 	local strict = {
 		calls = {
-			defs = { call = true }
+			defs = { call = true, other = true }
 		}
 	}
 	local decoder = json.decode.getDecoder(strict)
 	assert(decoder("call(1)").name == 'call')
+	assert(decoder("other(1)").name == 'other')
+end
+
+function test_permitted_nested()
+	local strict = {
+		calls = {
+			defs = { call = true, other = true }
+		}
+	}
+	local decoder = json.decode.getDecoder(strict)
+	assert(decoder("call(call(1))").name == 'call')
+	assert(decoder("other(call(1))").name == 'other')
 end
 
 function test_not_defined_fail()
