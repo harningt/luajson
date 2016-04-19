@@ -1,6 +1,7 @@
 local json = require("json")
 local lunit = require("lunit")
 local testutil = require("testutil")
+local lpeg = require("lpeg")
 -- DECODE NOT 'local' due to requirement for testutil to access it
 decode = json.decode.getDecoder(false)
 
@@ -42,6 +43,11 @@ function test_preprocess()
 	assert_equal('-Infinity', json.encode(1/0, {preProcess = function(x) return -x end}))
 end
 
+function test_additionalEscapes_only()
+    -- Need to do escape while skipping escape character san-check
+    assert_equal("Hello", json.decode([["\S"]], { strings = { additionalEscapes = lpeg.C(lpeg.P("S")) / "Hello", escapeCheck= false } }))
+end
+
 local strictDecoder = json.decode.getDecoder(true)
 
 local function buildStrictDecoder(f)
@@ -52,7 +58,7 @@ local function buildFailedStrictDecoder(f)
 end
 -- SETUP CHECKS FOR SEQUENCE OF DECODERS
 for k, v in pairs(TEST_ENV) do
-	if k:match("^test_") and not k:match("_gen$") then
+	if k:match("^test_") and not k:match("_gen$") and not k:match("_only$") then
 		if k:match("_nostrict") then
 			TEST_ENV[k .. "_strict_gen"] = buildFailedStrictDecoder(v)
 		else
