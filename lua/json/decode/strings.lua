@@ -107,11 +107,11 @@ local function generateLexer(options)
 	local escapeMatch = doSimpleSub
 	escapeMatch = escapeMatch + doXSub / decodeX
 	escapeMatch = escapeMatch + doUniSub / options.decodeUnicode
-	if options.additionalEscapes then
-		escapeMatch = escapeMatch + options.additionalEscapes
-	end
 	if options.escapeCheck then
 		escapeMatch = options.escapeCheck * escapeMatch + bad_escape
+	end
+	if options.additionalEscapes then
+		escapeMatch = options.additionalEscapes + escapeMatch
 	end
 	local captureString
 	for i = 1, #quotes do

@@ -44,8 +44,10 @@ function test_preprocess()
 end
 
 function test_additionalEscapes_only()
-    -- Need to do escape while skipping escape character san-check
-    assert_equal("Hello", json.decode([["\S"]], { strings = { additionalEscapes = lpeg.C(lpeg.P("S")) / "Hello", escapeCheck= false } }))
+    -- Test that additionalEscapes is processed on its own - side-stepping normal processing
+    assert_equal("Hello\\?", json.decode([["\S"]], { strings = { additionalEscapes = lpeg.C(lpeg.P("S")) / "Hello\\?" } }))
+    -- Test that additionalEscapes overrides any builtin handling
+    assert_equal("Hello\\?", json.decode([["\n"]], { strings = { additionalEscapes = lpeg.C(lpeg.P("n")) / "Hello\\?" } }))
 end
 
 local strictDecoder = json.decode.getDecoder(true)
