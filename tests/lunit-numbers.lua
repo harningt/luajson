@@ -118,6 +118,7 @@ function test_nan_nostrict()
 	assert_true(value ~= value)
 	local value = decode("NaN")
 	assert_true(value ~= value)
+	assert_equal("NaN", encode(decode("NaN")))
 end
 
 function test_expression()
