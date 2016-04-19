@@ -22,15 +22,21 @@ function setup()
 	_G["decode"] = json.decode.getDecoder(false)
 end
 
-local function assert_near(expect, received)
+local function is_near(expect, received)
 	local pctDiff
 	if expect == received then
 		pctDiff = 0
 	else
 		pctDiff = math.abs(1 - expect / received)
 	end
-	local msg = ("expected '%s' but was '%s' .. '%s'%% apart"):format(expect, received, pctDiff * 100)
-	assert(pctDiff < 0.000001, msg)
+	if pctDiff < 0.000001 then
+		return true
+	else
+		return false, ("expected '%s' but was '%s' .. '%s'%% apart"):format(expect, received, pctDiff * 100)
+	end
+end
+local function assert_near(expect, received)
+	assert(is_near(expect, received))
 end
 local function test_simple(num)
 	assert_near(num, decode(tostring(num)))
@@ -41,6 +47,15 @@ end
 local function test_scientific(num)
 	assert_near(num, decode(string.format('%e', num)))
 	assert_near(num, decode(string.format('%E', num)))
+end
+local function test_scientific_denied(num)
+	local decode = json.decode.getDecoder({ number = { exp = false } })
+	assert_error_match("Exponent-denied error did not match", "Exponents.*denied", function()
+		decode(string.format('%e', num))
+	end)
+	assert_error_match("Exponent-denied error did not match", "Exponents.*denied", function()
+		decode(string.format('%E', num))
+	end)
 end
 local numbers = {
 	0, 1, -1, math.pi, -math.pi
@@ -61,9 +76,35 @@ local function get_number_tester(f)
 	end
 end
 
+local function test_fraction(num)
+	assert_near(num, decode(string.format("%f", num)))
+end
+local function test_fraction_denied(num)
+	local decode = json.decode.getDecoder({ number = { frac = false } })
+	local formatted = string.format('%f', num)
+	assert_error_match("Fraction-denied error did not match for " .. formatted, "Fractions.*denied", function()
+		decode(formatted)
+	end)
+end
+local function get_number_fraction_tester(f)
+	return function ()
+		for _, v in ipairs(numbers) do
+			-- Fractional portion must be present
+			local formatted = string.format("%f", v)
+			-- San check that the formatted value is near the desired value
+			if nil ~= formatted:find("%.") and is_near(v, tonumber(formatted)) then
+				f(v)
+			end
+		end
+	end
+end
+
 test_simple_numbers = get_number_tester(test_simple)
 test_simple_numbers_w_encode = get_number_tester(test_simple_w_encode)
 test_simple_numbers_scientific = get_number_tester(test_scientific)
+test_simple_numbers_scientific_denied = get_number_tester(test_scientific_denied)
+test_simple_numbers_fraction_only = get_number_fraction_tester(test_fraction)
+test_simple_numbers_fraction_denied_only = get_number_fraction_tester(test_fraction_denied)
 
 function test_infinite_nostrict()
 	assert_equal(math.huge, decode("Infinity"))
