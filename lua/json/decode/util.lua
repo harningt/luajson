@@ -39,16 +39,6 @@ local function unexpected()
 	local msg = "unexpected character"
 	return build_report(msg)
 end
-local function expected(...)
-	local items = {...}
-	local msg
-	if #items > 1 then
-		msg = "expected one of '" .. table_concat(items, "','") .. "'"
-	else
-		msg = "expected '" .. items[1] .. "'"
-	end
-	return build_report(msg)
-end
 local function denied(item, option)
 	local msg
 	if option then
@@ -113,7 +103,6 @@ end
 
 local util = {
 	unexpected = unexpected,
-	expected = expected,
 	denied = denied,
 	ascii_space = ascii_space,
 	unicode_space = unicode_space,
