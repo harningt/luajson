@@ -79,3 +79,13 @@ function test_custom_array()
     assert_equal("[]", json.encode(setmetatable({}, {__is_luajson_array = true})))
     assert_equal("[]", json.encode(json.util.InitArray({})))
 end
+
+function test_undefined()
+	assert_equal("[undefined]", json.encode({ json.util.undefined }))
+end
+
+function test_unknown()
+	assert_error("Expected attempting to encode an unregistered function to fail", function()
+		json.encode({ function() end })
+	end)
+end
