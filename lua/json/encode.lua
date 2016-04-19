@@ -53,17 +53,12 @@ for _,name in ipairs(modulesToLoad) do
 	loadedModules[name] = mod
 end
 
--- Merges values, assumes all tables are arrays, inner values flattened, optionally constructing output
-local function flattenOutput(out, values)
-	out = not out and {} or type(out) == 'table' and out or {out}
-	if type(values) == 'table' then
-		for _, v in ipairs(values) do
-			out[#out + 1] = v
-		end
-	else
-		out[#out + 1] = values
-	end
-	return out
+-- NOTE: Nested not found, so assume unsupported until use case arises
+local function flattenOutput(out, value)
+    assert(type(value) ~= 'table')
+	out = out or {}
+    out[#out + 1] = value
+    return out
 end
 
 -- Prepares the encoding map from the already provided modules and new config
