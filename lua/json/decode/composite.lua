@@ -33,7 +33,8 @@ local defaultOptions = {
 	calls = {
 		defs = nil,
 		-- By default, do not allow undefined calls to be de-serialized as call objects
-		allowUndefined = false
+		allowUndefined = false,
+		trailingComma = true
 	}
 }
 

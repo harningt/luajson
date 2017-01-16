@@ -61,11 +61,23 @@ function state_ops.put_array_value(self, trailing)
 	local new_index = self.active_state + 1
 	self.active_state = new_index
 	self.active[new_index] = self:grab_value()
+
+function state_ops.put_call_value(self, trailing)
+	local call_options = self.options.calls
+	-- Safety check
+	if trailing and not self.previous_set and call_options.trailingComma then
+		return
+	end
+	local new_index = self.active_state + 1
+	self.active_state = new_index
+	self.active[new_index] = self:grab_value()
 end
 
 function state_ops.put_value(self, trailing)
 	if self.active_state == 'object' then
 		self:put_object_value(trailing)
+	elseif self.active.func then
+		self:put_call_value(trailing)
 	else
 		self:put_array_value(trailing)
 	end
