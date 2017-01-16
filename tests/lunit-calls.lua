@@ -114,6 +114,31 @@ function test_permitted()
 	assert(decoder("other(1)").name == 'other')
 end
 
+function test_permitted_trailing()
+	local strict = {
+		calls = {
+			defs = { call = true, other = true }
+		}
+	}
+	local decoder = json.decode.getDecoder(strict)
+	assert(decoder("call(1,)").name == 'call')
+	assert(decoder("other(1,)").name == 'other')
+end
+function test_permitted_no_trailing()
+	local strict = {
+		calls = {
+			defs = { call = true, other = true },
+			trailingComma = false
+		}
+	}
+	local decoder = json.decode.getDecoder(strict)
+	assert_error(function()
+		decoder("call(1,)")
+	end)
+	assert_error(function()
+		decoder("other(1,)")
+	end)
+end
 function test_permitted_nested()
 	local strict = {
 		calls = {
