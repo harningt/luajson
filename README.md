@@ -52,11 +52,6 @@ Table values are any valid input-type
 Array-like tables are converted into JSON arrays...
 Position 1 maps to JSON Array position 0
 
-___isEncodable ( value : ANY )___
-
-Returns a boolean stating whether is is encodeable or not
-NOTE: Tables/arrays are not deeply inspected
-
 ### json.decode (callable module referencing json.decode.decode)
 ___decode (data : string, strict : optional boolean)___
 
@@ -64,19 +59,56 @@ Takes in a string of JSON data and converts it into a Lua object
 If 'strict' is set, then the strict JSON rule-set is used
 
 ### json.util
-___printValue (tab : ANY, name : string)___
-
-recursively prints out all object values - if duplicates found, reference printed
-
+#### Useful utilities
 ___null___
 
 Reference value to represent 'null' in a well-defined way to
 allow for null values to be inserted into an array/table
 
-___merge (t : table, ... : tables)___
+   undefined
+
+Reference value to represent 'undefined' in a well-defined
+way to allow for undefined values to be inserted into an
+array/table.
+
+   IsArray (t : ANY)
+
+Checks if the passed in object is a plain-old-array based on
+whether or not is has the LuaJSON array metatable attached
+or the custom __is_luajson_array metadata key stored.
+
+   InitArray(t: table)
+
+Sets the 'array' marker metatable to guarantee the table is
+represented as a LuaJSON array type.
+
+   isCall (t : ANY)
+
+Checks if the passed in object is a LuaJSON call object.
+
+   buildCall(name : string, ... parameters)
+
+Builds a call object with the given name and set of parameters.
+The name is stored in the 'name' field and the parameters in
+the 'parameters' field as an array.
+
+#### Additional Utilities
+   clone (t : table)
+
+Shallow-clones a table by iterating using pairs and assigning.
+
+___printValue (tab : ANY, name : string)
+
+recursively prints out all object values - if duplicates found, reference printed
+
+___merge (t : table, ... : tables)
 
 Shallow-merges a sequence of tables onto table t by iterating over each using
 pairs and assigning.
+
+#### Internal Utilities - Not to Use
+   decodeCall
+   doOptionMerge
 
 ### Attribution
 parsing test suite from JSON_checker project of http://www.json.org/
