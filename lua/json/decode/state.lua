@@ -49,18 +49,20 @@ function state_ops.put_object_value(self, trailing)
 		end
 	end
 	assert(self.active_key, "Missing key value")
-	object_options.setObjectKey(self.active, self.active_key, self:grab_value())
+	object_options.setObjectKey(self.active, self.active_key, self:grab_value(object_options.allowEmptyElement))
 	self.active_key = nil
 end
 
 function state_ops.put_array_value(self, trailing)
+	local array_options = self.options.array
 	-- Safety check
-	if trailing and not self.previous_set and self.options.array.trailingComma then
+	if trailing and not self.previous_set and array_options.trailingComma then
 		return
 	end
 	local new_index = self.active_state + 1
 	self.active_state = new_index
-	self.active[new_index] = self:grab_value()
+	self.active[new_index] = self:grab_value(array_options.allowEmptyElement)
+end
 
 function state_ops.put_call_value(self, trailing)
 	local call_options = self.options.calls
@@ -70,7 +72,7 @@ function state_ops.put_call_value(self, trailing)
 	end
 	local new_index = self.active_state + 1
 	self.active_state = new_index
-	self.active[new_index] = self:grab_value()
+	self.active[new_index] = self:grab_value(call_options.allowEmptyElement)
 end
 
 function state_ops.put_value(self, trailing)
@@ -114,7 +116,7 @@ function state_ops.new_object(self)
 end
 
 function state_ops.end_object(self)
-	if self.previous_set or next(self.active) then
+	if self.active_key or self.previous_set or next(self.active) then
 		-- Not an empty object
 		self:put_value(true)
 	end
@@ -153,7 +155,11 @@ function state_ops.unset_value(self)
 	self.previous = nil
 end
 
-function state_ops.grab_value(self)
+function state_ops.grab_value(self, allowEmptyValue)
+	if not self.previous_set and allowEmptyValue then
+		-- Calculate an appropriate empty-value
+		return self.emptyValue
+	end
 	assert(self.previous_set, "Previous value not set")
 	self.previous_set = false
 	return self.previous
@@ -179,6 +185,13 @@ end
 
 
 local function create(options)
+	local emptyValue
+	-- Calculate an empty value up front
+	if options.others.allowUndefined then
+		emptyValue = options.others.undefined or nil
+	else
+		emptyValue = options.others.null or nil
+	end
 	local ret = {
 		options = options,
 		stack = {},
@@ -188,8 +201,8 @@ local function create(options)
 		active = nil,
 		active_key = nil,
 		previous = nil,
-		active_state = nil
-
+		active_state = nil,
+		emptyValue = emptyValue
 	}
 	return setmetatable(ret, state_mt)
 end

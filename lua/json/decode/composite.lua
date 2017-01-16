@@ -22,15 +22,18 @@ local _ENV = nil
 
 local defaultOptions = {
 	array = {
+		allowEmptyElement = false,
 		trailingComma = true
 	},
 	object = {
+		allowEmptyElement = false,
 		trailingComma = true,
 		number = true,
 		identifier = true,
 		setObjectKey = rawset
 	},
 	calls = {
+		allowEmptyElement = false,
 		defs = nil,
 		-- By default, do not allow undefined calls to be de-serialized as call objects
 		allowUndefined = false,
