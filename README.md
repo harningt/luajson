@@ -13,7 +13,7 @@ harningt@gmail.com
 
 ### Requirements
 Lua 5.1, 5.2, 5.3, LuaJIT 2.0, or LuaJIT 2.1
-LPeg (Tested with 0.7, 0.8, 0.9, 0.10, 0.12rc2, 1.0)
+LPeg (Tested with 0.7, 0.8, 0.9, 0.10, 0.12rc2, 1.0.1)
 For regressionTest:
 	lfs (Tested with 1.6.3)
 ### For lunit-tests:
@@ -26,7 +26,7 @@ it is not in the test matrix.
 ### Lua versions tested recently:
 * Lua 5.1.5
 * Lua 5.2.4
-* Lua 5.3.2
+* Lua 5.3.4
 * LuaJIT-2.0.4
 * LuaJIT-2.1.0-beta2
 
