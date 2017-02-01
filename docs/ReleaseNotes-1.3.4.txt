@@ -1,0 +1,103 @@
+luajson v1.3.4 Release Notes
+============================
+
+User Visible Changes
+--------------------
+
+Maintenance for older versions (ex: 1.0.x, 1.1.x, 1.2.x) will be on-demand. No
+longer will changes be introduced there and trickled down.
+
+The main changes for this release are:
+
+ * Lua 5.3 and LuaJIT 2.1-beta support added.
+ * LPEG 1.0.1 support verified.
+ * Documentation enhancements:
+   * README converted to MarkDown.
+   * Address utility method documentation to address exposed
+     public-use methods.
+   * Address utility method documentation to call out unsupported
+     internal methods.
+ * Address GitHub issue #38:
+  * A new allowEmptyElement option is available that will make
+    array and map building more forgiving for missing entries.
+
+Plans for next release
+----------------------
+At this point there are no particular strong plans for next release.
+
+Enhancing error output and performance are goals, but not terribly high on my
+priority list.
+
+
+Updates since 1.3.3
+===================
+
+Thomas Harning Jr (65):
+	base:
+		drops obsolute SCM rockspecs
+		updates lunit tests to pass through interpreter
+		adds travis-ci build file
+		fixes travis
+		travis fixes - drop unsupported Lua5.2 lpeg versions and add missing make build
+		fixes regression test lua path
+		travis fixes - drop unsupported Lua5.2 lpeg versions and add missing make build
+		applies required branch list to travis
+		rewrite language as python for broader support of the .travis.yml
+		updates Travis-CI build structure to use sample
+		lua is always symlinked as the correct version
+		expands to newer versions of Lua/luajit
+		switch to lunitx due to expanded Lua 5.2, Lua 5.3 support
+	build:
+		reverses build order to assign greater importance to newer items
+		updates to LPEG 0.12.2 due to Lua5.3 compat patch
+		adds LPeg 1.0.0 and trims a build from 0.12.2 tree
+	ci:
+		updates travis.yml to allow feature branches
+		update used version of LuaRocks
+		replaces LPEG 1.0.0 testing with 1.0.1 testing
+	codecov:
+		apply report generation automatically
+	compat:
+		fixes unpack calls to lookup table.unpack before the 5.2-deprecated/removed unpack
+	decode+docs+tests:
+		adds support for (array/object/calls).allowEmptyElement to address GH #38
+	decode.calls+tests:
+		handle trailingCommas in own setting vs borrowing 'array' configuration
+	decode.strings+tests:
+		fixes additionalEscapes to override builtin escapes and side-step escapeCheck needing to be altered
+	decoder:
+		drops unused 'expected' utility method
+	docs:
+		updates README to indicate updated testing results and drops mention of travis-ci pieces due to removal
+		cleans up reference for non-present functionality GH #37 and adds details for json.util
+		updates README to reflect new test LPEG platform and Lua 5.3.4 release
+	encode:
+		simplify encoder map building to current use case to enhance coverage
+	license:
+		updates copyright year
+	luacov:
+		update path to point to right location
+		not using luacov-coveralls
+	test:
+		update tests to not rely removed math.pow
+		update utf-8 handler to be more strict about integer division
+	tests:
+		updates to Lua 5.2/5.3 requirements
+		updates more strongly to Lua 5.2/5.3 requirements by dropping _M usage
+		adds positive test case with nothrow to enhance test coverage
+		adds multiple registered calls and nested calls to enhance test coverage
+		enhances coverage for number parsing options
+		enhances coverage for strings.additionalEscapes decoding option
+		enhances coverage for NaN handling
+		enhances coverage for undefined and unregistered method encoding
+	travis:
+		synchronizes with moteus/lua-travis-example to fix LuaJIT builds
+		use hererocks for local install management
+		adds in coveralls coverage reporting
+		run coveralls in verbose mode
+		try global coveralls support
+		manually do codecov generation after transforming to relative paths
+		attempt downgrading luacov to 0.9.1 to fix line stats
+Ewan Breakey (1):
+	-ungrouped-
+		Update README to use MarkDown
