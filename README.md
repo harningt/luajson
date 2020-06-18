@@ -5,15 +5,21 @@ JSON Parser/Constructor for Lua
 Thomas Harning Jr. <harningt@gmail.com>
 
 ### Source code:
-http://repo.or.cz/luajson
+http://github.com/harningt/luajson
 
 ### Bug reports:
 http://github.com/harningt/luajson
 harningt@gmail.com
 
 ### Requirements
-Lua 5.1, 5.2, 5.3, LuaJIT 2.0, or LuaJIT 2.1
-LPeg (Tested with 0.7, 0.8, 0.9, 0.10, 0.12rc2, 1.0.1)
+Lua VM
+ - Lua 5.1, 5.2, 5.3, or 5.4
+ - LuaJIT 2.0 or LuaJIT 2.1
+ - Moonjit 2.1
+LPeg
+ - Previously tested with 0.7, 0.8, 0.9, 0.10, 0.12rc2, 1.0.1, 1.0.2
+ - Recent tests only against 1.0.2
+
 For regressionTest:
 	lfs (Tested with 1.6.3)
 ### For lunit-tests:
@@ -23,12 +29,20 @@ lunitx >= 0.8
 LPeg 0.11 may not work - it crashed during my initial tests,
 it is not in the test matrix.
 
+If other versions of LPeg are desired - please let me know
+and I'll add them to the test matrix.
+
 ### Lua versions tested recently:
 * Lua 5.1.5
 * Lua 5.2.4
-* Lua 5.3.4
-* LuaJIT-2.0.4
-* LuaJIT-2.1.0-beta2
+* Lua 5.3.5
+* Lua 5.4-rc1
+* LuaJIT-2.0.5
+* LuaJIT-2.1.0-beta3
+* Moonjit 2.1 - only against LPeg 1.0.2
+
+NOTE: Moonjit 2.2 failed to build due to incompatibilities with
+Luarocks.
 
 ### License
 All-but tests: MIT-style, See LICENSE for details
