@@ -13,8 +13,14 @@ branches:
 
 env:
     global:
-        - LUAROCKS=2.4.2
+        - LUAROCKS=2.4.4
     matrix:
+        - LPEG=1.0.2-1 LUA="luajit 2.1"
+        - LPEG=1.0.2-1 LUA="luajit 2.0"
+        - LPEG=1.0.2-1 LUA="lua 5.4"
+        - LPEG=1.0.2-1 LUA="lua 5.3"
+        - LPEG=1.0.2-1 LUA="lua 5.2"
+        - LPEG=1.0.2-1 LUA="lua 5.1"
         - LPEG=1.0.1-1 LUA="luajit 2.1"
         - LPEG=1.0.1-1 LUA="luajit 2.0"
         - LPEG=1.0.1-1 LUA="lua 5.3"
