@@ -12,10 +12,14 @@ http://github.com/harningt/luajson
 harningt@gmail.com
 
 ### Requirements
-Lua 5.1, 5.2, 5.3, 5.4, LuaJIT 2.0, or LuaJIT 2.1
+Lua VM
+ - Lua 5.1, 5.2, 5.3, or 5.4
+ - LuaJIT 2.0 or LuaJIT 2.1
+ - Moonjit 2.1
 LPeg
  - Previously tested with 0.7, 0.8, 0.9, 0.10, 0.12rc2, 1.0.1, 1.0.2
  - Recent tests only against 1.0.2
+
 For regressionTest:
 	lfs (Tested with 1.6.3)
 ### For lunit-tests:
@@ -35,6 +39,10 @@ and I'll add them to the test matrix.
 * Lua 5.4-rc1
 * LuaJIT-2.0.5
 * LuaJIT-2.1.0-beta3
+* Moonjit 2.1 - only against LPeg 1.0.2
+
+NOTE: Moonjit 2.2 failed to build due to incompatibilities with
+Luarocks.
 
 ### License
 All-but tests: MIT-style, See LICENSE for details
