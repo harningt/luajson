@@ -35,10 +35,25 @@ env:
         - LPEG=0.7-3 LUA="luajit 2.0"
         - LPEG=0.7-3 LUA="lua 5.1"
 
-branches:
-    only:
-        - master
-        - /^feature[/]/
+matrix:
+    include:
+        - arch: ppc64le
+          env: LPEG=1.0.1-1 LUA="lua 5.3"
+        - arch: ppc64le
+          env: LPEG=0.12.2-1 LUA="lua 5.3"
+        - arch: ppc64le
+          env: LPEG=0.10.2-1 LUA="lua 5.2"
+        - arch: ppc64le
+          env: LPEG=0.9-1 LUA="lua 5.1"
+        - arch: ppc64le
+          env: LPEG=0.8.1-1 LUA="lua 5.1"
+        - arch: ppc64le
+          env: LPEG=0.7-3 LUA="lua 5.1"
+
+# branches:
+#     only:
+#         - master
+#         - /^feature[/]/
 
 before_install:
     - pip install hererocks
