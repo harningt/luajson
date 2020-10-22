@@ -1,4 +1,7 @@
 # Pull in python for access to pip for hererocks
+arch:
+    - amd64
+    - ppc64le
 language: python
 
 sudo: false
@@ -22,11 +25,22 @@ env:
         - LPEG=1.0.2-1 LUA="lua 5.3"
         - LPEG=1.0.2-1 LUA="lua 5.2"
         - LPEG=1.0.2-1 LUA="lua 5.1"
+        
+matrix:
+    exclude:
+    # luajit not supported on PPC64lE
+        - arch: ppc64le
+          env: LPEG=1.0.2-1 LUA="moonjit 2.1"
+        - arch: ppc64le
+          env: LPEG=1.0.2-1 LUA="luajit 2.1"
+        - arch: ppc64le
+          env: LPEG=1.0.2-1 LUA="luajit 2.0"
 
 branches:
     only:
         - master
         - /^feature[/]/
+        - develop
 
 before_install:
     - pip install hererocks
