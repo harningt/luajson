@@ -17,6 +17,8 @@ local table_concat = require("table").concat
 
 local merge = require("json.util").merge
 
+local type = type
+
 local _ENV = nil
 
 local function get_invalid_character_info(input, index)
@@ -94,7 +96,8 @@ local unicode_ignored = (unicode_space + comment)^0
 
 -- Parse the lpeg version skipping patch-values
 -- LPEG <= 0.7 have no version value... so 0.7 is value
-local DecimalLpegVersion = lpeg.version and tonumber(lpeg.version():match("^(%d+%.%d+)")) or 0.7
+-- LPEG >= 1.1 uses a string for the version instead of function
+local DecimalLpegVersion = lpeg.version and tonumber((type(lpeg.version) == "string" and lpeg.version or lpeg.version()):match("^(%d+%.%d+)")) or 0.7
 
 local function setObjectKeyForceNumber(t, key, value)
 	key = tonumber(key) or key
