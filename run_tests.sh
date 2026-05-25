@@ -78,6 +78,14 @@ else
     source "$ENV_DIR/bin/activate"
 fi
 
+# Ensure penlight is installed if testing under pl.strict
+if [ "${TEST_STRICT:-}" = "pl.strict" ]; then
+    if ! luarocks list | grep -q penlight; then
+        echo "Installing penlight for pl.strict testing..."
+        luarocks install https://luarocks.org/penlight-1.15.0-1.src.rock
+    fi
+fi
+
 # 3. Run the tests
 echo "Running tests in the target environment..."
 # Clean up any residual coverage file from previous runs
