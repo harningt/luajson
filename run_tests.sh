@@ -54,6 +54,9 @@ if [ ! -d "$ENV_DIR" ]; then
     if [[ "$LUA_VER" =~ ^[Ll]ua[Jj]it ]]; then
         VERSION_PART=$(echo "$LUA_VER" | sed -E 's/^[Ll]ua[Jj]it[[:space:]]*//')
         LUA_FLAG="--luajit $VERSION_PART"
+    elif [[ "$LUA_VER" =~ ^[Mm]oon[Jj]it ]]; then
+        VERSION_PART=$(echo "$LUA_VER" | sed -E 's/^[Mm]oon[Jj]it[[:space:]]*//')
+        LUA_FLAG="--moonjit $VERSION_PART"
     else
         VERSION_PART=$(echo "$LUA_VER" | sed -E 's/^[Ll]ua[[:space:]]*//')
         LUA_FLAG="--lua $VERSION_PART"

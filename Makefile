@@ -50,6 +50,7 @@ test-matrix:
 	./run_tests.sh "lua 5.5" "1.1.0-1"
 	./run_tests.sh "luajit 2.0" "1.0.1-1"
 	./run_tests.sh "luajit 2.1" "1.1.0-1"
+	./run_tests.sh "moonjit 2.2.0" "1.1.0-1"
 
 distcheck-tar: dist-tar
 	$(MKDIR) tmp
