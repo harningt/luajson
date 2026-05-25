@@ -1,0 +1,110 @@
+name: CI Test Suite
+
+on:
+  push:
+    branches:
+      - master
+      - next
+      - '1.*.x'
+      - 'feature/*'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Lua 5.1 combinations
+          - lua: "lua 5.1"
+            lpeg: "1.0.1-1"
+          - lua: "lua 5.1"
+            lpeg: "0.12.2-1"
+          - lua: "lua 5.1"
+            lpeg: "0.10.2-1"
+          - lua: "lua 5.1"
+            lpeg: "0.9-1"
+          - lua: "lua 5.1"
+            lpeg: "0.8.1-1"
+          - lua: "lua 5.1"
+            lpeg: "0.7-3"
+          
+          # Lua 5.2 combinations
+          - lua: "lua 5.2"
+            lpeg: "1.0.1-1"
+          - lua: "lua 5.2"
+            lpeg: "0.12.2-1"
+          - lua: "lua 5.2"
+            lpeg: "0.10.2-1"
+
+          # Lua 5.3 combinations
+          - lua: "lua 5.3"
+            lpeg: "1.0.1-1"
+          - lua: "lua 5.3"
+            lpeg: "0.12.2-1"
+
+          # Lua 5.4 combinations
+          - lua: "lua 5.4"
+            lpeg: "1.1.0-1"
+
+          # Lua 5.5 combinations
+          - lua: "lua 5.5"
+            lpeg: "1.1.0-1"
+
+          # LuaJIT 2.0 combinations
+          - lua: "luajit 2.0"
+            lpeg: "1.0.1-1"
+          - lua: "luajit 2.0"
+            lpeg: "0.12.2-1"
+          - lua: "luajit 2.0"
+            lpeg: "0.10.2-1"
+          - lua: "luajit 2.0"
+            lpeg: "0.9-1"
+          - lua: "luajit 2.0"
+            lpeg: "0.8.1-1"
+          - lua: "luajit 2.0"
+            lpeg: "0.7-3"
+
+          # LuaJIT 2.1 combinations
+          - lua: "luajit 2.1"
+            lpeg: "1.1.0-1"
+          - lua: "luajit 2.1"
+            lpeg: "1.0.1-1"
+          - lua: "luajit 2.1"
+            lpeg: "0.12.2-1"
+
+          # MoonJIT combinations
+          - lua: "moonjit 2.1.2"
+            lpeg: "1.0.2-1"
+          - lua: "moonjit 2.2.0"
+            lpeg: "1.1.0-1"
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Run Tests
+        run: |
+          ./run_tests.sh "${{ matrix.lua }}" "${{ matrix.lpeg }}"
+
+      - name: Generate Coverage Report
+        run: |
+          source .venv/bin/activate
+          source .hererocks/*/bin/activate
+          sed -e "s|../lua/|lua/|" < tests/luacov.stats.out > luacov.stats.out
+          luacov
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v6
+        with:
+          files: ./luacov.report.out
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
