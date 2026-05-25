@@ -44,6 +44,9 @@ jobs:
           - lua: "lua 5.3"
             lpeg: "1.0.1-1"
           - lua: "lua 5.3"
+            lpeg: "1.0.1-1"
+            strict_module: "pl.strict"
+          - lua: "lua 5.3"
             lpeg: "0.12.2-1"
 
           # Lua 5.4 combinations
@@ -93,7 +96,7 @@ jobs:
 
       - name: Run Tests
         env:
-          TEST_STRICT: 1
+          TEST_STRICT: ${{ matrix.strict_module || '1' }}
         run: |
           ./run_tests.sh "${{ matrix.lua }}" "${{ matrix.lpeg }}"
 
