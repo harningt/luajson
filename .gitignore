@@ -1,0 +1,8 @@
+# Local Python and hererocks environments
+.venv/
+.hererocks/
+
+# LuaCov coverage output
+luacov.stats.out
+luacov.report.out
+tests/luacov.stats.out

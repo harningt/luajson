@@ -3,7 +3,7 @@
 #
 
 DISTOPS= dist distclean dist-all dist-bzip2 dist-gzip dist-tar dist-zip
-.PHONY: all clean check $(DISTOPS) distcheck install
+.PHONY: all clean check $(DISTOPS) distcheck install test-env test-matrix
 
 LUA_BIN=lua
 LUNIT_BIN=lunit
@@ -35,6 +35,21 @@ check-unit:
 	cd tests && $(LUA_SETUP) $(LUNIT_BIN) --interpreter $(LUA_BIN) lunit-*.lua
 
 check: check-regression check-unit
+
+LUA ?= lua 5.3
+LPEG ?= 1.0.1-1
+
+test-env:
+	./run_tests.sh "$(LUA)" "$(LPEG)"
+
+test-matrix:
+	./run_tests.sh "lua 5.1" "1.0.1-1"
+	./run_tests.sh "lua 5.2" "1.0.1-1"
+	./run_tests.sh "lua 5.3" "1.0.1-1"
+	./run_tests.sh "lua 5.4" "1.1.0-1"
+	./run_tests.sh "lua 5.5" "1.1.0-1"
+	./run_tests.sh "luajit 2.0" "1.0.1-1"
+	./run_tests.sh "luajit 2.1" "1.1.0-1"
 
 distcheck-tar: dist-tar
 	$(MKDIR) tmp
