@@ -23,6 +23,7 @@ local _ENV = nil
 local defaultOptions = {
 	array = {
 		allowEmptyElement = false,
+		ignoreLength = false,
 		trailingComma = true
 	},
 	object = {

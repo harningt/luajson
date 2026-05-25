@@ -101,7 +101,7 @@ function state_ops.end_array(self)
 		-- Not an empty array
 		self:put_value(true)
 	end
-	if self.active_state ~= #self.active then
+	if self.active_state ~= #self.active and not self.options.array.ignoreLength then
 		-- Store the length in
 		self.active.n = self.active_state
 	end
