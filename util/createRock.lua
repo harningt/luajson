@@ -24,7 +24,7 @@ dependencies = {
 	"lpeg >= 0.8.1"
 }
 build = {
-	type = "module",
+	type = "builtin",
 	modules = {
 %MODULES%
 	}

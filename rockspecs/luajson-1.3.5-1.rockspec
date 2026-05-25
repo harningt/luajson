@@ -1,7 +1,8 @@
 package = "luajson"
-version = "scm-4"
+version = "1.3.5-1"
 source = {
-	url = "git://github.com/harningt/luajson.git"
+	url = "git://github.com/harningt/luajson.git",
+	tag = "1.3.5"
 }
 description = {
 	summary = "customizable JSON decoder/encoder",
@@ -15,30 +16,30 @@ description = {
 }
 dependencies = {
 	"lua >= 5.1",
-	"lunit >= 0.4",
 	"lpeg >= 0.8.1"
 }
 build = {
 	type = "builtin",
 	modules = {
-		["json"] = "lua/json.lua",
-		["json.decode"] = "lua/json/decode.lua",
 		["json.decode.composite"] = "lua/json/decode/composite.lua",
+		["json.decode"] = "lua/json/decode.lua",
 		["json.decode.number"] = "lua/json/decode/number.lua",
 		["json.decode.others"] = "lua/json/decode/others.lua",
 		["json.decode.state"] = "lua/json/decode/state.lua",
 		["json.decode.strings"] = "lua/json/decode/strings.lua",
 		["json.decode.util"] = "lua/json/decode/util.lua",
-		["json.encode"] = "lua/json/encode.lua",
 		["json.encode.array"] = "lua/json/encode/array.lua",
 		["json.encode.calls"] = "lua/json/encode/calls.lua",
+		["json.encode"] = "lua/json/encode.lua",
 		["json.encode.number"] = "lua/json/encode/number.lua",
 		["json.encode.object"] = "lua/json/encode/object.lua",
 		["json.encode.others"] = "lua/json/encode/others.lua",
 		["json.encode.output"] = "lua/json/encode/output.lua",
 		["json.encode.output_utility"] = "lua/json/encode/output_utility.lua",
 		["json.encode.strings"] = "lua/json/encode/strings.lua",
-		["json.util"] = "lua/json/util.lua"
+		["json"] = "lua/json.lua",
+		["json.util"] = "lua/json/util.lua",
+
 	}
 }
 

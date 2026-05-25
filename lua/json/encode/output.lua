@@ -5,7 +5,7 @@
 local type = type
 local assert, error = assert, error
 local table_concat = require("table").concat
-local loadstring = loadstring or load
+local loadstring = rawget(_G or {}, "loadstring") or load
 
 local io = require("io")
 

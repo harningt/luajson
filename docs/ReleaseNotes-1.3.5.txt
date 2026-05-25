@@ -1,0 +1,77 @@
+luajson v1.3.5 Release Notes
+============================
+
+User Visible Changes
+--------------------
+
+The main changes for this release are:
+
+ * Added support for LPeg 1.1 and fixed LPeg version detection.
+ * A new `array.ignoreLength` decoding option is available to avoid
+   assigning an `.n` field to decoded tables when the table length
+   does not match the parsed length (e.g., due to `null` or
+   `undefined` elements).
+ * Fixed a bug where accessing the deprecated global `loadstring`
+   caused a lookup error in strict-mode environments (GitHub issue #50).
+ * Switched the LuaRocks build type to `builtin` to address warnings
+   when installing via modern LuaRocks (GitHub issue #43).
+ * Modernized testing infrastructure (migrated CI from Travis CI to
+   GitHub Actions, added MoonJIT support, and added `pl.strict`
+   testing scenario to verify strict compliance).
+
+Plans for next release
+----------------------
+Review the GitHub issues and see what to prioritize, such as these:
+
+ - Investigate minified Lua output options to see if it's practical
+   to do for future releases.
+ - Prepare more examples.
+ - Pretty-printing support.
+
+Updates since 1.3.4
+===================
+
+Thomas Harning Jr (24):
+	-ungrouped-
+		Merge branch 'feature/enableLua5.4' into develop
+		Merge branch 'feature/pruneConfigurations' into develop
+		Merge pull request #46 from ezeeyahoo/develop
+		Merge pull request #48 from jokajak/patch-1
+		Merge pull request #42 from rodovich/no-array-n
+		Merge pull request #49 from jokajak/bugfix/lpeg_version_check
+		Merge branch 'master' into develop
+		Merge branch 'feature/test-environment' into develop
+		Merge pull request #53 from harningt/feature/pl.strict-testing
+	README/ci:
+		update to reflect current state of things and trim configurations
+	README:
+		adds mention of Moonjit testing
+	all:
+		bump the version reported in the module metadata
+	ci:
+		adds more configurations
+		update to use latest luarocks
+		adds Moonjit 2.1 to test matrix
+		migrate Travis CI to GitHub Actions
+		upgrade GitHub Actions to v6 for native Node 24 support
+	docs:
+		update README with new test environment and version support
+	feat:
+		Fix global loadstring lookup error under strict mode (#50)
+		add multi-configuration test environment
+		add MoonJIT support to test environment and CI matrix
+		integrate pl.strict testing and add to CI matrix per #35
+		update rockspec build type to builtin and update template
+	release:
+		add luajson 1.3.5-1 rockspec
+Josh (2):
+	feat:
+		support lpeg 1.1
+	fix:
+		fix lpeg version detection
+Eshant Gupta (1):
+	-ungrouped-
+		Adding CI for PPC64LE
+James Rodovich (1):
+	-ungrouped-
+		Add option to ignore mismatched array lengths due to `null`/`undefined`.

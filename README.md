@@ -2,33 +2,45 @@
 JSON Parser/Constructor for Lua
 
 ### Author:
-Thomas Harning Jr. <harningt@gmail.com>
+Thomas Harning Jr.
 
-### Source code:
-http://repo.or.cz/luajson
-
-### Bug reports:
-http://github.com/harningt/luajson
-harningt@gmail.com
+### Source code & Bug reports:
+https://github.com/harningt/luajson
 
 ### Requirements
-Lua 5.1, 5.2, 5.3, LuaJIT 2.0, or LuaJIT 2.1
-LPeg (Tested with 0.7, 0.8, 0.9, 0.10, 0.12rc2, 1.0.1)
-For regressionTest:
-	lfs (Tested with 1.6.3)
-### For lunit-tests:
-lunitx >= 0.8
+* **Lua:** 5.1, 5.2, 5.3, 5.4, 5.5, LuaJIT 2.0, LuaJIT 2.1, or MoonJIT 2.1 / 2.2
+* **LPeg:** >= 0.7 (tested up to 1.1.0)
+* **lfs:** >= 1.6.3 (For regressionTest - tested up to 1.9.0)
+* **lunitx:** >= 0.8 (For lunit-tests)
 
 ### NOTE:
 LPeg 0.11 may not work - it crashed during my initial tests,
 it is not in the test matrix.
 
+If other versions of LPeg are desired - please let me know
+and I'll add them to the test matrix.
+
 ### Lua versions tested recently:
 * Lua 5.1.5
 * Lua 5.2.4
-* Lua 5.3.4
-* LuaJIT-2.0.4
-* LuaJIT-2.1.0-beta2
+* Lua 5.3.6
+* Lua 5.4.4
+* Lua 5.5.0
+* LuaJIT-2.0.5
+* LuaJIT-2.1.0-beta3
+* MoonJIT-2.1.2
+* MoonJIT-2.2.0
+
+### Local Testing
+You can run tests across multiple Lua and LPeg version configurations locally using `hererocks` under a local virtual environment:
+
+```bash
+# Run a specific configuration (e.g. Lua 5.5 with LPeg 1.1.0)
+make test-env LUA="lua 5.5" LPEG="1.1.0-1"
+
+# Run tests across all standard matrix configurations (5.1 - 5.5, LuaJIT, MoonJIT)
+make test-matrix
+```
 
 ### License
 All-but tests: MIT-style, See LICENSE for details
