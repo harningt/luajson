@@ -3,7 +3,7 @@
 	Author: Thomas Harning Jr <harningt@gmail.com>
 ]]
 local setmetatable = setmetatable
-local assert, loadstring = assert, loadstring or load
+local assert, loadstring = assert, rawget(_G or {}, "loadstring") or load
 
 local _ENV = nil
 

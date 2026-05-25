@@ -92,6 +92,8 @@ jobs:
           python-version: '3.10'
 
       - name: Run Tests
+        env:
+          TEST_STRICT: 1
         run: |
           ./run_tests.sh "${{ matrix.lua }}" "${{ matrix.lpeg }}"
 
