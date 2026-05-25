@@ -19,7 +19,7 @@ dependencies = {
 	"lpeg >= 0.8.1"
 }
 build = {
-	type = "module",
+	type = "builtin",
 	modules = {
 		["json"] = "lua/json.lua",
 		["json.decode"] = "lua/json/decode.lua",
