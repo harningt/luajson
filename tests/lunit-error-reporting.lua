@@ -126,3 +126,25 @@ end
 function test_missing_array_value()
 	assert_decode_error('[1,, 2]', "Expected value in array", nil, 1, 4)
 end
+
+-- Test: expected utility helper with multiple arguments
+function test_util_expected_helper()
+	local util = require("json.decode.util")
+	local pattern = util.expected("foo", "bar")
+	local ok, err = pcall(function()
+		pattern:match("data")
+	end)
+	assert_false(ok)
+	assert_not_nil(string_find(tostring(err), "expected one of 'foo','bar'", 1, true))
+end
+
+-- Test: expected utility helper with single argument
+function test_util_expected_single_helper()
+	local util = require("json.decode.util")
+	local pattern = util.expected("baz")
+	local ok, err = pcall(function()
+		pattern:match("data")
+	end)
+	assert_false(ok)
+	assert_not_nil(string_find(tostring(err), "expected 'baz'", 1, true))
+end
