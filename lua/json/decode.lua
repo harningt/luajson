@@ -68,11 +68,21 @@ json_decode.default = nil
 local function generateDecoder(lexer, options)
 	-- Marker to permit detection of final end
 	local marker = {}
-	local parser = lpeg.Ct((options.ignored * lexer)^0 * lpeg.Cc(marker)) * options.ignored * (lpeg.P(-1) + util.unexpected())
-	local decoder = function(data)
+
+	-- 1. Fast parser (original style, no position tracking)
+	local fast_parser = lpeg.Ct((options.ignored * lexer)^0 * lpeg.Cc(marker)) * options.ignored * lpeg.P(-1)
+
+	-- 2. Diagnostic parser (with position tracking for error reporting)
+	local POS_MARK = function() end
+	local pos_capture = lpeg.Cc(POS_MARK) * lpeg.Cp()
+	local diagnostic_parser = lpeg.Ct((options.ignored * pos_capture * lexer)^0 * lpeg.Cc(marker)) * options.ignored * (lpeg.P(-1) + util.unexpected())
+
+	local function fast_decoder(data)
 		local state = decode_state.create(options)
-		local parsed = parser:match(data)
-		assert(parsed, "Invalid JSON data")
+		local parsed = fast_parser:match(data)
+		if not parsed then
+			error("Syntax error")
+		end
 		local i = 0
 		while true do
 			i = i + 1
@@ -87,9 +97,51 @@ local function generateDecoder(lexer, options)
 		if options.initialObject then
 			assert(type(state.previous) == 'table', "Initial value not an object or array")
 		end
-		-- Make sure stack is empty
 		assert(state.i == 0, "Unclosed elements present")
 		return state.previous
+	end
+
+	local function diagnostic_decoder(data)
+		local state = decode_state.create(options)
+		local parsed = diagnostic_parser:match(data)
+		if not parsed then
+			error("Invalid JSON data")
+		end
+		local last_pos = 1
+		local i = 0
+		local ok, err = pcall(function()
+			while true do
+				i = i + 1
+				local item = parsed[i]
+				if item == marker then break end
+				if item == POS_MARK then
+					i = i + 1
+					last_pos = parsed[i]
+				elseif type(item) == 'function' and item ~= jsonutil.undefined and item ~= jsonutil.null then
+					item(state)
+				else
+					state:set_value(item)
+				end
+			end
+			if options.initialObject then
+				assert(type(state.previous) == 'table', "Initial value not an object or array")
+			end
+			-- Make sure stack is empty
+			assert(state.i == 0, "Unclosed elements present")
+		end)
+		if not ok then
+			local line, col, char, last_line = util.get_invalid_character_info(data, last_pos)
+			error(err .. (" @ character: %i %i:%i [%s] line:\n%s"):format(last_pos, line, col, char, last_line))
+		end
+		return state.previous
+	end
+
+	local decoder = function(data)
+		local ok, rv = pcall(fast_decoder, data)
+		if ok then
+			return rv
+		end
+		return diagnostic_decoder(data)
 	end
 	if options.nothrow then
 		return function(data)

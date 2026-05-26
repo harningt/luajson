@@ -25,8 +25,8 @@ local function get_invalid_character_info(input, index)
 	local parsed = input:sub(1, index)
 	local bad_character = input:sub(index, index)
 	local _, line_number = parsed:gsub('\n',{})
-	local last_line = parsed:match("\n([^\n]+.)$") or parsed
-	return line_number, #last_line, bad_character, last_line
+	local last_line = parsed:match("\n([^\n]*)$") or parsed
+	return line_number + 1, #last_line, bad_character, last_line
 end
 
 local function build_report(msg)
@@ -47,6 +47,16 @@ local function denied(item, option)
 		msg = ("'%s' denied by option set '%s'"):format(item, option)
 	else
 		msg = ("'%s' denied"):format(item)
+	end
+	return build_report(msg)
+end
+local function expected(...)
+	local items = {...}
+	local msg
+	if #items > 1 then
+		msg = "expected one of '" .. table_concat(items, "','") .. "'"
+	else
+		msg = "expected '" .. items[1] .. "'"
 	end
 	return build_report(msg)
 end
@@ -111,6 +121,7 @@ end
 local util = {
 	unexpected = unexpected,
 	denied = denied,
+	expected = expected,
 	ascii_space = ascii_space,
 	unicode_space = unicode_space,
 	identifier = identifier,

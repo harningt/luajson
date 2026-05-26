@@ -6,6 +6,7 @@
 local setmetatable = setmetatable
 local jsonutil = require("json.util")
 local assert = assert
+local error = error
 local type = type
 local next = next
 local unpack = require("table").unpack or unpack
@@ -43,36 +44,51 @@ end
 
 function state_ops.put_object_value(self, trailing)
 	local object_options = self.options.object
-	if trailing and object_options.trailingComma then
-		if not self.active_key then
+	if trailing and not self.active_key then
+		if object_options.trailingComma then
 			return
 		end
+		error("Trailing comma in object not permitted (set object.trailingComma = true to allow)")
 	end
-	assert(self.active_key, "Missing key value")
-	object_options.setObjectKey(self.active, self.active_key, self:grab_value(object_options.allowEmptyElement))
+	assert(self.active_key, "Missing key for object value")
+	object_options.setObjectKey(self.active, self.active_key, self:grab_value(object_options.allowEmptyElement, "Expected value after ':'"))
 	self.active_key = nil
 end
 
 function state_ops.put_array_value(self, trailing)
 	local array_options = self.options.array
-	-- Safety check
-	if trailing and not self.previous_set and array_options.trailingComma then
-		return
+	if trailing and not self.previous_set then
+		if array_options.trailingComma then
+			return
+		end
+		-- NOTE: If allowEmptyElement is true, a trailing comma is permitted and
+		-- interpreted as an empty element (e.g. `[1, ]` becomes `[1, undefined]`).
+		-- Only raise an error if both trailingComma and allowEmptyElement are false.
+		if not array_options.allowEmptyElement then
+			error("Trailing comma in array not permitted (set array.trailingComma = true to allow)")
+		end
 	end
 	local new_index = self.active_state + 1
 	self.active_state = new_index
-	self.active[new_index] = self:grab_value(array_options.allowEmptyElement)
+	self.active[new_index] = self:grab_value(array_options.allowEmptyElement, "Expected value in array")
 end
 
 function state_ops.put_call_value(self, trailing)
 	local call_options = self.options.calls
-	-- Safety check
-	if trailing and not self.previous_set and call_options.trailingComma then
-		return
+	if trailing and not self.previous_set then
+		if call_options.trailingComma then
+			return
+		end
+		-- NOTE: If allowEmptyElement is true, a trailing comma is permitted and
+		-- interpreted as an empty element (e.g. `call(1, )` becomes `call(1, undefined)`).
+		-- Only raise an error if both trailingComma and allowEmptyElement are false.
+		if not call_options.allowEmptyElement then
+			error("Trailing comma in function call not permitted (set calls.trailingComma = true to allow)")
+		end
 	end
 	local new_index = self.active_state + 1
 	self.active_state = new_index
-	self.active[new_index] = self:grab_value(call_options.allowEmptyElement)
+	self.active[new_index] = self:grab_value(call_options.allowEmptyElement, "Expected value in function call")
 end
 
 function state_ops.put_value(self, trailing)
@@ -155,25 +171,25 @@ function state_ops.unset_value(self)
 	self.previous = nil
 end
 
-function state_ops.grab_value(self, allowEmptyValue)
+function state_ops.grab_value(self, allowEmptyValue, errorMessage)
 	if not self.previous_set and allowEmptyValue then
 		-- Calculate an appropriate empty-value
 		return self.emptyValue
 	end
-	assert(self.previous_set, "Previous value not set")
+	assert(self.previous_set, errorMessage or "Previous value not set")
 	self.previous_set = false
 	return self.previous
 end
 
 function state_ops.set_value(self, value)
-	assert(not self.previous_set, "Value set when one already in slot")
+	assert(not self.previous_set, "Unexpected value: a value was already pending (possible missing comma or colon)")
 	self.previous_set = true
 	self.previous = value
 end
 
 function state_ops.set_key(self)
 	assert(self.active_state == 'object', "Cannot set key on array")
-	local value = self:grab_value()
+	local value = self:grab_value(nil, "Expected key before ':'")
 	local value_type = type(value)
 	if self.options.object.number then
 		assert(value_type == 'string' or value_type == 'number', "As configured, a key must be a number or string") 
