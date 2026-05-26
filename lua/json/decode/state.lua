@@ -61,6 +61,9 @@ function state_ops.put_array_value(self, trailing)
 		if array_options.trailingComma then
 			return
 		end
+		-- NOTE: If allowEmptyElement is true, a trailing comma is permitted and
+		-- interpreted as an empty element (e.g. `[1, ]` becomes `[1, undefined]`).
+		-- Only raise an error if both trailingComma and allowEmptyElement are false.
 		if not array_options.allowEmptyElement then
 			error("Trailing comma in array not permitted (set array.trailingComma = true to allow)")
 		end
@@ -76,6 +79,9 @@ function state_ops.put_call_value(self, trailing)
 		if call_options.trailingComma then
 			return
 		end
+		-- NOTE: If allowEmptyElement is true, a trailing comma is permitted and
+		-- interpreted as an empty element (e.g. `call(1, )` becomes `call(1, undefined)`).
+		-- Only raise an error if both trailingComma and allowEmptyElement are false.
 		if not call_options.allowEmptyElement then
 			error("Trailing comma in function call not permitted (set calls.trailingComma = true to allow)")
 		end

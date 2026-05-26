@@ -70,6 +70,12 @@ ___decode (data : string, strict : optional boolean)___
 Takes in a string of JSON data and converts it into a Lua object
 If 'strict' is set, then the strict JSON rule-set is used
 
+#### Options Interaction
+Options passed to decoders configure behavior like trailing commas and empty elements:
+* **`trailingComma`**: If true, a trailing comma is ignored (e.g., `[1, ]` decodes to `[1]`). If false, trailing commas are disallowed unless empty elements are permitted.
+* **`allowEmptyElement`**: If true, empty elements (e.g., `[1,, 2]`) decode to `undefined` or `null`.
+* **Note on Arrays/Calls**: If `trailingComma` is false but `allowEmptyElement` is true, a trailing comma (like `[1, ]` or `call(1, )`) is permitted and interpreted as a trailing empty element (yielding `[1, undefined]`). If both options are false, a trailing comma results in a syntax error.
+
 ### json.util
 #### Useful utilities
 ___null___
