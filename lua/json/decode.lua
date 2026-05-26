@@ -104,9 +104,6 @@ local function generateDecoder(lexer, options)
 	local function diagnostic_decoder(data)
 		local state = decode_state.create(options)
 		local parsed = diagnostic_parser:match(data)
-		if not parsed then
-			error("Invalid JSON data")
-		end
 		local last_pos = 1
 		local i = 0
 		local ok, err = pcall(function()
@@ -133,7 +130,8 @@ local function generateDecoder(lexer, options)
 			local line, col, char, last_line = util.get_invalid_character_info(data, last_pos)
 			error(err .. (" @ character: %i %i:%i [%s] line:\n%s"):format(last_pos, line, col, char, last_line))
 		end
-		return state.previous
+		-- This line should never be reached since diagnostic_decoder is only run on failure paths
+		assert(false, "Diagnostic decoder finished without throwing an error")
 	end
 
 	local decoder = function(data)
