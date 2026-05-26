@@ -130,6 +130,8 @@ local function generateDecoder(lexer, options)
 			local line, col, char, last_line = util.get_invalid_character_info(data, last_pos)
 			error(err .. (" @ character: %i %i:%i [%s] line:\n%s"):format(last_pos, line, col, char, last_line))
 		end
+		-- This line should never be reached since diagnostic_decoder is only run on failure paths
+		assert(false, "Diagnostic decoder finished without throwing an error")
 	end
 
 	local decoder = function(data)
