@@ -50,6 +50,16 @@ local function denied(item, option)
 	end
 	return build_report(msg)
 end
+local function expected(...)
+	local items = {...}
+	local msg
+	if #items > 1 then
+		msg = "expected one of '" .. table_concat(items, "','") .. "'"
+	else
+		msg = "expected '" .. items[1] .. "'"
+	end
+	return build_report(msg)
+end
 
 -- 09, 0A, 0B, 0C, 0D, 20
 local ascii_space = lpeg.S("\t\n\v\f\r ")
@@ -111,6 +121,7 @@ end
 local util = {
 	unexpected = unexpected,
 	denied = denied,
+	expected = expected,
 	ascii_space = ascii_space,
 	unicode_space = unicode_space,
 	identifier = identifier,
